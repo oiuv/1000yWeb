@@ -3,7 +3,7 @@ const { executeQuery } = require('../config/database');
 class User {
   static async findByAccount(account) {
     try {
-      const query = 'SELECT * FROM dbo.account1000y WHERE account = @account';
+      const query = 'SELECT * FROM dbo.account1000y WHERE RTRIM(account) = @account';
       const result = await executeQuery(query, { account });
       return result.recordset[0] || null;
     } catch (error) {
@@ -66,7 +66,7 @@ class User {
       const query = `
         UPDATE dbo.account1000y
         SET lastdate = @lastdate, ipaddr = @ipaddr
-        WHERE account = @account
+        WHERE RTRIM(account) = @account
       `;
 
       const params = {
@@ -116,7 +116,7 @@ class User {
             birth = @birth,
             address = @address,
             updated_at = GETDATE()
-        WHERE account = @account
+        WHERE RTRIM(account) = @account
       `;
 
       const params = {
