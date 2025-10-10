@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云端千年-炎黄新章</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">云端千年-炎黄新章</div>
+            <nav class="nav-links">
+                <a href="index.html">首页</a>
+                <a href="register.html">注册</a>
+                <a href="login.html">登录</a>
+                <a href="https://1000y.gameivy.com/download.html" target="_blank">客户端下载</a>
+                <a href="https://1000y.gameivy.com/" target="_blank">游戏官网</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="container">
+            <h1 class="game-title">云端千年-炎黄新章</h1>
+
+        <div class="card">
+            <h2 class="card-title">账号管理中心</h2>
+
+            <div id="alert-container"></div>
+
+            <div class="welcome-content">
+                <div class="button-group">
+                    <a href="login.html" class="btn btn-primary">账号登录</a>
+                    <a href="register.html" class="btn btn-primary btn-success">注册新账号</a>
+                </div>
+
+                <div class="nav-links-section" style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #8B4513;">
+                    <h3 style="text-align: center; color: #D4AF37; margin-bottom: 25px; font-size: 24px;">快速导航</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <a href="https://1000y.gameivy.com/download.html" target="_blank"
+                           class="nav-link-item" style="display: block; padding: 15px; background: rgba(139, 0, 0, 0.3);
+                                border: 1px solid #8B4513; border-radius: 6px; text-align: center;
+                                color: #FFD700; text-decoration: none; transition: all 0.3s ease;"
+                           onmouseover="this.style.background='rgba(165, 42, 42, 0.5)'; this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.background='rgba(139, 0, 0, 0.3)'; this.style.transform='translateY(0)'">
+                            <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">📥 客户端下载</div>
+                            <div style="font-size: 14px; color: #999;">下载最新游戏客户端</div>
+                        </a>
+
+                        <a href="https://1000y.gameivy.com/" target="_blank"
+                           class="nav-link-item" style="display: block; padding: 15px; background: rgba(139, 0, 0, 0.3);
+                                border: 1px solid #8B4513; border-radius: 6px; text-align: center;
+                                color: #FFD700; text-decoration: none; transition: all 0.3s ease;"
+                           onmouseover="this.style.background='rgba(165, 42, 42, 0.5)'; this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.background='rgba(139, 0, 0, 0.3)'; this.style.transform='translateY(0)'">
+                            <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">🌐 游戏官网</div>
+                            <div style="font-size: 14px; color: #999;">访问官方网站</div>
+                        </a>
+
+                        <a href="dashboard.html"
+                           class="nav-link-item" style="display: block; padding: 15px; background: rgba(139, 0, 0, 0.3);
+                                border: 1px solid #8B4513; border-radius: 6px; text-align: center;
+                                color: #FFD700; text-decoration: none; transition: all 0.3s ease;"
+                           onmouseover="this.style.background='rgba(165, 42, 42, 0.5)'; this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.background='rgba(139, 0, 0, 0.3)'; this.style.transform='translateY(0)'">
+                            <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">👤 个人中心</div>
+                            <div style="font-size: 14px; color: #999;">管理账号信息</div>
+                        </a>
+
+                        <a href="#" onclick="showContactInfo(); return false;"
+                           class="nav-link-item" style="display: block; padding: 15px; background: rgba(139, 0, 0, 0.3);
+                                border: 1px solid #8B4513; border-radius: 6px; text-align: center;
+                                color: #FFD700; text-decoration: none; transition: all 0.3s ease;"
+                           onmouseover="this.style.background='rgba(165, 42, 42, 0.5)'; this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.background='rgba(139, 0, 0, 0.3)'; this.style.transform='translateY(0)'">
+                            <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">🎮 游戏QQ群</div>
+                            <div style="font-size: 14px; color: #999;">云端千年:2887111</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // 页面加载时检查是否已登录
+        window.addEventListener('load', function() {
+            const user = localStorage.getItem('user');
+            if (user) {
+                // 如果已登录，显示欢迎信息
+                const userData = JSON.parse(user);
+                showAlert('success', `欢迎回来，${userData.username || userData.account}！`);
+
+                // 可以添加快速进入游戏的按钮
+                setTimeout(() => {
+                    if (confirm('检测到您已登录，是否进入用户中心？')) {
+                        window.location.href = 'dashboard.html';
+                    }
+                }, 1500);
+            }
+        });
+
+        // 显示联系客服信息
+        function showContactInfo() {
+            showAlert('success', '游戏QQ群：云端千年:2887111，欢迎加入交流！');
+        }
+    </script>
+</body>
+</html>

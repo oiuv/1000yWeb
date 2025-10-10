@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账号登录 - 云端千年-炎黄新章</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">云端千年-炎黄新章</div>
+            <nav class="nav-links">
+                <a href="index.html">首页</a>
+                <a href="register.html">注册</a>
+                <a href="login.html">登录</a>
+                <a href="https://1000y.gameivy.com/download.html" target="_blank">客户端下载</a>
+                <a href="https://1000y.gameivy.com/" target="_blank">游戏官网</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="container">
+            <h1 class="game-title">账号登录</h1>
+
+        <div class="card">
+            <h2 class="card-title">账号登录</h2>
+
+            <div id="alert-container"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="account" class="form-label required">账号</label>
+                    <input type="text" class="form-control" id="account" name="account"
+                           placeholder="请输入账号" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label required">密码</label>
+                    <input type="password" class="form-control" id="password" name="password"
+                           placeholder="请输入密码" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; color: #FFD700; font-size: 16px;">
+                        <input type="checkbox" id="rememberMe" name="rememberMe" style="margin-right: 8px;">
+                        记住我的登录状态
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    登录
+                </button>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    正在登录...
+                </div>
+            </form>
+
+            <div class="text-center">
+                <a href="register.html" class="link">还没有账号？立即注册</a>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // 登录表单处理
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            // 客户端验证
+            if (!validateForm(data)) {
+                return;
+            }
+
+            const loginBtn = document.getElementById('loginBtn');
+            const loading = document.getElementById('loading');
+
+            loginBtn.disabled = true;
+            loading.style.display = 'block';
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('success', result.message);
+
+                    // 保存用户信息到 localStorage
+                    localStorage.setItem('user', JSON.stringify(result.user));
+
+                    // 跳转到游戏主页或用户中心
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                } else {
+                    showAlert('danger', result.message);
+                    if (result.errors) {
+                        displayErrors(result.errors);
+                    }
+                }
+            } catch (error) {
+                showAlert('danger', '网络错误，请稍后再试');
+                console.error('登录错误:', error);
+            } finally {
+                loginBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        // 表单验证函数
+        function validateForm(data) {
+            let isValid = true;
+
+            // 清除之前的错误
+            document.querySelectorAll('.form-control').forEach(input => {
+                input.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('.invalid-feedback').forEach(feedback => {
+                feedback.style.display = 'none';
+            });
+
+            // 验证账号
+            if (!data.account || data.account.trim().length === 0) {
+                showFieldError('account', '请输入账号');
+                isValid = false;
+            }
+
+            // 验证密码
+            if (!data.password || data.password.trim().length === 0) {
+                showFieldError('password', '请输入密码');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // 显示字段错误
+        function showFieldError(fieldName, message) {
+            const field = document.getElementById(fieldName);
+            const feedback = field.nextElementSibling;
+
+            field.classList.add('is-invalid');
+            feedback.textContent = message;
+            feedback.style.display = 'block';
+        }
+
+        // 显示服务器返回的错误
+        function displayErrors(errors) {
+            errors.forEach(error => {
+                const field = document.getElementById(error.param);
+                if (field) {
+                    showFieldError(error.param, error.msg);
+                }
+            });
+        }
+
+        // 回车键登录
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // 页面加载时检查是否已登录
+        window.addEventListener('load', function() {
+            const user = localStorage.getItem('user');
+            if (user) {
+                // 如果已登录，直接跳转到用户中心
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>

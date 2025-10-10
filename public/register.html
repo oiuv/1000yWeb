@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>账号注册 - 云端千年-炎黄新章</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">云端千年-炎黄新章</div>
+            <nav class="nav-links">
+                <a href="index.html">首页</a>
+                <a href="register.html">注册</a>
+                <a href="login.html">登录</a>
+                <a href="https://1000y.gameivy.com/download.html" target="_blank">客户端下载</a>
+                <a href="https://1000y.gameivy.com/" target="_blank">游戏官网</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="container">
+            <h1 class="game-title">账号注册</h1>
+
+        <div class="card">
+            <h2 class="card-title">账号注册</h2>
+
+            <div id="alert-container"></div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="account" class="form-label required">账号</label>
+                    <input type="text" class="form-control" id="account" name="account"
+                           placeholder="请输入5-12位账号" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label required">密码</label>
+                    <input type="password" class="form-control" id="password" name="password"
+                           placeholder="请输入密码" required>
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="passwordStrength"></div>
+                    </div>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label required">确认密码</label>
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                           placeholder="请再次输入密码" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label required">邮箱</label>
+                    <input type="email" class="form-control" id="email" name="email"
+                           placeholder="请输入邮箱地址" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="telephone" class="form-label required">手机号码</label>
+                    <input type="tel" class="form-control" id="telephone" name="telephone"
+                           placeholder="请输入手机号码" required>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="registerBtn">
+                    立即注册
+                </button>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    正在注册...
+                </div>
+            </form>
+
+            <div class="text-center">
+                <a href="login.html" class="link">已有账号？立即登录</a>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // 密码强度检测
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('passwordStrength');
+
+            if (password.length === 0) {
+                strengthBar.className = 'password-strength-bar';
+                return;
+            }
+
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+            strengthBar.className = 'password-strength-bar';
+            if (strength <= 2) {
+                strengthBar.classList.add('strength-weak');
+            } else if (strength <= 3) {
+                strengthBar.classList.add('strength-medium');
+            } else {
+                strengthBar.classList.add('strength-strong');
+            }
+        });
+
+        // 注册表单处理
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            // 客户端验证
+            if (!validateForm(data)) {
+                return;
+            }
+
+            const registerBtn = document.getElementById('registerBtn');
+            const loading = document.getElementById('loading');
+
+            registerBtn.disabled = true;
+            loading.style.display = 'block';
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('success', result.message);
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    showAlert('danger', result.message);
+                    if (result.errors) {
+                        displayErrors(result.errors);
+                    }
+                }
+            } catch (error) {
+                showAlert('danger', '网络错误，请稍后再试');
+                console.error('注册错误:', error);
+            } finally {
+                registerBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        // 表单验证函数
+        function validateForm(data) {
+            let isValid = true;
+
+            // 清除之前的错误
+            document.querySelectorAll('.form-control').forEach(input => {
+                input.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('.invalid-feedback').forEach(feedback => {
+                feedback.style.display = 'none';
+            });
+
+            // 验证账号 (5-12位)
+            if (!data.account || data.account.length < 5 || data.account.length > 12) {
+                showFieldError('account', '账号长度必须在5-12个字符之间');
+                isValid = false;
+            } else if (!/^[a-zA-Z0-9_]+$/.test(data.account)) {
+                showFieldError('account', '账号只能包含字母、数字和下划线');
+                isValid = false;
+            }
+
+            // 验证密码
+            if (!data.password || data.password.length < 6 || data.password.length > 20) {
+                showFieldError('password', '密码长度必须在6-20个字符之间');
+                isValid = false;
+            }
+
+            // 验证确认密码
+            if (data.password !== data.confirmPassword) {
+                showFieldError('confirmPassword', '确认密码与密码不匹配');
+                isValid = false;
+            }
+
+            // 验证邮箱格式 (必填)
+            if (!data.email) {
+                showFieldError('email', '请输入邮箱地址');
+                isValid = false;
+            } else if (!isValidEmail(data.email)) {
+                showFieldError('email', '请输入有效的邮箱地址');
+                isValid = false;
+            }
+
+            // 验证手机号格式 (必填)
+            if (!data.telephone) {
+                showFieldError('telephone', '请输入手机号码');
+                isValid = false;
+            } else if (!isValidPhone(data.telephone)) {
+                showFieldError('telephone', '请输入有效的手机号码');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // 显示字段错误
+        function showFieldError(fieldName, message) {
+            const field = document.getElementById(fieldName);
+            const feedback = field.nextElementSibling;
+
+            field.classList.add('is-invalid');
+            feedback.textContent = message;
+            feedback.style.display = 'block';
+        }
+
+        // 显示服务器返回的错误
+        function displayErrors(errors) {
+            errors.forEach(error => {
+                const field = document.getElementById(error.param);
+                if (field) {
+                    showFieldError(error.param, error.msg);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户中心 - 云端千年-炎黄新章</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">云端千年-炎黄新章</div>
+            <nav class="nav-links">
+                <a href="index.html">首页</a>
+                <a href="register.html">注册</a>
+                <a href="login.html">登录</a>
+                <a href="https://1000y.gameivy.com/download.html" target="_blank">客户端下载</a>
+                <a href="https://1000y.gameivy.com/" target="_blank">游戏官网</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="container">
+            <h1 class="game-title">用户中心</h1>
+
+        <div class="card">
+            <h2 class="card-title">个人资料管理</h2>
+
+            <div id="alert-container"></div>
+
+            <div id="userInfo">
+                <div class="loading" id="userLoading">
+                    <div class="spinner"></div>
+                    加载中...
+                </div>
+            </div>
+
+            <div class="user-actions" style="display: none;">
+                <!-- 只读信息显示 -->
+                <div class="info-section" style="margin-bottom: 30px;">
+                    <h3 style="color: #D4AF37; margin-bottom: 15px; font-size: 20px;">基本信息</h3>
+
+                    <div class="form-group">
+                        <label class="form-label">账号:</label>
+                        <div id="userAccount" style="color: #FFD700; padding: 8px; background: rgba(139, 0, 0, 0.2); border-radius: 4px;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">注册时间:</label>
+                        <div id="makeDate" style="color: #FFD700; padding: 8px; background: rgba(139, 0, 0, 0.2); border-radius: 4px;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">最后登录:</label>
+                        <div id="lastLogin" style="color: #FFD700; padding: 8px; background: rgba(139, 0, 0, 0.2); border-radius: 4px;"></div>
+                    </div>
+                </div>
+
+                <!-- 可编辑信息 -->
+                <div class="edit-section" style="margin-bottom: 30px;">
+                    <h3 style="color: #D4AF37; margin-bottom: 15px; font-size: 20px;">资料修改</h3>
+
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label for="editUsername" class="form-label">用户名:</label>
+                            <input type="text" class="form-control" id="editUsername" name="username" placeholder="请输入用户名">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editEmail" class="form-label">邮箱:</label>
+                            <input type="email" class="form-control" id="editEmail" name="email" placeholder="请输入邮箱地址">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editTelephone" class="form-label">手机号码:</label>
+                            <input type="tel" class="form-control" id="editTelephone" name="telephone" placeholder="请输入手机号码">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editBirth" class="form-label">出生日期:</label>
+                            <input type="date" class="form-control" id="editBirth" name="birth">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editAddress" class="form-label">地址:</label>
+                            <input type="text" class="form-control" id="editAddress" name="address" placeholder="请输入地址">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="updateBtn">
+                            保存修改
+                        </button>
+
+                        <div class="loading" id="updateLoading">
+                            <div class="spinner"></div>
+                            正在保存...
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="action-section">
+                    <button type="button" class="btn btn-primary" onclick="logout()" style="background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);">
+                        退出登录
+                    </button>
+
+                    <button type="button" class="btn btn-primary" onclick="goToGame()" style="margin-top: 10px;">
+                        进入游戏
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        let currentUser = null;
+
+        // 页面加载时显示用户信息
+        window.addEventListener('load', function() {
+            const user = localStorage.getItem('user');
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            currentUser = JSON.parse(user);
+            loadUserProfile();
+        });
+
+        // 加载用户详细信息
+        async function loadUserProfile() {
+            try {
+                const response = await fetch('/api/auth/profile', {
+                    headers: {
+                        'Authorization': 'Bearer ' + btoa(JSON.stringify(currentUser))
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayUserInfo(result.user);
+                    fillEditForm(result.user);
+                } else {
+                    showAlert('danger', result.message);
+                }
+            } catch (error) {
+                console.error('加载用户信息失败:', error);
+                showAlert('danger', '加载用户信息失败');
+            }
+        }
+
+        // 显示用户信息
+        function displayUserInfo(user) {
+            document.getElementById('userLoading').style.display = 'none';
+            document.querySelector('.user-actions').style.display = 'block';
+
+            document.getElementById('userAccount').textContent = user.account;
+            document.getElementById('makeDate').textContent = user.makedate ?
+                new Date(user.makedate).toLocaleString() : '未知';
+            document.getElementById('lastLogin').textContent = user.lastdate ?
+                new Date(user.lastdate).toLocaleString() : '首次登录';
+        }
+
+        // 填充编辑表单
+        function fillEditForm(user) {
+            document.getElementById('editUsername').value = user.username || '';
+            document.getElementById('editEmail').value = user.email || '';
+            document.getElementById('editTelephone').value = user.telephone || '';
+            document.getElementById('editBirth').value = user.birth ?
+                new Date(user.birth).toISOString().split('T')[0] : '';
+            document.getElementById('editAddress').value = user.address || '';
+        }
+
+        // 资料更新表单处理
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+
+            // 客户端验证
+            if (!validateProfileForm(data)) {
+                return;
+            }
+
+            const updateBtn = document.getElementById('updateBtn');
+            const updateLoading = document.getElementById('updateLoading');
+
+            updateBtn.disabled = true;
+            updateLoading.style.display = 'block';
+
+            try {
+                const response = await fetch('/api/auth/update-profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + btoa(JSON.stringify(currentUser))
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('success', result.message);
+                    // 重新加载用户信息
+                    loadUserProfile();
+                } else {
+                    showAlert('danger', result.message);
+                    if (result.errors) {
+                        displayProfileErrors(result.errors);
+                    }
+                }
+            } catch (error) {
+                showAlert('danger', '网络错误，请稍后再试');
+                console.error('更新资料错误:', error);
+            } finally {
+                updateBtn.disabled = false;
+                updateLoading.style.display = 'none';
+            }
+        });
+
+        // 表单验证函数
+        function validateProfileForm(data) {
+            let isValid = true;
+
+            // 清除之前的错误
+            document.querySelectorAll('#profileForm .form-control').forEach(input => {
+                input.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('#profileForm .invalid-feedback').forEach(feedback => {
+                feedback.style.display = 'none';
+            });
+
+            // 验证用户名长度
+            if (data.username && data.username.length > 20) {
+                showProfileFieldError('editUsername', '用户名长度不能超过20个字符');
+                isValid = false;
+            }
+
+            // 验证邮箱格式
+            if (data.email && !isValidEmail(data.email)) {
+                showProfileFieldError('editEmail', '请输入有效的邮箱地址');
+                isValid = false;
+            }
+
+            // 验证手机号格式
+            if (data.telephone && !isValidPhone(data.telephone)) {
+                showProfileFieldError('editTelephone', '请输入有效的手机号码');
+                isValid = false;
+            }
+
+            // 验证地址长度
+            if (data.address && data.address.length > 50) {
+                showProfileFieldError('editAddress', '地址长度不能超过50个字符');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // 显示字段错误
+        function showProfileFieldError(fieldName, message) {
+            const field = document.getElementById(fieldName);
+            const feedback = field.nextElementSibling;
+
+            field.classList.add('is-invalid');
+            feedback.textContent = message;
+            feedback.style.display = 'block';
+        }
+
+        // 显示服务器返回的错误
+        function displayProfileErrors(errors) {
+            errors.forEach(error => {
+                const fieldMap = {
+                    'username': 'editUsername',
+                    'email': 'editEmail',
+                    'telephone': 'editTelephone',
+                    'birth': 'editBirth',
+                    'address': 'editAddress'
+                };
+
+                const fieldName = fieldMap[error.param];
+                if (fieldName) {
+                    showProfileFieldError(fieldName, error.msg);
+                }
+            });
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('user');
+            showAlert('success', '已退出登录');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1000);
+        }
+
+        // 进入游戏（这里只是示例）
+        function goToGame() {
+            showAlert('success', '正在启动游戏客户端...');
+            // 实际项目中这里可能会启动游戏客户端或跳转到游戏页面
+        }
+    </script>
+</body>
+</html>
