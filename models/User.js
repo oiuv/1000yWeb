@@ -72,7 +72,7 @@ class User {
       const params = {
         account,
         ipaddr,
-        lastdate: new Date().toISOString()
+        lastdate: new Date().toLocaleString('zh-CN')
       };
 
       const result = await executeQuery(query, params);
