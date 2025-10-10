@@ -141,7 +141,37 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    showAlert('success', result.message + '<br><br><strong>下一步：</strong><a href="https://1000y.gameivy.com/download.html" target="_blank" style="color: #90EE90; text-decoration: underline;">点击下载游戏客户端</a>');
+                    showAlert('success', result.message);
+
+                    // 显示下载客户端提示
+                    setTimeout(() => {
+                        const downloadMsg = document.createElement('div');
+                        downloadMsg.style.cssText = `
+                            text-align: center;
+                            margin-top: 20px;
+                            padding: 15px;
+                            background: rgba(40, 167, 69, 0.1);
+                            border: 1px solid rgba(40, 167, 69, 0.3);
+                            border-radius: 8px;
+                            color: #90EE90;
+                        `;
+                        downloadMsg.innerHTML = `
+                            <div style="font-size: 16px; margin-bottom: 10px;">🎮 注册成功！</div>
+                            <div style="font-size: 14px; margin-bottom: 15px;">下一步请下载游戏客户端</div>
+                            <a href="https://1000y.gameivy.com/download.html" target="_blank"
+                               style="display: inline-block; padding: 10px 20px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                                      color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                                下载游戏客户端
+                            </a>
+                        `;
+
+                        // 插入到表单后面
+                        const form = document.getElementById('registerForm');
+                        form.parentNode.insertBefore(downloadMsg, form.nextSibling);
+
+                        // 滚动到下载提示
+                        downloadMsg.scrollIntoView({ behavior: 'smooth' });
+                    }, 500);
                 } else {
                     showAlert('danger', result.message);
                     if (result.errors) {
