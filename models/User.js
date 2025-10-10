@@ -91,7 +91,8 @@ class User {
       }
 
       // 简单的密码比较（实际项目中应该使用bcrypt等加密方式）
-      return user.password === password;
+      // 两个都需要去除右侧空格（因为数据库CHAR字段会自动填充）
+      return user.password.trim() === password.trim();
     } catch (error) {
       console.error('密码验证失败:', error);
       throw error;
