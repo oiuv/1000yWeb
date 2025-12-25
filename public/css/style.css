@@ -72,7 +72,7 @@ body::before {
 
 /* 主要内容区域 */
 .main-content {
-    padding-top: 100px;
+    padding-top: 80px;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -84,7 +84,7 @@ body::before {
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
-    padding: 40px;
+    padding: 20px;
 }
 
 /* 卡片样式 */
@@ -92,7 +92,7 @@ body::before {
     background: rgba(30, 20, 10, 0.95);
     border: 2px solid #D4AF37;
     border-radius: 8px;
-    padding: 50px;
+    padding: 35px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(15px);
     position: relative;
