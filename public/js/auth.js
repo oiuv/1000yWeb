@@ -84,6 +84,42 @@ function checkAuth() {
     return user ? JSON.parse(user) : null;
 }
 
+// 更新导航菜单（根据登录状态）
+function updateNavigation() {
+    const user = checkAuth();
+    const loginLink = document.querySelector('a[href="login.html"]');
+    const dashboardLink = document.querySelector('a[href="dashboard.html"]');
+
+    if (user) {
+        // 已登录：隐藏登录链接，显示用户中心
+        if (loginLink) {
+            loginLink.style.display = 'none';
+        }
+        // 如果没有用户中心链接，添加一个
+        if (!dashboardLink) {
+            const nav = document.querySelector('.nav-links');
+            if (nav) {
+                const rechargeLink = nav.querySelector('a[href="recharge.html"]');
+                const newLink = document.createElement('a');
+                newLink.href = 'dashboard.html';
+                newLink.textContent = '用户中心';
+                newLink.className = 'nav-link-item';
+                if (rechargeLink) {
+                    nav.insertBefore(newLink, rechargeLink.nextSibling);
+                }
+            }
+        }
+    } else {
+        // 未登录：显示登录链接，隐藏用户中心
+        if (loginLink) {
+            loginLink.style.display = '';
+        }
+        if (dashboardLink) {
+            dashboardLink.style.display = 'none';
+        }
+    }
+}
+
 // 清除认证信息
 function clearAuth() {
     localStorage.removeItem('user');
@@ -152,4 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         document.body.style.opacity = '1';
     }, 100);
+
+    // 根据登录状态更新导航
+    updateNavigation();
 });

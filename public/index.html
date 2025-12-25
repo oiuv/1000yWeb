@@ -112,13 +112,6 @@
                 // 如果已登录，显示欢迎信息
                 const userData = JSON.parse(user);
                 showAlert('success', `欢迎回来，${userData.username || userData.account}！`);
-
-                // 可以添加快速进入游戏的按钮
-                setTimeout(() => {
-                    if (confirm('检测到您已登录，是否进入用户中心？')) {
-                        window.location.href = 'dashboard.html';
-                    }
-                }, 1500);
             }
         });
 
