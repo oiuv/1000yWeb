@@ -127,6 +127,20 @@
             }
 
             currentUser = JSON.parse(user);
+
+            // 创建toast通知容器
+            const toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                z-index: 10000;
+                min-width: 300px;
+                max-width: 400px;
+            `;
+            document.body.appendChild(toastContainer);
+
             loadUserProfile();
         });
 
@@ -147,7 +161,7 @@
                 } else {
                     // 认证失败，清除无效的用户信息
                     localStorage.removeItem('user');
-                    showAlert('danger', result.message || '登录已失效，请重新登录');
+                    showToast('danger', result.message || '登录已失效，请重新登录');
                     setTimeout(() => {
                         window.location.href = 'login.html';
                     }, 1500);
@@ -155,7 +169,7 @@
             } catch (error) {
                 console.error('加载用户信息失败:', error);
                 localStorage.removeItem('user');
-                showAlert('danger', '加载失败，请重新登录');
+                showToast('danger', '加载失败，请重新登录');
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 1500);
@@ -236,13 +250,13 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    showAlert('success', result.message);
+                    showToast('success', result.message);
                     document.getElementById('passwordForm').reset();
                 } else {
-                    showAlert('danger', result.message);
+                    showToast('danger', result.message);
                 }
             } catch (error) {
-                showAlert('danger', '网络错误，请稍后再试');
+                showToast('danger', '网络错误，请稍后再试');
                 console.error('修改密码错误:', error);
             } finally {
                 changePasswordBtn.disabled = false;
@@ -294,10 +308,82 @@
         // 退出登录
         function logout() {
             localStorage.removeItem('user');
-            showAlert('success', '已退出登录');
+            showToast('success', '已退出登录');
             setTimeout(() => {
                 window.location.href = 'login.html';
             }, 1000);
+        }
+
+        // 显示Toast通知
+        function showToast(type, message) {
+            const toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.style.cssText = `
+                background: ${type === 'success' ? 'rgba(40, 167, 69, 0.95)' : 'rgba(220, 53, 69, 0.95)'};
+                color: #fff;
+                padding: 16px 20px;
+                border-radius: 8px;
+                margin-bottom: 12px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+                border: 1px solid ${type === 'success' ? 'rgba(40, 167, 69, 0.6)' : 'rgba(220, 53, 69, 0.6)'};
+                font-size: 15px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+                backdrop-filter: blur(10px);
+            `;
+
+            const icon = type === 'success' ? '' : '';
+            const span = document.createElement('span');
+            span.textContent = message;
+            toast.innerHTML = icon;
+            toast.appendChild(span);
+
+            toastContainer.appendChild(toast);
+
+            // 5秒后自动消失
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+
+            // 添加动画样式
+            if (!document.getElementById('toast-animation-style')) {
+                const style = document.createElement('style');
+                style.id = 'toast-animation-style';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                    @keyframes slideOut {
+                        from {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                        to {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
         }
     </script>
 </body>
