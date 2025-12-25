@@ -688,27 +688,31 @@ body:has(.recharge-form) .container,
 
     .header-content {
         flex-direction: column;
-        gap: 10px;
-        padding: 0 15px;
+        gap: 8px;
+        padding: 0 10px;
     }
 
     .logo {
-        font-size: 20px;
+        font-size: 22px;
     }
 
     .nav-links {
-        gap: 15px;
-        flex-wrap: wrap;
-        justify-content: center;
+        gap: 0;
+        flex-wrap: nowrap;
+        justify-content: space-evenly;
+        width: 100%;
     }
 
     .nav-links a {
-        font-size: 14px;
+        font-size: 15px;
+        padding: 4px 6px;
+        text-align: center;
+        white-space: nowrap;
     }
 
     /* 主内容区域 */
     .main-content {
-        padding-top: 120px;
+        padding-top: 115px;
         padding-left: 15px;
         padding-right: 15px;
     }
@@ -873,19 +877,20 @@ body:has(.recharge-form) .container,
 @media (max-width: 480px) {
     /* 更小屏幕的适配 */
     .logo {
-        font-size: 18px;
+        font-size: 20px;
     }
 
     .nav-links {
-        gap: 10px;
+        gap: 0;
     }
 
     .nav-links a {
-        font-size: 13px;
+        font-size: 14px;
+        padding: 4px 5px;
     }
 
     .main-content {
-        padding-top: 130px;
+        padding-top: 120px;
     }
 
     .game-title {
