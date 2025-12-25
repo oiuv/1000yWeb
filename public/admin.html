@@ -235,7 +235,7 @@
                         <td>${escapeHtml(record.transaction_id)}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                         <td>${escapeHtml(record.ip_address || '-')}</td>
-                        <td>${escapeHtml(record.remark || '-')}</td>
+                        <td title="${record.remark ? escapeHtml(record.remark) : '无备注'}">${escapeHtml(record.remark || '-')}</td>
                         <td>
                             ${record.status === 'pending' ? `
                                 <button class="btn-approve" onclick="updateStatus(${record.id}, 'verified')">通过</button>
