@@ -169,9 +169,6 @@ router.post('/login', [
 
     const ipaddr = getClientIP();
 
-    // 更新最后登录时间
-    await User.updateLastLogin(account, ipaddr);
-
     // 获取用户信息
     const user = await User.findByAccount(account);
     const isAdmin = user.id === 1;
