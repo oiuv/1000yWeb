@@ -147,22 +147,44 @@ router.post('/login', [
     }
 
     // 获取客户端IP
-    const ipaddr = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'];
+    const getClientIP = () => {
+      const xForwardedFor = req.headers['x-forwarded-for'];
+      if (xForwardedFor) {
+        return xForwardedFor.split(',')[0].trim();
+      }
+      const xRealIP = req.headers['x-real-ip'];
+      if (xRealIP) {
+        return xRealIP;
+      }
+      const xClientIP = req.headers['x-client-ip'];
+      if (xClientIP) {
+        return xClientIP;
+      }
+      const cfConnectingIP = req.headers['cf-connecting-ip'];
+      if (cfConnectingIP) {
+        return cfConnectingIP;
+      }
+      return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || '127.0.0.1';
+    };
+
+    const ipaddr = getClientIP();
 
     // 更新最后登录时间
     await User.updateLastLogin(account, ipaddr);
 
     // 获取用户信息
     const user = await User.findByAccount(account);
+    const isAdmin = user.id === 1;
 
     res.json({
       success: true,
-      message: '登录成功！',
+      message: isAdmin ? '登录成功！欢迎管理员' : '登录成功！',
       user: {
+        id: user.id,
         account: user.account,
         username: user.username,
         email: user.email,
-        lastdate: user.lastdate
+        isAdmin: isAdmin
       }
     });
 
@@ -260,8 +282,8 @@ router.get('/profile', async (req, res) => {
       });
     }
 
-    const userInfo = await User.findByAccount(user.account);
-    if (!userInfo) {
+    const profile = await User.getProfile(user.account);
+    if (!profile) {
       return res.status(404).json({
         success: false,
         message: '用户不存在'
@@ -270,15 +292,12 @@ router.get('/profile', async (req, res) => {
 
     res.json({
       success: true,
-      user: {
-        account: userInfo.account,
-        username: userInfo.username,
-        email: userInfo.email,
-        telephone: userInfo.telephone,
-        birth: userInfo.birth,
-        address: userInfo.address,
-        makedate: userInfo.makedate,
-        lastdate: userInfo.lastdate
+      profile: {
+        account: profile.account,
+        username: profile.username,
+        email: profile.email,
+        characters: profile.characters,
+        lastdate: profile.lastdate
       }
     });
 
@@ -287,6 +306,83 @@ router.get('/profile', async (req, res) => {
     res.status(500).json({
       success: false,
       message: '获取信息失败，请稍后再试'
+    });
+  }
+});
+
+// 修改密码
+router.post('/change-password', [
+  body('oldPassword')
+    .notEmpty()
+    .withMessage('请输入原密码'),
+  body('newPassword')
+    .isLength({ min: 6, max: 20 })
+    .withMessage('新密码长度必须在6-20个字符之间')
+], async (req, res) => {
+  try {
+    // 检查验证错误
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: '输入验证失败',
+        errors: errors.array()
+      });
+    }
+
+    const user = checkAuth(req);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: '请先登录'
+      });
+    }
+
+    const { oldPassword, newPassword } = req.body;
+
+    // 获取客户端IP
+    const getClientIP = () => {
+      const xForwardedFor = req.headers['x-forwarded-for'];
+      if (xForwardedFor) {
+        return xForwardedFor.split(',')[0].trim();
+      }
+      const xRealIP = req.headers['x-real-ip'];
+      if (xRealIP) {
+        return xRealIP;
+      }
+      const xClientIP = req.headers['x-client-ip'];
+      if (xClientIP) {
+        return xClientIP;
+      }
+      const cfConnectingIP = req.headers['cf-connecting-ip'];
+      if (cfConnectingIP) {
+        return cfConnectingIP;
+      }
+      return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || '127.0.0.1';
+    };
+
+    const ipaddr = getClientIP();
+
+    // 修改密码
+    const result = await User.changePassword(user.account, oldPassword, newPassword, ipaddr);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: result.message
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.message
+      });
+    }
+
+  } catch (error) {
+    console.error('修改密码失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '修改密码失败，请稍后再试'
     });
   }
 });

@@ -107,9 +107,13 @@
                     // 保存用户信息到 localStorage
                     localStorage.setItem('user', JSON.stringify(result.user));
 
-                    // 跳转到游戏主页或用户中心
+                    // 根据用户类型跳转到不同页面
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
+                        if (result.user.isAdmin) {
+                            window.location.href = 'admin.html';
+                        } else {
+                            window.location.href = 'dashboard.html';
+                        }
                     }, 1500);
                 } else {
                     showAlert('danger', result.message);
@@ -184,8 +188,13 @@
         window.addEventListener('load', function() {
             const user = localStorage.getItem('user');
             if (user) {
-                // 如果已登录，直接跳转到用户中心
-                window.location.href = 'dashboard.html';
+                const userData = JSON.parse(user);
+                // 如果已登录，根据用户类型跳转
+                if (userData.isAdmin) {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
             }
         });
     </script>

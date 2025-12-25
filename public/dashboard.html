@@ -26,98 +26,97 @@
         <div class="container">
             <h1 class="game-title">用户中心</h1>
 
-        <div class="card">
-            <h2 class="card-title">个人资料管理</h2>
+            <div class="card">
+                <div id="alert-container"></div>
 
-            <div id="alert-container"></div>
-
-            <div id="userInfo">
-                <div class="loading" id="userLoading">
-                    <div class="spinner"></div>
-                    加载中...
-                </div>
-            </div>
-
-            <div class="user-actions" style="display: none;">
-                <!-- 只读信息显示 -->
-                <div class="info-section" style="margin-bottom: 30px;">
-                    <h3 style="color: #D4AF37; margin-bottom: 15px; font-size: 20px;">基本信息</h3>
-
-                    <div class="form-group">
-                        <label class="form-label">账号:</label>
-                        <div id="userAccount" style="color: #FFD700; padding: 8px; background: rgba(139, 0, 0, 0.2); border-radius: 4px;"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">注册时间:</label>
-                        <div id="makeDate" style="color: #FFD700; padding: 8px; background: rgba(139, 0, 0, 0.2); border-radius: 4px;"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">最后登录:</label>
-                        <div id="lastLogin" style="color: #FFD700; padding: 8px; background: rgba(139, 0, 0, 0.2); border-radius: 4px;"></div>
+                <div id="userInfo">
+                    <div class="loading" id="userLoading">
+                        <div class="spinner"></div>
+                        加载中...
                     </div>
                 </div>
 
-                <!-- 可编辑信息 -->
-                <div class="edit-section" style="margin-bottom: 30px;">
-                    <h3 style="color: #D4AF37; margin-bottom: 15px; font-size: 20px;">资料修改</h3>
+                <div class="user-content" style="display: none;">
+                    <!-- 基本信息 -->
+                    <div class="info-section" style="margin-bottom: 30px;">
+                        <h3 class="section-title">基本信息</h3>
 
-                    <form id="profileForm">
-                        <div class="form-group">
-                            <label for="editUsername" class="form-label">用户名:</label>
-                            <input type="text" class="form-control" id="editUsername" name="username" placeholder="请输入用户名">
-                            <div class="invalid-feedback"></div>
+                        <div class="info-row">
+                            <span class="info-label">游戏账号：</span>
+                            <span class="info-value" id="userAccount"></span>
                         </div>
 
-                        <div class="form-group">
-                            <label for="editEmail" class="form-label">邮箱:</label>
-                            <input type="email" class="form-control" id="editEmail" name="email" placeholder="请输入邮箱地址">
-                            <div class="invalid-feedback"></div>
+                        <div class="info-row">
+                            <span class="info-label">用户名：</span>
+                            <span class="info-value" id="userName"></span>
                         </div>
 
-                        <div class="form-group">
-                            <label for="editTelephone" class="form-label">手机号码:</label>
-                            <input type="tel" class="form-control" id="editTelephone" name="telephone" placeholder="请输入手机号码">
-                            <div class="invalid-feedback"></div>
+                        <div class="info-row">
+                            <span class="info-label">联系邮箱：</span>
+                            <span class="info-value" id="userEmail"></span>
+                        </div>
+                    </div>
+
+                    <!-- 游戏角色 -->
+                    <div class="info-section" style="margin-bottom: 30px;">
+                        <h3 class="section-title">游戏角色</h3>
+
+                        <div class="characters-container" id="charactersList">
+                            <!-- 角色列表将动态生成 -->
                         </div>
 
-                        <div class="form-group">
-                            <label for="editBirth" class="form-label">出生日期:</label>
-                            <input type="date" class="form-control" id="editBirth" name="birth">
-                            <div class="invalid-feedback"></div>
+                        <div class="info-row">
+                            <span class="info-label">最后登录：</span>
+                            <span class="info-value" id="lastLogin"></span>
                         </div>
+                    </div>
 
-                        <div class="form-group">
-                            <label for="editAddress" class="form-label">地址:</label>
-                            <input type="text" class="form-control" id="editAddress" name="address" placeholder="请输入地址">
-                            <div class="invalid-feedback"></div>
-                        </div>
+                    <!-- 修改密码 -->
+                    <div class="info-section" style="margin-bottom: 30px;">
+                        <h3 class="section-title">修改密码</h3>
 
-                        <button type="submit" class="btn btn-primary" id="updateBtn">
-                            保存修改
+                        <form id="passwordForm" style="max-width: 500px;">
+                            <div class="form-group">
+                                <label for="oldPassword" class="form-label required">原密码</label>
+                                <input type="password" class="form-control" id="oldPassword" name="oldPassword"
+                                       placeholder="请输入原密码" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="newPassword" class="form-label required">新密码</label>
+                                <input type="password" class="form-control" id="newPassword" name="newPassword"
+                                       placeholder="请输入新密码（6-20位）" minlength="6" maxlength="20" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirmPassword" class="form-label required">确认新密码</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                                       placeholder="请再次输入新密码" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+                                修改密码
+                            </button>
+
+                            <div class="loading" id="passwordLoading">
+                                <div class="spinner"></div>
+                                处理中...
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="action-section">
+                        <button type="button" class="btn btn-primary" onclick="logout()">
+                            退出登录
                         </button>
-
-                        <div class="loading" id="updateLoading">
-                            <div class="spinner"></div>
-                            正在保存...
-                        </div>
-                    </form>
-                </div>
-
-                <!-- 操作按钮 -->
-                <div class="action-section">
-                    <button type="button" class="btn btn-primary" onclick="logout()" style="background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);">
-                        退出登录
-                    </button>
-
-                    <button type="button" class="btn btn-primary" onclick="goToGame()" style="margin-top: 10px;">
-                        进入游戏
-                    </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
     <script src="js/auth.js"></script>
@@ -133,6 +132,13 @@
             }
 
             currentUser = JSON.parse(user);
+
+            // 如果是管理员，跳转到管理员页面
+            if (currentUser.isAdmin) {
+                window.location.href = 'admin.html';
+                return;
+            }
+
             loadUserProfile();
         });
 
@@ -148,152 +154,132 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    displayUserInfo(result.user);
-                    fillEditForm(result.user);
+                    displayUserInfo(result.profile);
                 } else {
                     showAlert('danger', result.message);
+                    if (result.message.includes('请先登录')) {
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 1500);
+                    }
                 }
             } catch (error) {
                 console.error('加载用户信息失败:', error);
                 showAlert('danger', '加载用户信息失败');
+            } finally {
+                document.getElementById('userLoading').style.display = 'none';
             }
         }
 
         // 显示用户信息
-        function displayUserInfo(user) {
-            document.getElementById('userLoading').style.display = 'none';
-            document.querySelector('.user-actions').style.display = 'block';
+        function displayUserInfo(profile) {
+            document.querySelector('.user-content').style.display = 'block';
 
-            document.getElementById('userAccount').textContent = user.account;
-            document.getElementById('makeDate').textContent = user.makedate ?
-                new Date(user.makedate).toLocaleString() : '未知';
-            document.getElementById('lastLogin').textContent = user.lastdate ?
-                new Date(user.lastdate).toLocaleString() : '首次登录';
+            document.getElementById('userAccount').textContent = profile.account || '未知';
+            document.getElementById('userName').textContent = profile.username || '未设置';
+            document.getElementById('userEmail').textContent = profile.email || '未设置';
+
+            // 显示角色列表
+            const charactersList = document.getElementById('charactersList');
+            if (profile.characters && profile.characters.length > 0) {
+                charactersList.innerHTML = profile.characters.map(char =>
+                    `<div class="character-tag">${char}</div>`
+                ).join('');
+            } else {
+                charactersList.innerHTML = '<div class="info-value">暂无角色</div>';
+            }
+
+            // 显示最后登录时间
+            document.getElementById('lastLogin').textContent = profile.lastdate || '首次登录';
         }
 
-        // 填充编辑表单
-        function fillEditForm(user) {
-            document.getElementById('editUsername').value = user.username || '';
-            document.getElementById('editEmail').value = user.email || '';
-            document.getElementById('editTelephone').value = user.telephone || '';
-            document.getElementById('editBirth').value = user.birth ?
-                new Date(user.birth).toISOString().split('T')[0] : '';
-            document.getElementById('editAddress').value = user.address || '';
-        }
-
-        // 资料更新表单处理
-        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+        // 修改密码表单处理
+        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData);
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
 
-            // 客户端验证
-            if (!validateProfileForm(data)) {
+            // 清除之前的错误
+            clearPasswordErrors();
+
+            // 验证
+            if (!validatePasswordForm(oldPassword, newPassword, confirmPassword)) {
                 return;
             }
 
-            const updateBtn = document.getElementById('updateBtn');
-            const updateLoading = document.getElementById('updateLoading');
+            const changePasswordBtn = document.getElementById('changePasswordBtn');
+            const passwordLoading = document.getElementById('passwordLoading');
 
-            updateBtn.disabled = true;
-            updateLoading.style.display = 'block';
+            changePasswordBtn.disabled = true;
+            passwordLoading.style.display = 'block';
 
             try {
-                const response = await fetch('/api/auth/update-profile', {
+                const response = await fetch('/api/auth/change-password', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + btoa(JSON.stringify(currentUser))
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({ oldPassword, newPassword })
                 });
 
                 const result = await response.json();
 
                 if (result.success) {
                     showAlert('success', result.message);
-                    // 重新加载用户信息
-                    loadUserProfile();
+                    document.getElementById('passwordForm').reset();
                 } else {
                     showAlert('danger', result.message);
-                    if (result.errors) {
-                        displayProfileErrors(result.errors);
-                    }
                 }
             } catch (error) {
                 showAlert('danger', '网络错误，请稍后再试');
-                console.error('更新资料错误:', error);
+                console.error('修改密码错误:', error);
             } finally {
-                updateBtn.disabled = false;
-                updateLoading.style.display = 'none';
+                changePasswordBtn.disabled = false;
+                passwordLoading.style.display = 'none';
             }
         });
 
-        // 表单验证函数
-        function validateProfileForm(data) {
+        // 验证密码表单
+        function validatePasswordForm(oldPassword, newPassword, confirmPassword) {
             let isValid = true;
 
-            // 清除之前的错误
-            document.querySelectorAll('#profileForm .form-control').forEach(input => {
-                input.classList.remove('is-invalid');
-            });
-            document.querySelectorAll('#profileForm .invalid-feedback').forEach(feedback => {
-                feedback.style.display = 'none';
-            });
-
-            // 验证用户名长度
-            if (data.username && data.username.length > 20) {
-                showProfileFieldError('editUsername', '用户名长度不能超过20个字符');
+            if (!oldPassword) {
+                showPasswordError('oldPassword', '请输入原密码');
                 isValid = false;
             }
 
-            // 验证邮箱格式
-            if (data.email && !isValidEmail(data.email)) {
-                showProfileFieldError('editEmail', '请输入有效的邮箱地址');
+            if (!newPassword || newPassword.length < 6 || newPassword.length > 20) {
+                showPasswordError('newPassword', '新密码长度必须在6-20个字符之间');
                 isValid = false;
             }
 
-            // 验证手机号格式
-            if (data.telephone && !isValidPhone(data.telephone)) {
-                showProfileFieldError('editTelephone', '请输入有效的手机号码');
-                isValid = false;
-            }
-
-            // 验证地址长度
-            if (data.address && data.address.length > 50) {
-                showProfileFieldError('editAddress', '地址长度不能超过50个字符');
+            if (newPassword !== confirmPassword) {
+                showPasswordError('confirmPassword', '两次输入的密码不一致');
                 isValid = false;
             }
 
             return isValid;
         }
 
-        // 显示字段错误
-        function showProfileFieldError(fieldName, message) {
-            const field = document.getElementById(fieldName);
+        // 显示密码错误
+        function showPasswordError(fieldId, message) {
+            const field = document.getElementById(fieldId);
             const feedback = field.nextElementSibling;
-
             field.classList.add('is-invalid');
             feedback.textContent = message;
             feedback.style.display = 'block';
         }
 
-        // 显示服务器返回的错误
-        function displayProfileErrors(errors) {
-            errors.forEach(error => {
-                const fieldMap = {
-                    'username': 'editUsername',
-                    'email': 'editEmail',
-                    'telephone': 'editTelephone',
-                    'birth': 'editBirth',
-                    'address': 'editAddress'
-                };
-
-                const fieldName = fieldMap[error.param];
-                if (fieldName) {
-                    showProfileFieldError(fieldName, error.msg);
-                }
+        // 清除密码错误
+        function clearPasswordErrors() {
+            document.querySelectorAll('#passwordForm .form-control').forEach(input => {
+                input.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('#passwordForm .invalid-feedback').forEach(feedback => {
+                feedback.style.display = 'none';
             });
         }
 
@@ -304,12 +290,6 @@
             setTimeout(() => {
                 window.location.href = 'login.html';
             }, 1000);
-        }
-
-        // 进入游戏（这里只是示例）
-        function goToGame() {
-            showAlert('success', '正在启动游戏客户端...');
-            // 实际项目中这里可能会启动游戏客户端或跳转到游戏页面
         }
     </script>
 </body>

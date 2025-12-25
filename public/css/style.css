@@ -677,3 +677,58 @@ body:has(.recharge-form) .container,
         max-width: 200px;
     }
 }
+
+/* ==================== 用户中心样式 ==================== */
+
+.section-title {
+    color: #D4AF37;
+    font-size: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.info-section {
+    padding: 20px;
+    background: rgba(40, 30, 20, 0.3);
+    border-radius: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #999;
+    font-size: 14px;
+    min-width: 100px;
+}
+
+.info-value {
+    color: #FFD700;
+    font-size: 15px;
+}
+
+.characters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.character-tag {
+    background: rgba(139, 0, 0, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    color: #FFD700;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+}

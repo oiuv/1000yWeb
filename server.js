@@ -7,6 +7,7 @@ const helmet = require('helmet');
 
 const authRoutes = require('./routes/auth');
 const rechargeRoutes = require('./routes/recharge');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // 路由
 app.use('/api/auth', authRoutes);
 app.use('/api/recharge', rechargeRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 主页路由
 app.get('/', (req, res) => {
