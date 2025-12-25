@@ -111,7 +111,8 @@
             if (user) {
                 // 如果已登录，显示欢迎信息
                 const userData = JSON.parse(user);
-                showAlert('success', `欢迎回来，${userData.username || userData.account}！`);
+                const displayName = userData.account || '玩家';
+                showAlert('success', `欢迎回来，${displayName}！`);
             }
         });
 
