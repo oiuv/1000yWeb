@@ -10,8 +10,10 @@ const config = {
   trustServerCertificate: true,
   options: {
     enableArithAbort: true,
-    trustServerCertificate: true
-  }
+    trustServerCertificate: true,
+    charset: 'GBK'
+  },
+  requestTimeout: 30000
 };
 
 let pool;

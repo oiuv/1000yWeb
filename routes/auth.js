@@ -395,8 +395,9 @@ function checkAuth(req) {
   }
 
   try {
-    // 这里应该验证token的有效性，目前简化处理
-    const user = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+    // 解码 URL 编码的字符串
+    const decoded = decodeURIComponent(Buffer.from(token, 'base64').toString());
+    const user = JSON.parse(decoded);
     return user;
   } catch (error) {
     return null;

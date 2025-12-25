@@ -133,9 +133,10 @@
         // 加载用户详细信息
         async function loadUserProfile() {
             try {
+                const token = btoa(encodeURIComponent(JSON.stringify(currentUser)));
                 const response = await fetch('/api/auth/profile', {
                     headers: {
-                        'Authorization': 'Bearer ' + btoa(JSON.stringify(currentUser))
+                        'Authorization': 'Bearer ' + token
                     }
                 });
 
@@ -218,11 +219,12 @@
             passwordLoading.style.display = 'block';
 
             try {
+                const token = btoa(encodeURIComponent(JSON.stringify(currentUser)));
                 const response = await fetch('/api/auth/change-password', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + btoa(JSON.stringify(currentUser))
+                        'Authorization': 'Bearer ' + token
                     },
                     body: JSON.stringify({ oldPassword, newPassword })
                 });

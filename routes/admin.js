@@ -12,7 +12,9 @@ function checkAdminAuth(req) {
   }
 
   try {
-    const user = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+    // 解码 URL 编码的字符串
+    const decoded = decodeURIComponent(Buffer.from(token, 'base64').toString());
+    const user = JSON.parse(decoded);
     // 检查是否为管理员（id=1）
     if (user.id === 1) {
       return user;

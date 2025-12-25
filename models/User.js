@@ -158,8 +158,12 @@ class User {
         user.characters = [];
         for (let i = 1; i <= 5; i++) {
           const char = user[`char${i}`];
-          if (char && char.trim()) {
-            user.characters.push(char.trim());
+          // GBK编码的字符可能包含额外空格，需要trim
+          if (char) {
+            const trimmedChar = String(char).trim();
+            if (trimmedChar && trimmedChar !== '' && trimmedChar !== 'null') {
+              user.characters.push(trimmedChar);
+            }
           }
         }
       }
