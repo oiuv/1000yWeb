@@ -6,21 +6,31 @@ const User = require('../models/User');
 
 // 检查管理员权限
 function checkAdminAuth(req) {
-  const token = req.headers.authorization || req.headers['x-auth-token'];
-  if (!token) {
+  const authHeader = req.headers.authorization || req.headers['x-auth-token'];
+  if (!authHeader) {
     return null;
   }
 
   try {
-    // 解码 URL 编码的字符串
-    const decoded = decodeURIComponent(Buffer.from(token, 'base64').toString());
-    const user = JSON.parse(decoded);
+    // 移除 'Bearer ' 前缀（如果存在）
+    const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
+
+    // Base64 解码
+    const decoded = Buffer.from(token, 'base64').toString('utf-8');
+
+    // URL 解码
+    const urlDecoded = decodeURIComponent(decoded);
+
+    // 解析 JSON
+    const user = JSON.parse(urlDecoded);
+
     // 检查是否为管理员（id=1）
     if (user.id === 1) {
       return user;
     }
     return null;
   } catch (error) {
+    console.error('[checkAdminAuth] Token 解析失败:', error.message);
     return null;
   }
 }

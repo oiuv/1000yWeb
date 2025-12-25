@@ -276,11 +276,14 @@ router.get('/profile', async (req, res) => {
   try {
     const user = checkAuth(req);
     if (!user) {
+      console.log('[GET /api/auth/profile] 认证失败：无效的token');
       return res.status(401).json({
         success: false,
         message: '请先登录'
       });
     }
+
+    console.log('[GET /api/auth/profile] 用户认证成功：', user.account);
 
     const profile = await User.getProfile(user.account);
     if (!profile) {
@@ -389,17 +392,27 @@ router.post('/change-password', [
 
 // 检查用户认证状态
 function checkAuth(req) {
-  const token = req.headers.authorization || req.headers['x-auth-token'];
-  if (!token) {
+  const authHeader = req.headers.authorization || req.headers['x-auth-token'];
+  if (!authHeader) {
     return null;
   }
 
   try {
-    // 解码 URL 编码的字符串
-    const decoded = decodeURIComponent(Buffer.from(token, 'base64').toString());
-    const user = JSON.parse(decoded);
+    // 移除 'Bearer ' 前缀（如果存在）
+    const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
+
+    // Base64 解码
+    const decoded = Buffer.from(token, 'base64').toString('utf-8');
+
+    // URL 解码
+    const urlDecoded = decodeURIComponent(decoded);
+
+    // 解析 JSON
+    const user = JSON.parse(urlDecoded);
+
     return user;
   } catch (error) {
+    console.error('[checkAuth] Token 解析失败:', error.message);
     return null;
   }
 }

@@ -145,16 +145,20 @@
                 if (result.success) {
                     displayUserInfo(result.profile);
                 } else {
-                    showAlert('danger', result.message);
-                    if (result.message.includes('请先登录')) {
-                        setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 1500);
-                    }
+                    // 认证失败，清除无效的用户信息
+                    localStorage.removeItem('user');
+                    showAlert('danger', result.message || '登录已失效，请重新登录');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1500);
                 }
             } catch (error) {
                 console.error('加载用户信息失败:', error);
-                showAlert('danger', '加载用户信息失败');
+                localStorage.removeItem('user');
+                showAlert('danger', '加载失败，请重新登录');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
             } finally {
                 document.getElementById('userLoading').style.display = 'none';
             }
