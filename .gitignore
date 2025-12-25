@@ -28,3 +28,8 @@ logs
 # 操作系统
 .DS_Store
 Thumbs.db
+
+# 数据库文件
+database/*.db
+database/*.db-shm
+database/*.db-wal
