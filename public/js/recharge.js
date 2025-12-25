@@ -148,6 +148,14 @@ function validateForm() {
         isValid = false;
     }
 
+    // 验证游戏分区
+    const server = document.querySelector('input[name="server"]:checked');
+    const serverFeedback = document.getElementById('server-feedback');
+    if (!server) {
+        serverFeedback.style.display = 'block';
+        isValid = false;
+    }
+
     return isValid;
 }
 
@@ -158,7 +166,8 @@ function getFormData() {
         items.push(checkbox.value);
     });
 
-    const server = document.querySelector('input[name="server"]:checked').value;
+    const serverRadio = document.querySelector('input[name="server"]:checked');
+    const server = serverRadio ? serverRadio.value : '';
     // 使用 toFixed(2) 确保金额精度正确
     const amount = parseFloat(document.getElementById('amount').value);
     const formattedAmount = Math.round(amount * 100) / 100;
