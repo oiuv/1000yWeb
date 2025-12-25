@@ -678,6 +678,250 @@ body:has(.recharge-form) .container,
     }
 }
 
+/* ==================== 移动端适配 ==================== */
+
+@media (max-width: 768px) {
+    /* 头部导航 */
+    .header {
+        padding: 10px 0;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 10px;
+        padding: 0 15px;
+    }
+
+    .logo {
+        font-size: 20px;
+    }
+
+    .nav-links {
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .nav-links a {
+        font-size: 14px;
+    }
+
+    /* 主内容区域 */
+    .main-content {
+        padding-top: 120px;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    /* 容器 */
+    .container {
+        padding: 15px;
+    }
+
+    /* 卡片 */
+    .card {
+        padding: 25px 20px;
+    }
+
+    /* 标题 */
+    .game-title {
+        font-size: 28px !important;
+    }
+
+    /* 按钮 */
+    .btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+
+    /* 表单 */
+    .form-control {
+        font-size: 16px; /* 防止iOS缩放 */
+    }
+
+    /* 快速导航 */
+    .nav-links-section {
+        margin-top: 30px !important;
+    }
+
+    .nav-links-section div[style*="grid"] {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+        gap: 15px !important;
+    }
+
+    .nav-link-item {
+        padding: 12px !important;
+    }
+
+    .nav-link-item div[style*="font-size: 18px"] {
+        font-size: 16px !important;
+    }
+
+    .nav-link-item div[style*="font-size: 14px"] {
+        font-size: 12px !important;
+    }
+
+    /* 充值说明 */
+    .recharge-notice {
+        padding: 15px !important;
+    }
+
+    .notice-title {
+        font-size: 18px !important;
+    }
+
+    .notice-item {
+        font-size: 13px !important;
+        padding: 8px 10px !important;
+    }
+
+    /* 收款码 */
+    .qrcode-section {
+        padding: 15px !important;
+    }
+
+    .qrcode-title {
+        font-size: 18px !important;
+    }
+
+    .qrcode-image {
+        max-width: 180px;
+    }
+
+    /* 表单组 */
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-label {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    /* 提示信息 */
+    .alert {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    /* 用户中心 */
+    .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .info-label {
+        min-width: auto;
+        font-size: 13px;
+    }
+
+    .info-value {
+        font-size: 14px;
+    }
+
+    .characters-container {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .character-tag {
+        width: 100%;
+        text-align: center;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    /* 管理员表格 */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .records-table {
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .records-table th,
+    .records-table td {
+        padding: 8px 5px;
+    }
+
+    /* 统计卡片 */
+    .stat-card {
+        min-width: 100px;
+        padding: 15px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+    }
+
+    .stat-label {
+        font-size: 12px;
+    }
+
+    /* 分页 */
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* 更小屏幕的适配 */
+    .logo {
+        font-size: 18px;
+    }
+
+    .nav-links {
+        gap: 10px;
+    }
+
+    .nav-links a {
+        font-size: 13px;
+    }
+
+    .main-content {
+        padding-top: 130px;
+    }
+
+    .game-title {
+        font-size: 24px !important;
+    }
+
+    .card {
+        padding: 20px 15px;
+    }
+
+    /* 快速导航更小 */
+    .nav-links-section div[style*="grid"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    .nav-link-item {
+        padding: 10px !important;
+    }
+
+    .nav-link-item div[style*="font-size: 18px"] {
+        font-size: 14px !important;
+    }
+
+    .nav-link-item div[style*="font-size: 14px"] {
+        font-size: 11px !important;
+    }
+
+    /* 按钮 */
+    .btn {
+        width: 100%;
+        padding: 14px 20px;
+        text-align: center;
+    }
+}
+
 /* ==================== 用户中心样式 ==================== */
 
 .section-title {
