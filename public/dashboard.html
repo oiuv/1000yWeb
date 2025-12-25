@@ -47,11 +47,6 @@
                         </div>
 
                         <div class="info-row">
-                            <span class="info-label">用户名：</span>
-                            <span class="info-value" id="userName"></span>
-                        </div>
-
-                        <div class="info-row">
                             <span class="info-label">联系邮箱：</span>
                             <span class="info-value" id="userEmail"></span>
                         </div>
@@ -132,13 +127,6 @@
             }
 
             currentUser = JSON.parse(user);
-
-            // 如果是管理员，跳转到管理员页面
-            if (currentUser.isAdmin) {
-                window.location.href = 'admin.html';
-                return;
-            }
-
             loadUserProfile();
         });
 
@@ -176,8 +164,22 @@
             document.querySelector('.user-content').style.display = 'block';
 
             document.getElementById('userAccount').textContent = profile.account || '未知';
-            document.getElementById('userName').textContent = profile.username || '未设置';
             document.getElementById('userEmail').textContent = profile.email || '未设置';
+
+            // 如果是管理员，显示管理中心入口
+            if (currentUser.isAdmin) {
+                const actionSection = document.querySelector('.action-section');
+                const adminBtn = document.createElement('button');
+                adminBtn.className = 'btn btn-primary';
+                adminBtn.textContent = '进入管理中心';
+                adminBtn.style.marginTop = '10px';
+                adminBtn.style.background = 'linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #D4AF37 100%)';
+                adminBtn.style.color = '#8B0000';
+                adminBtn.onclick = () => {
+                    window.location.href = 'admin.html';
+                };
+                actionSection.insertBefore(adminBtn, actionSection.firstChild);
+            }
 
             // 显示角色列表
             const charactersList = document.getElementById('charactersList');
