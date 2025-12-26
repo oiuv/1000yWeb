@@ -114,12 +114,15 @@ router.get('/recharge-stats', async (req, res) => {
     }
 
     const allRecords = Recharge.getAll(10000, 0);
+    const verifiedRecords = allRecords.filter(r => r.status === 'verified');
+    const totalAmount = verifiedRecords.reduce((sum, r) => sum + parseFloat(r.amount), 0);
 
     const stats = {
       total: allRecords.length,
       pending: allRecords.filter(r => r.status === 'pending').length,
-      verified: allRecords.filter(r => r.status === 'verified').length,
-      rejected: allRecords.filter(r => r.status === 'rejected').length
+      verified: verifiedRecords.length,
+      rejected: allRecords.filter(r => r.status === 'rejected').length,
+      totalAmount: totalAmount.toFixed(2)
     };
 
     res.json({
