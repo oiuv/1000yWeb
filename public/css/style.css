@@ -535,9 +535,10 @@ body::before {
 }
 
 .qrcode-tip {
-    color: #999;
+    color: #FFD700;
     font-size: 14px;
     margin: 0;
+    font-weight: 500;
 }
 
 /* 充值表单 */
