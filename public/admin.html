@@ -52,6 +52,14 @@
                         <div class="stat-value" id="totalAmount">-</div>
                         <div class="stat-label">总金额(元)</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="shenwuAmount">-</div>
+                        <div class="stat-label">神武奇章(元)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="yanhuangAmount">-</div>
+                        <div class="stat-label">炎黄新章(元)</div>
+                    </div>
                 </div>
 
                 <!-- 筛选器 -->
@@ -269,6 +277,8 @@
                     document.getElementById('verifiedCount').textContent = result.stats.verified || 0;
                     document.getElementById('rejectedCount').textContent = result.stats.rejected || 0;
                     document.getElementById('totalAmount').textContent = result.stats.totalAmount || '0.00';
+                    document.getElementById('shenwuAmount').textContent = result.stats.shenwuAmount || '0.00';
+                    document.getElementById('yanhuangAmount').textContent = result.stats.yanhuangAmount || '0.00';
                 }
             } catch (error) {
                 console.error('加载统计信息失败:', error);
