@@ -51,11 +51,13 @@ router.get('/recharge-records', async (req, res) => {
     const offset = (page - 1) * limit;
     const status = req.query.status;
     const search = req.query.search;
+    const server = req.query.server;
+    const item = req.query.item;
 
     let records;
     let hasMore = false;
 
-    if (status || search) {
+    if (status || search || server || item) {
       // 使用过滤查询
       records = Recharge.getAll(1000, 0); // 获取所有记录，然后过滤
 
@@ -68,6 +70,19 @@ router.get('/recharge-records', async (req, res) => {
           r.game_account.toLowerCase().includes(searchLower) ||
           r.character_name.toLowerCase().includes(searchLower)
         );
+      }
+      if (server) {
+        records = records.filter(r => r.server === server);
+      }
+      if (item) {
+        records = records.filter(r => {
+          try {
+            const items = JSON.parse(r.items);
+            return items.includes(item);
+          } catch (e) {
+            return false;
+          }
+        });
       }
 
       // 分页处理

@@ -70,6 +70,17 @@
                         <option value="verified">已通过</option>
                         <option value="rejected">已拒绝</option>
                     </select>
+                    <select id="serverFilter" class="form-control" style="width: auto; min-width: 150px;">
+                        <option value="">全部分区</option>
+                        <option value="神武奇章">神武奇章</option>
+                        <option value="炎黄新章">炎黄新章</option>
+                    </select>
+                    <select id="itemFilter" class="form-control" style="width: auto; min-width: 150px;">
+                        <option value="">全部付款项</option>
+                        <option value="月卡">月卡</option>
+                        <option value="福袋">福袋</option>
+                        <option value="宝石">宝石</option>
+                    </select>
                     <input type="text" id="searchInput" class="form-control" placeholder="搜索账号或角色..." style="width: 200px;">
                     <button class="btn btn-primary" onclick="loadRecords()" style="width: auto; padding: 10px 20px;">刷新</button>
                 </div>
@@ -148,6 +159,16 @@
                 loadRecords();
             });
 
+            document.getElementById('serverFilter').addEventListener('change', () => {
+                currentPage = 1;
+                loadRecords();
+            });
+
+            document.getElementById('itemFilter').addEventListener('change', () => {
+                currentPage = 1;
+                loadRecords();
+            });
+
             document.getElementById('searchInput').addEventListener('keyup', (e) => {
                 if (e.key === 'Enter') {
                     currentPage = 1;
@@ -159,6 +180,8 @@
         // 加载充值记录
         async function loadRecords() {
             const statusFilter = document.getElementById('statusFilter').value;
+            const serverFilter = document.getElementById('serverFilter').value;
+            const itemFilter = document.getElementById('itemFilter').value;
             const searchInput = document.getElementById('searchInput').value;
             const tableBody = document.getElementById('recordsTableBody');
 
@@ -178,6 +201,8 @@
                 });
 
                 if (statusFilter) params.append('status', statusFilter);
+                if (serverFilter) params.append('server', serverFilter);
+                if (itemFilter) params.append('item', itemFilter);
                 if (searchInput) params.append('search', searchInput);
 
                 const token = btoa(encodeURIComponent(JSON.stringify(currentUser)));
