@@ -1,154 +1,131 @@
-const Database = require('better-sqlite3');
-const path = require('path');
+'use strict';
+const { randomUUID } = require('node:crypto');
+const { paidPlan } = require('../lib/products');
 
-// 数据库文件路径
-const dbPath = path.join(__dirname, '../database/recharge.db');
-const db = new Database(dbPath);
-
-// 初始化数据库表
-db.exec(`
-    CREATE TABLE IF NOT EXISTS recharge_records (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        payment_time DATETIME NOT NULL,
-        transaction_id TEXT NOT NULL,
-        amount DECIMAL(10,2) NOT NULL,
-        items TEXT NOT NULL,
-        game_account TEXT NOT NULL,
-        character_name TEXT NOT NULL,
-        server TEXT NOT NULL,
-        remark TEXT,
-        status TEXT DEFAULT 'pending',
-        ip_address TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_transaction_id ON recharge_records(transaction_id);
-    CREATE INDEX IF NOT EXISTS idx_game_account ON recharge_records(game_account);
-    CREATE INDEX IF NOT EXISTS idx_status ON recharge_records(status);
-`);
-
+const TRANSITIONS = {
+  pending: ['verified', 'rejected'], verified: ['delivered', 'pending'],
+  rejected: ['pending'], delivered: []
+};
 class Recharge {
-    /**
-     * 创建充值记录
-     * @param {Object} data - 充值数据
-     * @param {string} data.payment_time - 付款时间
-     * @param {string} data.transaction_id - 交易单号(后6位)
-     * @param {number} data.amount - 付款金额
-     * @param {Array} data.items - 付款项数组
-     * @param {string} data.game_account - 游戏账号
-     * @param {string} data.character_name - 角色名称
-     * @param {string} data.server - 游戏分区
-     * @param {string} data.remark - 备注说明
-     * @param {string} data.ip_address - IP地址
-     * @returns {Object} 创建的记录
-     */
-    static create(data) {
-        const stmt = db.prepare(`
-            INSERT INTO recharge_records
-            (payment_time, transaction_id, amount, items, game_account, character_name, server, remark, ip_address)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-
-        const itemsJson = JSON.stringify(data.items);
-        // 确保金额精度：使用整数存储（分为单位），避免浮点数精度问题
-        const amountInCents = Math.round(data.amount * 100);
-        const formattedAmount = amountInCents / 100;
-
-        try {
-            const result = stmt.run(
-                data.payment_time,
-                data.transaction_id,
-                formattedAmount,
-                itemsJson,
-                data.game_account,
-                data.character_name,
-                data.server,
-                data.remark || '',
-                data.ip_address || ''
-            );
-
-            console.log(`[Recharge] 充值记录创建成功: ID=${result.lastInsertRowid}, 账号=${data.game_account}, 金额=${formattedAmount}`);
-
-            return {
-                success: true,
-                id: result.lastInsertRowid
-            };
-        } catch (error) {
-            console.error('[Recharge] 创建充值记录失败:', error);
-            throw error;
+  constructor(db) { this.db = db; }
+  create(data) {
+    return this.db.transaction(() => {
+      // Six digits help human reconciliation; they are not globally unique payment IDs.
+      const duplicate = this.db.prepare('SELECT id FROM recharge_records WHERE ' +
+        'transaction_id = ? COLLATE NOCASE AND payment_time = ? AND amount = ? AND ' +
+        "game_account = ? COLLATE NOCASE AND server = ? AND status <> 'rejected'")
+        .get(data.transaction_id, data.payment_time, data.amount, data.game_account, data.server);
+      if (duplicate) return { duplicate: true, id: duplicate.id };
+      const result = this.db.prepare('INSERT INTO recharge_records ' +
+        '(payment_time,transaction_id,amount,items,game_account,character_name,server,remark,ip_address,submitted_by,quantities)' +
+        ' VALUES (@payment_time,@transaction_id,@amount,@items,@game_account,@character_name,@server,@remark,@ip_address,@submitted_by,@quantities)')
+        .run({ ...data, items: JSON.stringify(data.items), quantities: JSON.stringify(data.quantities) });
+      return { id: Number(result.lastInsertRowid), duplicate: false };
+    })();
+  }
+  where(filters = {}, submittedBy) {
+    const clauses = [], params = [];
+    for (const key of ['status', 'server']) {
+      if (filters[key]) { clauses.push(key + ' = ?'); params.push(filters[key]); }
+    }
+    if (filters.item) {
+      clauses.push("EXISTS (SELECT 1 FROM json_each(CASE WHEN json_valid(items) THEN items ELSE '[]' END) WHERE value = ?)");
+      params.push(filters.item);
+    }
+    if (filters.search) {
+      const term = '%' + filters.search.replace(/[\\%_]/g, '\\$&') + '%';
+      clauses.push("(game_account LIKE ? ESCAPE '\\' OR character_name LIKE ? ESCAPE '\\' OR transaction_id LIKE ? ESCAPE '\\')");
+      params.push(term, term, term);
+    }
+    if (submittedBy !== undefined) { clauses.push('submitted_by = ?'); params.push(submittedBy); }
+    return { sql: clauses.length ? ' WHERE ' + clauses.join(' AND ') : '', params };
+  }
+  parse(record) {
+    let items = [], quantities = {};
+    try { items = JSON.parse(record.items); } catch {}
+    try { quantities = JSON.parse(record.quantities); } catch {}
+    return { ...record, items: Array.isArray(items) ? items : [], quantities,
+      paid: this.paidJob(record.id) || null };
+  }
+  list(filters = {}, submittedBy) {
+    const { sql, params } = this.where(filters, submittedBy);
+    const page = filters.page || 1, limit = filters.limit || 20;
+    const total = this.db.prepare('SELECT COUNT(*) AS n FROM recharge_records' + sql).get(...params).n;
+    const records = this.db.prepare('SELECT * FROM recharge_records' + sql +
+      ' ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?')
+      .all(...params, limit, (page - 1) * limit).map(record => this.parse(record));
+    return { records, total, page, pages: Math.ceil(total / limit), hasMore: page * limit < total };
+  }
+  stats() {
+    const row = this.db.prepare('SELECT COUNT(*) total,' +
+      "COALESCE(SUM(status='pending'),0) pending, COALESCE(SUM(status='verified'),0) verified," +
+      "COALESCE(SUM(status='delivered'),0) delivered, COALESCE(SUM(status='rejected'),0) rejected," +
+      "COALESCE(SUM(CASE WHEN status IN ('verified','delivered') THEN ROUND(amount*100) ELSE 0 END),0) cents," +
+      "COALESCE(SUM(CASE WHEN status IN ('verified','delivered') AND server='神武奇章' THEN ROUND(amount*100) ELSE 0 END),0) shenwu," +
+      "COALESCE(SUM(CASE WHEN status IN ('verified','delivered') AND server='炎黄新章' THEN ROUND(amount*100) ELSE 0 END),0) yanhuang" +
+      ' FROM recharge_records').get();
+    return { total: row.total, pending: row.pending, verified: row.verified, delivered: row.delivered,
+      rejected: row.rejected, totalAmount: (row.cents / 100).toFixed(2),
+      shenwuAmount: (row.shenwu / 100).toFixed(2), yanhuangAmount: (row.yanhuang / 100).toFixed(2) };
+  }
+  history(id) {
+    return this.db.prepare('SELECT actor,from_status,to_status,note,created_at FROM recharge_history ' +
+      'WHERE record_id = ? ORDER BY id').all(id);
+  }
+  paidJob(id) { return this.db.prepare('SELECT * FROM paid_recharges WHERE record_id=?').get(id); }
+  updateStatus(id, status, expectedStatus, actor, note, paidEnabled = false) {
+    return this.db.transaction(() => {
+      const record = this.db.prepare('SELECT * FROM recharge_records WHERE id=?').get(id);
+      if (!record) return { error: 404, message: '登记记录不存在' };
+      if (record.status !== expectedStatus) return { error: 409, message: '此记录已被处理，请刷新后重试' };
+      if (!TRANSITIONS[record.status]?.includes(status)) return { error: 409, message: '当前状态不能执行此操作' };
+      const job = this.paidJob(id);
+      if (job && status === 'pending') return { error: 409, message: '此记录已提交 Paid 充值，不能退回重审；请核对到账状态' };
+      if (job && status === 'delivered' && job.state !== 'done') return { error: 409, message: '付费时长尚未确认到账，请先重试充值' };
+      if (status === 'verified') {
+        let plan;
+        try { plan = paidPlan(this.parse(record)); }
+        catch (error) { return { error: 400, message: error.message }; }
+        if (plan) {
+          if (!paidEnabled) return { error: 503, message: '尚未配置 Paid 自动充值，核款状态未改变，请先完成部署配置' };
+          if (!record.submitted_by || record.submitted_by !== record.game_account) {
+            return { error: 409, message: '登记账号未绑定登录身份，不能自动充值，请人工核对' };
+          }
+          this.db.prepare('INSERT INTO paid_recharges(record_id,order_id,loginid,days) VALUES (?,?,?,?)')
+            .run(id, 'yh:' + randomUUID(), record.game_account, plan.days);
         }
+      }
+      this.db.prepare('UPDATE recharge_records SET status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').run(status, id);
+      this.db.prepare('INSERT INTO recharge_history(record_id,actor,from_status,to_status,note) VALUES (?,?,?,?,?)')
+        .run(id, actor, record.status, status, note);
+      return { success: true };
+    })();
+  }
+  async fulfillPaid(id, paid, actor) {
+    const job = this.paidJob(id);
+    if (!job) return { error: 409, message: '此登记没有自动充值任务' };
+    if (job.state === 'done') return { success: true, message: '付费时长已经到账，无需重复充值' };
+    if (!paid) return { error: 503, message: '尚未配置 Paid 自动充值' };
+    try {
+      const receipt = await paid.credit({ order_id: job.order_id, loginid: job.loginid, days: job.days });
+      this.db.transaction(() => {
+        if (this.paidJob(id).state === 'done') return;
+        this.db.prepare("UPDATE paid_recharges SET state='done',error=NULL,old_enddate=?,enddate=?,updated_at=CURRENT_TIMESTAMP WHERE record_id=?")
+          .run(receipt.old_enddate, receipt.enddate, id);
+        const record = this.parse(this.db.prepare('SELECT * FROM recharge_records WHERE id=?').get(id));
+        const status = paidPlan(record).onlyCards ? 'delivered' : 'verified';
+        this.db.prepare('UPDATE recharge_records SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').run(status, id);
+        this.db.prepare('INSERT INTO recharge_history(record_id,actor,from_status,to_status,note) VALUES (?,?,?,?,?)')
+          .run(id, actor, record.status, status, `Paid 已到账 ${job.days} 天，到期时间 ${receipt.enddate}；游戏重登生效`);
+      })();
+      return { success: true, message: '付费时长已到账；如包含物品，仍须人工发放' };
+    } catch {
+      // The process may have committed before timing out. Keep the same order key on every retry.
+      this.db.prepare("UPDATE paid_recharges SET state='error',error=?,updated_at=CURRENT_TIMESTAMP WHERE record_id=? AND state<>'done'")
+        .run('未确认到账：请检查 Paid 配置、账号模式、大小写和数据库状态后重试', id);
+      if (this.paidJob(id).state === 'done') return { success: true, message: '付费时长已到账' };
+      return { success: true, paidPending: true, message: '核款已保存，但 Paid 尚未确认到账。请刷新详情检查并重试充值，不要手工重复续期' };
     }
-
-    /**
-     * 检查交易单号是否已存在
-     * @param {string} transactionId - 交易单号(后6位)
-     * @returns {boolean} 是否存在
-     */
-    static existsByTransactionId(transactionId) {
-        const stmt = db.prepare('SELECT COUNT(*) as count FROM recharge_records WHERE transaction_id = ?');
-        const result = stmt.get(transactionId);
-        return result.count > 0;
-    }
-
-    /**
-     * 获取所有充值记录
-     * @param {number} limit - 限制数量
-     * @param {number} offset - 偏移量
-     * @returns {Array} 充值记录列表
-     */
-    static getAll(limit = 100, offset = 0) {
-        const stmt = db.prepare(`
-            SELECT * FROM recharge_records
-            ORDER BY created_at DESC
-            LIMIT ? OFFSET ?
-        `);
-        return stmt.all(limit, offset);
-    }
-
-    /**
-     * 根据游戏账号查询充值记录
-     * @param {string} gameAccount - 游戏账号
-     * @returns {Array} 充值记录列表
-     */
-    static getByAccount(gameAccount) {
-        const stmt = db.prepare(`
-            SELECT * FROM recharge_records
-            WHERE game_account = ?
-            ORDER BY created_at DESC
-        `);
-        return stmt.all(gameAccount);
-    }
-
-    /**
-     * 更新充值记录状态
-     * @param {number} id - 记录ID
-     * @param {string} status - 新状态 (pending/verified/rejected)
-     * @returns {boolean} 是否成功
-     */
-    static updateStatus(id, status) {
-        const stmt = db.prepare(`
-            UPDATE recharge_records
-            SET status = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?
-        `);
-        const result = stmt.run(status, id);
-        return result.changes > 0;
-    }
-
-    /**
-     * 根据ID获取充值记录
-     * @param {number} id - 记录ID
-     * @returns {Object|null} 充值记录
-     */
-    static getById(id) {
-        const stmt = db.prepare('SELECT * FROM recharge_records WHERE id = ?');
-        const record = stmt.get(id);
-        if (record && record.items) {
-            record.items = JSON.parse(record.items);
-        }
-        return record;
-    }
+  }
 }
-
 module.exports = Recharge;

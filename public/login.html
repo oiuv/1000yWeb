@@ -1,202 +1,33 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>账号登录 - 云端千年-炎黄新章</title>
-    <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="云端千年·炎黄新章账号中心，游戏注册、账号管理与人工充值登记。">
+<title>账号登录 · 云端千年·炎黄新章</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- 头部导航 -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">云端千年-炎黄新章</div>
-            <nav class="nav-links">
-                <a href="index.html">首页</a>
-                <a href="register.html">注册</a>
-                <a href="login.html">登录</a>
-                <a href="recharge.html">充值</a>
-                <a href="https://1000y.gameivy.com/download.html" target="_blank">下载</a>
-                <a href="https://1000y.gameivy.com/" target="_blank">游戏官网</a>
-            </nav>
-        </div>
-    </header>
-
-    <div class="main-content">
-        <div class="container">
-            <h1 class="game-title">账号登录</h1>
-
-        <div class="card">
-            <h2 class="card-title">账号登录</h2>
-
-            <div id="alert-container"></div>
-
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="account" class="form-label required">账号</label>
-                    <input type="text" class="form-control" id="account" name="account"
-                           placeholder="请输入账号" required>
-                    <div class="invalid-feedback"></div>
-                </div>
-
-                <div class="form-group">
-                    <label for="password" class="form-label required">密码</label>
-                    <input type="password" class="form-control" id="password" name="password"
-                           placeholder="请输入密码" required>
-                    <div class="invalid-feedback"></div>
-                </div>
-
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; color: #FFD700; font-size: 16px;">
-                        <input type="checkbox" id="rememberMe" name="rememberMe" style="margin-right: 8px;">
-                        记住我的登录状态
-                    </label>
-                </div>
-
-                <button type="submit" class="btn btn-primary" id="loginBtn">
-                    登录
-                </button>
-
-                <div class="loading" id="loading">
-                    <div class="spinner"></div>
-                    正在登录...
-                </div>
-            </form>
-
-            <div class="text-center">
-                <a href="register.html" class="link">还没有账号？立即注册</a>
-            </div>
-        </div>
-    </div>
-    </div>
-
-    <script src="js/auth.js"></script>
-    <script>
-        // 登录表单处理
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData);
-
-            // 客户端验证
-            if (!validateForm(data)) {
-                return;
-            }
-
-            const loginBtn = document.getElementById('loginBtn');
-            const loading = document.getElementById('loading');
-
-            loginBtn.disabled = true;
-            loading.style.display = 'block';
-
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showAlert('success', result.message);
-
-                    // 保存用户信息到 localStorage
-                    localStorage.setItem('user', JSON.stringify(result.user));
-
-                    // 根据用户类型跳转到不同页面
-                    setTimeout(() => {
-                        if (result.user.isAdmin) {
-                            window.location.href = 'admin.html';
-                        } else {
-                            window.location.href = 'dashboard.html';
-                        }
-                    }, 1500);
-                } else {
-                    showAlert('danger', result.message);
-                    if (result.errors) {
-                        displayErrors(result.errors);
-                    }
-                }
-            } catch (error) {
-                showAlert('danger', '网络错误，请稍后再试');
-                console.error('登录错误:', error);
-            } finally {
-                loginBtn.disabled = false;
-                loading.style.display = 'none';
-            }
-        });
-
-        // 表单验证函数
-        function validateForm(data) {
-            let isValid = true;
-
-            // 清除之前的错误
-            document.querySelectorAll('.form-control').forEach(input => {
-                input.classList.remove('is-invalid');
-            });
-            document.querySelectorAll('.invalid-feedback').forEach(feedback => {
-                feedback.style.display = 'none';
-            });
-
-            // 验证账号
-            if (!data.account || data.account.trim().length === 0) {
-                showFieldError('account', '请输入账号');
-                isValid = false;
-            }
-
-            // 验证密码
-            if (!data.password || data.password.trim().length === 0) {
-                showFieldError('password', '请输入密码');
-                isValid = false;
-            }
-
-            return isValid;
-        }
-
-        // 显示字段错误
-        function showFieldError(fieldName, message) {
-            const field = document.getElementById(fieldName);
-            const feedback = field.nextElementSibling;
-
-            field.classList.add('is-invalid');
-            feedback.textContent = message;
-            feedback.style.display = 'block';
-        }
-
-        // 显示服务器返回的错误
-        function displayErrors(errors) {
-            errors.forEach(error => {
-                const field = document.getElementById(error.param);
-                if (field) {
-                    showFieldError(error.param, error.msg);
-                }
-            });
-        }
-
-        // 回车键登录
-        document.getElementById('password').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
-            }
-        });
-
-        // 页面加载时检查是否已登录
-        window.addEventListener('load', function() {
-            const user = localStorage.getItem('user');
-            if (user) {
-                const userData = JSON.parse(user);
-                // 如果已登录，根据用户类型跳转
-                if (userData.isAdmin) {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = 'dashboard.html';
-                }
-            }
-        });
-    </script>
+<header class="site-header" id="site-header"></header>
+<noscript><p class="notice">账号与充值操作需要启用 JavaScript。</p></noscript>
+<main class="container" id="main">
+  <div class="breadcrumb"><a href="index.html">首页</a> / 账号登录</div>
+  <div class="auth-layout">
+    <aside class="auth-story"><span class="eyebrow">云端千年 · 炎黄新章</span><h1>山河无恙，<br>少侠别来无恙。</h1><p>熟悉的名字，未完的故事。<br>登录账号中心，整理行囊，再赴江湖。</p><div class="story-bottom"><p>武林霸业谈笑中，<br>不胜千年一场醉。</p></div></aside>
+    <section class="auth-form">
+      <h2>账号登录</h2><p class="intro">使用炎黄新章游戏账号登录。</p>
+      <form id="login-form">
+        <div id="login-feedback" class="form-feedback" role="alert" hidden></div>
+        <div class="field"><label for="account">游戏账号</label><input id="account" name="account" autocomplete="username" maxlength="20" placeholder="请输入游戏账号" required autofocus></div>
+        <div class="field"><label for="password">游戏密码</label><div class="password-wrap"><input id="password" name="password" type="password" autocomplete="current-password" maxlength="100" placeholder="请输入密码" required><button type="button" class="password-toggle" data-for="password" aria-label="显示游戏密码" aria-pressed="false">显示</button></div></div>
+        <button class="button full" type="submit">登录账号中心</button>
+      </form>
+      <p class="hint section-gap">忘记密码？请联系 GM 核验身份。请勿向他人提供账号密码。</p>
+      <p class="auth-switch">尚未踏入江湖？ <a href="register.html">注册游戏账号 →</a></p>
+    </section>
+  </div>
+</main>
+<footer class="site-footer" id="site-footer"></footer>
+<script type="module" src="js/login.js"></script>
 </body>
 </html>

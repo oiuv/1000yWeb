@@ -1,165 +1,54 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>游戏充值 - 云端千年-炎黄新章</title>
-    <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="云端千年·炎黄新章账号中心，游戏注册、账号管理与人工充值登记。">
+<title>充值登记 · 云端千年·炎黄新章</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- 头部导航 -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">云端千年-炎黄新章</div>
-            <nav class="nav-links">
-                <a href="index.html">首页</a>
-                <a href="register.html">注册</a>
-                <a href="login.html">登录</a>
-                <a href="recharge.html">充值</a>
-                <a href="https://1000y.gameivy.com/download.html" target="_blank">下载</a>
-                <a href="https://1000y.gameivy.com/" target="_blank">游戏官网</a>
-            </nav>
+<header class="site-header" id="site-header"></header>
+<noscript><p class="notice">账号与充值操作需要启用 JavaScript。</p></noscript>
+<main class="container" id="main">
+  <div class="breadcrumb"><a href="index.html">首页</a> / 充值登记</div>
+  <div class="page-heading"><div><span class="eyebrow">江湖相伴 · 云端千年</span><h1>充值登记</h1><p>付款后留下信息，交由 GM 核对。登记不代表已经到账。</p></div><a class="button secondary compact" href="dashboard.html#records">我的登记记录 →</a></div>
+  <ol class="steps" aria-label="充值流程"><li><b>1</b>扫码付款</li><li><b>2</b>登记信息</li><li><b>3</b>GM 人工核款</li><li><b>4</b>完成交付</li></ol>
+  <div class="split-layout">
+    <aside class="side-note">
+      <div class="qr-box"><strong>微信扫码付款</strong><img src="images/wepay.jpg" alt="云端千年微信收款码"><span class="small">请核对收款方、付款项及数量。</span></div>
+      <div><h3>填写后六位即可</h3><p>订单尾号和付款时间用于人工对账，无需填写完整交易单号。</p><h3>关于交付</h3><p>GM 确认后 24 小时内完成交付。填写错误或有疑问，请联系 QQ 群 2887111。</p><h3>月卡注意事项</h3><p>未付费账号每次游戏 2 小时后需重新登录；月卡账号到期后无法登录。仓库小号是否充值，请按实际需要决定。</p></div>
+    </aside>
+    <section class="panel">
+      <div class="panel-title"><h2>填写付款信息</h2><span class="small muted">请以实际支付记录为准</span></div>
+      <div class="notice" id="account-notice">充值登记须先登录炎黄账号，正在确认登录状态…</div>
+      <div id="recharge-load-feedback" class="form-feedback" role="alert" hidden></div>
+      <form id="recharge-form" class="section-gap" hidden>
+        <div id="recharge-feedback" class="form-feedback" role="alert" hidden></div>
+        <div class="form-grid">
+          <div class="field"><label for="payment_time">付款时间</label><input id="payment_time" name="payment_time" type="datetime-local" required><small class="hint">请填写支付凭证上的时间。</small></div>
+          <div class="field"><label for="transaction_id">交易单号后 6 位</label><input id="transaction_id" name="transaction_id" minlength="6" maxlength="6" pattern="[a-zA-Z0-9]{6}" autocomplete="off" placeholder="例如 123456" required><small class="hint">在微信账单详情中查看。</small></div>
+          <div class="field"><label for="amount">实付金额（元）</label><input id="amount" name="amount" type="number" step="0.01" min="0.01" max="999999.99" inputmode="decimal" placeholder="0.00" required></div>
+          <div class="field"><label for="server">游戏分区</label><select id="server" name="server" required><option value="炎黄新章">炎黄新章</option><option value="神武奇章">神武奇章</option></select></div>
+          <div class="field"><label for="game_account">收货游戏账号</label><input id="game_account" name="game_account" minlength="5" maxlength="12" pattern="[a-zA-Z0-9_]{5,12}" autocomplete="username" aria-describedby="account-hint" readonly required><small class="hint" id="account-hint">固定使用当前登录的炎黄账号。</small></div>
+          <div class="field"><label id="character-label" for="character-select">收货角色名称</label><select id="character-select" name="character_name" aria-describedby="character-hint" required></select><input id="character_name" name="character_name" maxlength="20" placeholder="请输入神武奇章角色名称" aria-describedby="character-hint" required hidden disabled><small class="hint" id="character-hint">自动读取当前账号的炎黄角色。</small></div>
         </div>
-    </header>
-
-    <div class="main-content">
-        <div class="container">
-            <h1 class="game-title">游戏充值</h1>
-
-            <div class="card">
-                <div id="alert-container"></div>
-
-                <!-- 充值说明 -->
-                <div class="recharge-notice">
-                    <h2 class="notice-title">充值说明</h2>
-                    <div class="notice-content">
-                        <p class="notice-item">
-                            <span class="notice-icon">游戏</span>
-                            <strong>免费游戏</strong>未付费账号可无限制免费畅玩，每次游戏2小时后自动下线，重新登录即可继续。
-                        </p>
-                        <p class="notice-item">
-                            <span class="notice-icon">充值</span>
-                            <strong>月卡升级</strong>充值月卡后账号升级为付费账号，畅享无限制游戏体验。
-                        </p>
-                        <p class="notice-item">
-                            <span class="notice-icon">注意</span>
-                            <strong>到期限制</strong>付费账号到期后无法登录，仓库小号无需充值，避免后期不想充值又无法进入游戏。
-                        </p>
-                        <p class="notice-item highlight">
-                            <span class="notice-icon">提交</span>
-                            <strong>重要提示</strong>充值后请务必填写下方充值登记表单，GM确认后24小时内完成交付！
-                        </p>
-                    </div>
-                </div>
-
-                <!-- 收款码区域 -->
-                <div class="qrcode-section">
-                    <h3 class="qrcode-title">扫描二维码支付</h3>
-                    <div class="qrcode-container">
-                        <img src="images/wepay.jpg" alt="微信收款码" class="qrcode-image">
-                    </div>
-                    <p class="qrcode-tip">请务必选择正确的付款项和数量（默认x1可修改）</p>
-                </div>
-
-                <!-- 充值登记表单 -->
-                <form id="rechargeForm" class="recharge-form">
-                    <h2 class="form-section-title">充值登记表单</h2>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label required" for="payment_time">付款时间</label>
-                            <input type="datetime-local" class="form-control" id="payment_time"
-                                   name="payment_time" required>
-                            <div class="invalid-feedback">请选择付款时间</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required" for="transaction_id">交易单号（后6位）</label>
-                            <input type="text" class="form-control" id="transaction_id"
-                                   name="transaction_id" maxlength="6" placeholder="请输入交易单号后6位"
-                                   pattern="[a-zA-Z0-9]{6}" required>
-                            <div class="invalid-feedback">交易单号必须为6位字母或数字</div>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label required" for="amount">付款金额（元）</label>
-                            <input type="number" class="form-control" id="amount"
-                                   name="amount" step="0.01" min="0.01" placeholder="请输入付款金额" required>
-                            <div class="invalid-feedback">请输入有效的付款金额</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label required" for="game_account">游戏账号</label>
-                            <input type="text" class="form-control" id="game_account"
-                                   name="game_account" minlength="5" maxlength="12" placeholder="请输入游戏账号" required>
-                            <div class="invalid-feedback">游戏账号长度必须在5-12个字符之间</div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label required" for="character_name">角色名称</label>
-                        <input type="text" class="form-control" id="character_name"
-                               name="character_name" maxlength="20" placeholder="请填写账号下主要角色名称用于校验身份和发货" required>
-                        <div class="invalid-feedback">请输入角色名称</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label required">付款项（可多选）</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-item">
-                                <input type="checkbox" name="items" value="月卡">
-                                <span>月卡</span>
-                            </label>
-                            <label class="checkbox-item">
-                                <input type="checkbox" name="items" value="福袋">
-                                <span>福袋</span>
-                            </label>
-                            <label class="checkbox-item">
-                                <input type="checkbox" name="items" value="宝石">
-                                <span>宝石</span>
-                            </label>
-                        </div>
-                        <div class="invalid-feedback" id="items-feedback">请至少选择一项付款项</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label required">游戏分区</label>
-                        <div class="radio-group">
-                            <label class="radio-item">
-                                <input type="radio" name="server" value="神武奇章">
-                                <span>神武奇章</span>
-                            </label>
-                            <label class="radio-item">
-                                <input type="radio" name="server" value="炎黄新章">
-                                <span>炎黄新章</span>
-                            </label>
-                        </div>
-                        <div class="invalid-feedback" id="server-feedback">请选择游戏分区</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="remark">备注说明</label>
-                        <textarea class="form-control" id="remark" name="remark"
-                                  rows="3" maxlength="200" placeholder="选填，请输入其他需要说明的信息，比如联系QQ"></textarea>
-                        <div class="char-count">0/200</div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" id="submitBtn">
-                        提交充值登记
-                    </button>
-
-                    <div class="loading" id="loading">
-                        <span class="spinner"></span>
-                        <span>提交中...</span>
-                    </div>
-                </form>
-            </div>
+        <div class="field section-gap"><span class="field-label" id="products-label">付款项与数量</span>
+          <div class="product-list" role="group" aria-labelledby="products-label">
+            <div class="product"><label><input type="checkbox" name="items" value="月卡">月卡</label><div class="quantity"><label for="quantity-month">数量</label><input id="quantity-month" type="number" min="1" max="99" value="1" data-quantity="月卡" disabled></div></div>
+            <div class="product"><label><input type="checkbox" name="items" value="年卡">年卡</label><div class="quantity"><label for="quantity-year">数量</label><input id="quantity-year" type="number" min="1" max="99" value="1" data-quantity="年卡" disabled></div></div>
+            <div class="product"><label><input type="checkbox" name="items" value="福袋">福袋</label><div class="quantity"><label for="quantity-bank">数量</label><input id="quantity-bank" type="number" min="1" max="99" value="1" data-quantity="福袋" disabled></div></div>
+            <div class="product"><label><input type="checkbox" name="items" value="宝石">宝石</label><div class="quantity"><label for="quantity-gem">数量</label><input id="quantity-gem" type="number" min="1" max="99" value="1" data-quantity="宝石" disabled></div></div>
+          </div><small class="hint">炎黄月卡 10 元／30 天，年卡 100 元／365 天，核款通过后自动充入登录账号，重登游戏生效。福袋、宝石及神武订单人工交付。可多选，数量须与实际付款一致。</small>
         </div>
-    </div>
-
-    <script src="js/auth.js"></script>
-    <script src="js/recharge.js"></script>
+        <div class="field"><label for="remark">备注说明<span class="optional">选填</span></label><textarea id="remark" name="remark" maxlength="200" rows="3" placeholder="如需说明交付事项或留下联系 QQ，可在此填写。"></textarea><small class="hint"><span id="remark-count">0</span> / 200 字</small></div>
+        <button class="button full" type="submit">提交登记 · 等待人工核款</button>
+        <p class="hint">请勿在备注中填写密码。提交前请再次核对游戏分区和收货账号。</p>
+      </form>
+    </section>
+  </div>
+</main>
+<footer class="site-footer" id="site-footer"></footer>
+<script type="module" src="js/recharge.js"></script>
 </body>
 </html>

@@ -1,390 +1,47 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户中心 - 云端千年-炎黄新章</title>
-    <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="云端千年·炎黄新章账号中心，游戏注册、账号管理与人工充值登记。">
+<title>用户中心 · 云端千年·炎黄新章</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- 头部导航 -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">云端千年-炎黄新章</div>
-            <nav class="nav-links">
-                <a href="index.html">首页</a>
-                <a href="register.html">注册</a>
-                <a href="login.html">登录</a>
-                <a href="recharge.html">充值</a>
-                <a href="https://1000y.gameivy.com/download.html" target="_blank">下载</a>
-                <a href="https://1000y.gameivy.com/" target="_blank">游戏官网</a>
-            </nav>
-        </div>
-    </header>
-
-    <div class="main-content">
-        <div class="container">
-            <h1 class="game-title">用户中心</h1>
-
-            <div class="card">
-                <div id="alert-container"></div>
-
-                <div id="userInfo">
-                    <div class="loading" id="userLoading">
-                        <div class="spinner"></div>
-                        加载中...
-                    </div>
-                </div>
-
-                <div class="user-content" style="display: none;">
-                    <!-- 基本信息 -->
-                    <div class="info-section" style="margin-bottom: 30px;">
-                        <h3 class="section-title">基本信息</h3>
-
-                        <div class="info-row">
-                            <span class="info-label">游戏账号：</span>
-                            <span class="info-value" id="userAccount"></span>
-                        </div>
-
-                        <div class="info-row">
-                            <span class="info-label">联系邮箱：</span>
-                            <span class="info-value" id="userEmail"></span>
-                        </div>
-                    </div>
-
-                    <!-- 游戏角色 -->
-                    <div class="info-section" style="margin-bottom: 30px;">
-                        <h3 class="section-title">游戏角色</h3>
-
-                        <div class="characters-container" id="charactersList">
-                            <!-- 角色列表将动态生成 -->
-                        </div>
-
-                        <div class="info-row">
-                            <span class="info-label">最后登录：</span>
-                            <span class="info-value" id="lastLogin"></span>
-                        </div>
-                    </div>
-
-                    <!-- 修改密码 -->
-                    <div class="info-section" style="margin-bottom: 30px;">
-                        <h3 class="section-title">修改密码</h3>
-
-                        <form id="passwordForm" style="max-width: 500px;">
-                            <div class="form-group">
-                                <label for="oldPassword" class="form-label required">原密码</label>
-                                <input type="password" class="form-control" id="oldPassword" name="oldPassword"
-                                       placeholder="请输入原密码" required>
-                                <div class="invalid-feedback"></div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="newPassword" class="form-label required">新密码</label>
-                                <input type="password" class="form-control" id="newPassword" name="newPassword"
-                                       placeholder="请输入新密码（6-20位）" minlength="6" maxlength="20" required>
-                                <div class="invalid-feedback"></div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="confirmPassword" class="form-label required">确认新密码</label>
-                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
-                                       placeholder="请再次输入新密码" required>
-                                <div class="invalid-feedback"></div>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary" id="changePasswordBtn">
-                                修改密码
-                            </button>
-
-                            <div class="loading" id="passwordLoading">
-                                <div class="spinner"></div>
-                                处理中...
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- 操作按钮 -->
-                    <div class="action-section">
-                        <button type="button" class="btn btn-primary" onclick="logout()">
-                            退出登录
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+<header class="site-header" id="site-header"></header>
+<noscript><p class="notice">账号与充值操作需要启用 JavaScript。</p></noscript>
+<main class="container" id="main">
+  <div class="breadcrumb"><a href="index.html">首页</a> / 用户中心</div>
+  <div class="page-heading"><div><span class="eyebrow">故人归来 · 整理行囊</span><h1>我的江湖</h1><p id="welcome">正在读取账号资料…</p></div><div class="actions"><a class="button" href="recharge.html">充值登记</a><a class="button secondary" id="admin-link" href="admin.html" hidden>管理中心</a></div></div>
+  <div id="dashboard-feedback" class="form-feedback" role="alert" hidden></div>
+  <div id="profile-content" hidden>
+    <div class="profile-grid">
+      <section>
+        <div class="panel"><div class="panel-title"><h2>账号资料</h2><span class="small muted">炎黄新章</span></div><dl class="profile-details"><dt>游戏账号</dt><dd id="profile-account">—</dd><dt>联系邮箱</dt><dd id="profile-email">—</dd><dt>游戏登录</dt><dd id="profile-lastdate">—</dd></dl></div>
+        <div class="panel"><div class="panel-title"><h2>江湖角色</h2></div><div id="character-list" class="character-list"></div><p class="hint section-gap">角色由游戏创建和维护，网站只展示账号已有的角色资料。</p></div>
+      </section>
+      <section class="panel"><div class="panel-title"><h2>修改游戏密码</h2></div>
+        <form id="password-form">
+          <div id="password-feedback" class="form-feedback" role="alert" hidden></div>
+          <div class="field"><label for="oldPassword">原密码</label><input id="oldPassword" name="oldPassword" type="password" autocomplete="current-password" maxlength="100" required></div>
+          <div class="field"><label for="newPassword">新密码</label><div class="password-wrap"><input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="6" maxlength="20" placeholder="6–20 位英文、数字或符号" required><button type="button" class="password-toggle" data-for="newPassword" aria-label="显示新密码" aria-pressed="false">显示</button></div><small class="hint">不含空格、中文和逗号。</small></div>
+          <div class="field"><label for="confirmPassword">确认新密码</label><input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="6" maxlength="20" required></div>
+          <button class="button full" type="submit">确认修改密码</button>
+          <p class="hint">修改后，所有网站登录会话将失效，需要重新登录。不强制断开正在运行的游戏。</p>
+        </form>
+      </section>
     </div>
-
-    <script src="js/auth.js"></script>
-    <script>
-        let currentUser = null;
-
-        // 页面加载时显示用户信息
-        window.addEventListener('load', function() {
-            const user = localStorage.getItem('user');
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            currentUser = JSON.parse(user);
-
-            // 创建toast通知容器
-            const toastContainer = document.createElement('div');
-            toastContainer.id = 'toast-container';
-            toastContainer.style.cssText = `
-                position: fixed;
-                top: 100px;
-                right: 20px;
-                z-index: 10000;
-                min-width: 300px;
-                max-width: 400px;
-            `;
-            document.body.appendChild(toastContainer);
-
-            loadUserProfile();
-        });
-
-        // 加载用户详细信息
-        async function loadUserProfile() {
-            try {
-                const token = btoa(encodeURIComponent(JSON.stringify(currentUser)));
-                const response = await fetch('/api/auth/profile', {
-                    headers: {
-                        'Authorization': 'Bearer ' + token
-                    }
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    displayUserInfo(result.profile);
-                } else {
-                    // 认证失败，清除无效的用户信息
-                    localStorage.removeItem('user');
-                    showToast('danger', result.message || '登录已失效，请重新登录');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 1500);
-                }
-            } catch (error) {
-                console.error('加载用户信息失败:', error);
-                localStorage.removeItem('user');
-                showToast('danger', '加载失败，请重新登录');
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 1500);
-            } finally {
-                document.getElementById('userLoading').style.display = 'none';
-            }
-        }
-
-        // 显示用户信息
-        function displayUserInfo(profile) {
-            document.querySelector('.user-content').style.display = 'block';
-
-            document.getElementById('userAccount').textContent = profile.account || '未知';
-            document.getElementById('userEmail').textContent = profile.email || '未设置';
-
-            // 如果是管理员，显示管理中心入口
-            if (currentUser.isAdmin) {
-                const actionSection = document.querySelector('.action-section');
-                const adminBtn = document.createElement('button');
-                adminBtn.className = 'btn btn-primary';
-                adminBtn.textContent = '进入管理中心';
-                adminBtn.style.marginTop = '10px';
-                adminBtn.style.background = 'linear-gradient(135deg, #D4AF37 0%, #FFD700 50%, #D4AF37 100%)';
-                adminBtn.style.color = '#8B0000';
-                adminBtn.onclick = () => {
-                    window.location.href = 'admin.html';
-                };
-                actionSection.insertBefore(adminBtn, actionSection.firstChild);
-            }
-
-            // 显示角色列表
-            const charactersList = document.getElementById('charactersList');
-            if (profile.characters && profile.characters.length > 0) {
-                charactersList.innerHTML = profile.characters.map(char =>
-                    `<div class="character-tag">${char}</div>`
-                ).join('');
-            } else {
-                charactersList.innerHTML = '<div class="info-value">暂无角色</div>';
-            }
-
-            // 显示最后登录时间
-            document.getElementById('lastLogin').textContent = profile.lastdate || '首次登录';
-        }
-
-        // 修改密码表单处理
-        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const oldPassword = document.getElementById('oldPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            // 清除之前的错误
-            clearPasswordErrors();
-
-            // 验证
-            if (!validatePasswordForm(oldPassword, newPassword, confirmPassword)) {
-                return;
-            }
-
-            const changePasswordBtn = document.getElementById('changePasswordBtn');
-            const passwordLoading = document.getElementById('passwordLoading');
-
-            changePasswordBtn.disabled = true;
-            passwordLoading.style.display = 'block';
-
-            try {
-                const token = btoa(encodeURIComponent(JSON.stringify(currentUser)));
-                const response = await fetch('/api/auth/change-password', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ oldPassword, newPassword })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showToast('success', result.message);
-                    document.getElementById('passwordForm').reset();
-                } else {
-                    showToast('danger', result.message);
-                }
-            } catch (error) {
-                showToast('danger', '网络错误，请稍后再试');
-                console.error('修改密码错误:', error);
-            } finally {
-                changePasswordBtn.disabled = false;
-                passwordLoading.style.display = 'none';
-            }
-        });
-
-        // 验证密码表单
-        function validatePasswordForm(oldPassword, newPassword, confirmPassword) {
-            let isValid = true;
-
-            if (!oldPassword) {
-                showPasswordError('oldPassword', '请输入原密码');
-                isValid = false;
-            }
-
-            if (!newPassword || newPassword.length < 6 || newPassword.length > 20) {
-                showPasswordError('newPassword', '新密码长度必须在6-20个字符之间');
-                isValid = false;
-            }
-
-            if (newPassword !== confirmPassword) {
-                showPasswordError('confirmPassword', '两次输入的密码不一致');
-                isValid = false;
-            }
-
-            return isValid;
-        }
-
-        // 显示密码错误
-        function showPasswordError(fieldId, message) {
-            const field = document.getElementById(fieldId);
-            const feedback = field.nextElementSibling;
-            field.classList.add('is-invalid');
-            feedback.textContent = message;
-            feedback.style.display = 'block';
-        }
-
-        // 清除密码错误
-        function clearPasswordErrors() {
-            document.querySelectorAll('#passwordForm .form-control').forEach(input => {
-                input.classList.remove('is-invalid');
-            });
-            document.querySelectorAll('#passwordForm .invalid-feedback').forEach(feedback => {
-                feedback.style.display = 'none';
-            });
-        }
-
-        // 退出登录
-        function logout() {
-            localStorage.removeItem('user');
-            showToast('success', '已退出登录');
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 1000);
-        }
-
-        // 显示Toast通知
-        function showToast(type, message) {
-            const toastContainer = document.getElementById('toast-container');
-            if (!toastContainer) return;
-
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.style.cssText = `
-                background: ${type === 'success' ? 'rgba(40, 167, 69, 0.95)' : 'rgba(220, 53, 69, 0.95)'};
-                color: #fff;
-                padding: 16px 20px;
-                border-radius: 8px;
-                margin-bottom: 12px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-                border: 1px solid ${type === 'success' ? 'rgba(40, 167, 69, 0.6)' : 'rgba(220, 53, 69, 0.6)'};
-                font-size: 15px;
-                font-weight: 500;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                animation: slideIn 0.3s ease;
-                backdrop-filter: blur(10px);
-            `;
-
-            const icon = type === 'success' ? '' : '';
-            const span = document.createElement('span');
-            span.textContent = message;
-            toast.innerHTML = icon;
-            toast.appendChild(span);
-
-            toastContainer.appendChild(toast);
-
-            // 5秒后自动消失
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                }, 300);
-            }, 5000);
-
-            // 添加动画样式
-            if (!document.getElementById('toast-animation-style')) {
-                const style = document.createElement('style');
-                style.id = 'toast-animation-style';
-                style.textContent = `
-                    @keyframes slideIn {
-                        from {
-                            transform: translateX(100%);
-                            opacity: 0;
-                        }
-                        to {
-                            transform: translateX(0);
-                            opacity: 1;
-                        }
-                    }
-                    @keyframes slideOut {
-                        from {
-                            transform: translateX(0);
-                            opacity: 1;
-                        }
-                        to {
-                            transform: translateX(100%);
-                            opacity: 0;
-                        }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-        }
-    </script>
+    <section class="panel section-gap" id="records">
+      <div class="panel-title"><h2>我的登记记录</h2><button type="button" class="button secondary compact" id="refresh-records">刷新</button></div>
+      <p class="muted small">显示本账号提交的登记，包括为其它神武账号登记的记录。未关联登录账号的历史登记，请联系 GM 查询。</p>
+      <div id="records-feedback" class="form-feedback" role="alert" hidden></div>
+      <div class="table-wrap"><table class="record-table" id="records-table"><thead><tr><th>编号</th><th>付款时间 / 尾号</th><th>账号 / 角色</th><th>付款项</th><th>金额</th><th>状态</th><th>操作</th></tr></thead><tbody></tbody></table></div>
+      <div class="pagination"><span id="page-info">正在读取…</span><div class="actions"><button id="prev-page" class="button secondary compact" type="button" disabled>上一页</button><button id="next-page" class="button secondary compact" type="button" disabled>下一页</button></div></div>
+    </section>
+  </div>
+  <dialog id="record-dialog"><div class="dialog-heading"><h2>登记详情</h2><button class="dialog-close" type="button" data-close-dialog aria-label="关闭登记详情">×</button></div><div id="record-detail"></div><div class="actions section-gap"><button type="button" class="button secondary" data-close-dialog>关闭</button></div></dialog>
+</main>
+<footer class="site-footer" id="site-footer"></footer>
+<script type="module" src="js/dashboard.js"></script>
 </body>
 </html>

@@ -1,194 +1,203 @@
-// 通用工具函数
-
-// 显示提示信息
-function showAlert(type, message) {
-    const alertContainer = document.getElementById('alert-container');
-    if (!alertContainer) return;
-
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type}`;
-    alertDiv.textContent = message;
-
-    alertContainer.innerHTML = '';
-    alertContainer.appendChild(alertDiv);
-
-    // 3秒后自动消失
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.parentNode.removeChild(alertDiv);
-        }
-    }, 3000);
+export const state = { user: null, csrfToken: null };
+export const statuses = { pending: '待审核', verified: '已核款', delivered: '已交付', rejected: '已拒绝' };
+export const $ = selector => document.querySelector(selector);
+export function el(tag, className = '', text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
 }
-
-// 验证邮箱格式
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+export function message(target, text, success = false) {
+  target.textContent = text;
+  target.className = 'form-feedback' + (success ? ' success' : '');
+  target.hidden = !text;
 }
-
-// 验证手机号格式
-function isValidPhone(phone) {
-    const phoneRegex = /^1[3-9]\d{9}$/;
-    return phoneRegex.test(phone);
+export function toast(text, error = false) {
+  document.querySelector('.toast')?.remove();
+  const node = el('div', 'toast' + (error ? ' error' : ''), text);
+  node.setAttribute('role', 'status');
+  document.body.append(node);
+  setTimeout(() => node.remove(), 6000);
 }
-
-// 验证身份证号格式
-function isValidIDCard(idCard) {
-    const idCardRegex = /^\d{17}[\dXx]$/;
-    if (!idCardRegex.test(idCard)) return false;
-
-    // 简单的校验码验证
-    const weights = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
-    const checkCodes = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'];
-
-    let sum = 0;
-    for (let i = 0; i < 17; i++) {
-        sum += parseInt(idCard[i]) * weights[i];
+export async function api(path, { body, ...options } = {}) {
+  const response = await fetch(path, {
+    credentials: 'same-origin', ...options,
+    method: body === undefined ? 'GET' : 'POST',
+    headers: {
+      ...(body === undefined ? {} : { 'Content-Type': 'application/json', 'X-CSRF-Token': state.csrfToken || '' }),
+      ...options.headers
+    },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) })
+  });
+  let data;
+  try { data = await response.json(); } catch { throw new Error('服务响应异常，请稍后再试'); }
+  if (!response.ok) {
+    const error = new Error(data.message || '操作失败');
+    error.status = response.status; error.fields = data.errors;
+    throw error;
+  }
+  return data;
+}
+export async function submit(form, action) {
+  if (form.getAttribute('aria-busy') === 'true') return;
+  const button = form.querySelector('[type="submit"]');
+  const original = button.textContent;
+  const feedback = form.querySelector('.form-feedback');
+  message(feedback, '');
+  button.disabled = true; button.textContent = '正在处理…';
+  form.setAttribute('aria-busy', 'true');
+  try { await action(); }
+  catch (error) {
+    message(feedback, error.message);
+    if (error.fields?.[0]?.path) {
+      const field = form.elements.namedItem(error.fields[0].path);
+      if (field?.focus) field.focus();
     }
-
-    const checkCode = checkCodes[sum % 11];
-    return idCard[17].toUpperCase() === checkCode;
+  } finally {
+    button.disabled = false; button.textContent = original;
+    form.removeAttribute('aria-busy');
+  }
 }
-
-// 获取客户端IP
-function getClientIP() {
-    return fetch('https://api.ipify.org?format=json')
-        .then(response => response.json())
-        .then(data => data.ip)
-        .catch(() => '127.0.0.1');
-}
-
-// 格式化日期
-function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN');
-}
-
-// 防抖函数
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// 检查用户是否登录
-function checkAuth() {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
-}
-
-// 更新导航菜单（根据登录状态）
-function updateNavigation() {
-    const user = checkAuth();
-    const loginLink = document.querySelector('a[href="login.html"]');
-    const dashboardLink = document.querySelector('a[href="dashboard.html"]');
-
-    if (user) {
-        // 已登录：隐藏登录链接，显示用户中心
-        if (loginLink) {
-            loginLink.style.display = 'none';
-        }
-        // 如果没有用户中心链接，添加一个
-        if (!dashboardLink) {
-            const nav = document.querySelector('.nav-links');
-            if (nav) {
-                const rechargeLink = nav.querySelector('a[href="recharge.html"]');
-                const newLink = document.createElement('a');
-                newLink.href = 'dashboard.html';
-                newLink.textContent = '用户中心';
-                newLink.className = 'nav-link-item';
-                if (rechargeLink) {
-                    nav.insertBefore(newLink, rechargeLink.nextSibling);
-                }
-            }
-        }
-    } else {
-        // 未登录：显示登录链接，隐藏用户中心
-        if (loginLink) {
-            loginLink.style.display = '';
-        }
-        if (dashboardLink) {
-            dashboardLink.style.display = 'none';
-        }
+export async function init({ auth = false, admin = false } = {}) {
+  $('#site-header').innerHTML =
+    '<a class="skip-link" href="#main">跳转到正文</a><div class="header-inner">' +
+    '<a class="brand" href="index.html" aria-label="云端千年首页"><span class="seal" aria-hidden="true">云<br>端</span>' +
+    '<span><strong>云端千年</strong><small>炎黄新章 · 江湖未远</small></span></a>' +
+    '<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>' +
+    '<nav class="site-nav" id="site-nav" aria-label="主导航">' +
+    '<a href="index.html">首页</a><a href="recharge.html">充值登记</a>' +
+    '<a href="https://1000y.gameivy.com/download.html" target="_blank" rel="noopener noreferrer">客户端下载 ↗</a>' +
+    '<a href="https://1000y.gameivy.com/" target="_blank" rel="noopener noreferrer">游戏官网 ↗</a>' +
+    '<span class="nav-auth" id="nav-auth"><a href="login.html">登录</a><a class="button compact" href="register.html">注册账号</a></span></nav></div>';
+  $('#site-footer').innerHTML = '<div class="footer-inner"><span>云端千年 · 炎黄新章<span class="muted">　武林霸业谈笑中，不胜千年一场醉。</span></span>' +
+    '<span><a href="https://1000y.gameivy.com/" target="_blank" rel="noopener noreferrer">游戏官网</a><span>玩家 QQ 群 · 2887111</span></span></div>';
+  $('.nav-toggle').addEventListener('click', event => {
+    const open = $('#site-nav').classList.toggle('open');
+    event.currentTarget.setAttribute('aria-expanded', String(open));
+  });
+  for (const link of document.querySelectorAll('#site-nav a')) {
+    const url = new URL(link.href);
+    if (url.origin === location.origin && (url.pathname === location.pathname ||
+        (location.pathname === '/' && link.getAttribute('href') === 'index.html'))) {
+      link.setAttribute('aria-current', 'page');
     }
+  }
+  for (const toggle of document.querySelectorAll('.password-toggle')) {
+    toggle.addEventListener('click', () => {
+      const input = document.getElementById(toggle.dataset.for);
+      const show = input.type === 'password'; input.type = show ? 'text' : 'password';
+      toggle.textContent = show ? '隐藏' : '显示';
+      toggle.setAttribute('aria-label', (show ? '隐藏' : '显示') + input.labels[0].textContent);
+      toggle.setAttribute('aria-pressed', String(show));
+    });
+  }
+  for (const button of document.querySelectorAll('[data-copy-qq]')) {
+    button.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText('2887111'); toast('QQ群号已复制：2887111'); }
+      catch { toast('玩家 QQ 群：2887111'); }
+    });
+  }
+  for (const close of document.querySelectorAll('[data-close-dialog]')) {
+    close.addEventListener('click', () => close.closest('dialog').close());
+  }
+  const session = await api('/api/auth/session');
+  Object.assign(state, { user: session.user, csrfToken: session.csrfToken });
+  if (auth && !state.user) {
+    location.replace('login.html?next=' + encodeURIComponent(location.pathname.split('/').pop()));
+    return false;
+  }
+  if (admin && !state.user?.isAdmin) {
+    location.replace('dashboard.html');
+    return false;
+  }
+  if (state.user) {
+    const nav = $('#nav-auth'); nav.replaceChildren();
+    const link = el('a', '', state.user.isAdmin ? '管理中心' : '用户中心');
+    link.href = state.user.isAdmin ? 'admin.html' : 'dashboard.html';
+    nav.append(link);
+    const logout = el('button','button subtle compact','退出');
+    logout.type = 'button';
+    logout.addEventListener('click', async () => {
+      logout.disabled = true;
+      try { await api('/api/auth/logout', { body: {} }); location.href = 'login.html'; }
+      catch (error) { toast(error.message, true); logout.disabled = false; }
+    });
+    nav.append(logout);
+  }
+  return true;
 }
-
-// 清除认证信息
-function clearAuth() {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+export function badge(status) {
+  return el('span', 'badge ' + (Object.hasOwn(statuses, status) ? status : 'pending'), statuses[status] || '未知状态');
 }
-
-// 通用API请求函数
-async function apiRequest(url, options = {}) {
-    const defaultOptions = {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    };
-
-    const mergedOptions = { ...defaultOptions, ...options };
-
-    try {
-        const response = await fetch(url, mergedOptions);
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || '请求失败');
-        }
-
-        return data;
-    } catch (error) {
-        console.error('API请求错误:', error);
-        throw error;
+export function money(value) { return '¥' + Number(value).toFixed(2); }
+export function timestamp(value, utc = false) {
+  if (!value) return '暂无记录';
+  if (!utc) return String(value).replace('T', ' ').slice(0,16);
+  const date = new Date(value.replace(' ', 'T') + 'Z');
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('zh-CN', { hour12: false });
+}
+export function itemText(record) {
+  return record.items.map(item => item + (record.quantities?.[item] ? ' ×' + record.quantities[item] : '（数量未记录）')).join('、');
+}
+export function renderTable(table, records, onOpen, admin = false) {
+  const body = table.querySelector('tbody'); body.replaceChildren();
+  if (!records.length) {
+    const row = el('tr'), cell = el('td', 'empty-cell');
+    cell.colSpan = admin ? 8 : 7;
+    cell.append(el('strong','','暂无符合条件的登记记录'));
+    row.append(cell); body.append(row); return;
+  }
+  for (const record of records) {
+    const row = el('tr');
+    const cells = [
+      ['登记编号', '#' + record.id],
+      ['付款时间 / 尾号', timestamp(record.payment_time), record.transaction_id],
+      ['账号 / 角色', record.game_account, record.character_name + ' · ' + record.server],
+      ['付款项', itemText(record)],
+      ['金额', money(record.amount)],
+      ['状态', badge(record.status)]
+    ];
+    if (admin) cells.push(['备注', record.remark || '—']);
+    for (const [label, value, secondary] of cells) {
+      const cell = el('td'), content = el('div','cell-value');
+      cell.append(el('span','cell-label',label));
+      content.append(value instanceof Node ? value : el('span', label === '金额' ? 'money' : '', value));
+      if (secondary) content.append(el('small','',secondary));
+      if (label === '备注') { content.title = record.remark || ''; content.classList.add('record-remark'); }
+      cell.append(content); row.append(cell);
     }
+    const cell = el('td'), button = el('button','button secondary compact', admin ? '详情 / 处理' : '查看详情');
+    button.type = 'button'; button.setAttribute('aria-label', '查看登记 #' + record.id);
+    button.addEventListener('click', () => onOpen(record));
+    cell.append(el('span','cell-label','操作'),button); row.append(cell); body.append(row);
+  }
 }
-
-// 密码强度检测
-function checkPasswordStrength(password) {
-    if (!password) return 0;
-
-    let strength = 0;
-
-    // 长度检查
-    if (password.length >= 8) strength++;
-    if (password.length >= 12) strength++;
-
-    // 字符类型检查
-    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^a-zA-Z0-9]/.test(password)) strength++;
-
-    return Math.min(strength, 4);
+export function recordDetails(container, record, admin = false) {
+  container.replaceChildren();
+  const detail = el('dl','profile-details');
+  const fields = [
+    ['登记编号','#' + record.id], ['游戏分区',record.server], ['游戏账号',record.game_account],
+    ['角色名称',record.character_name], ['付款时间',timestamp(record.payment_time)],
+    ['订单尾号',record.transaction_id], ['金额',money(record.amount)], ['付款项',itemText(record)],
+    ['状态',badge(record.status)], ['玩家备注',record.remark || '无']
+  ];
+  if (admin) fields.push(['登记来源',record.submitted_by ? '登录账号：' + record.submitted_by : '未登录登记'], ['登记 IP',record.ip_address || '未记录']);
+  if (record.paid) {
+    fields.push(['付费时长',record.paid.days+' 天'], ['时长到账',record.paid.state==='done' ? '已到账，重登游戏生效' : '待确认到账，请联系 GM']);
+    if(record.paid.state==='done') fields.push(['原到期时间',record.paid.old_enddate || '首次开户'], ['充值后到期时间',record.paid.enddate]);
+    else if(admin) fields.push(['充值处理提示',record.paid.error || '任务已保存，可重试确认到账']);
+  }
+  for (const [label,value] of fields) {
+    const dd=el('dd','record-remark');dd.append(value instanceof Node ? value : el('span','',value));
+    detail.append(el('dt','',label),dd);
+  }
+  container.append(detail,el('h3','section-gap','处理记录'));
+  if (!record.history.length) { container.append(el('p','muted small','暂无处理记录。历史登记保留原状态。')); return; }
+  const history=el('ol','history');
+  for(const entry of record.history) {
+    const li=el('li','',timestamp(entry.created_at,true)+' · '+(statuses[entry.to_status] || entry.to_status));
+    li.append(el('p','',entry.actor + (entry.note ? '：' + entry.note : '')));
+    history.append(li);
+  }
+  container.append(history);
 }
-
-// 生成随机字符串
-function generateRandomString(length = 8) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-}
-
-// 页面加载完成后执行
-document.addEventListener('DOMContentLoaded', function() {
-    // 添加页面加载动画
-    document.body.style.opacity = '0';
-    document.body.style.transition = 'opacity 0.3s ease';
-
-    setTimeout(() => {
-        document.body.style.opacity = '1';
-    }, 100);
-
-    // 根据登录状态更新导航
-    updateNavigation();
-});

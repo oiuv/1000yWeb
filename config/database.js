@@ -1,58 +1,31 @@
+'use strict';
 const sql = require('mssql');
-
-const config = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER,
-  database: process.env.DB_DATABASE,
-  port: parseInt(process.env.DB_PORT) || 1433,
-  encrypt: JSON.parse(process.env.DB_ENCRYPT || 'false'),
-  trustServerCertificate: true,
-  options: {
-    enableArithAbort: true,
-    trustServerCertificate: true,
-    charset: 'GBK'
-  },
-  requestTimeout: 30000
-};
-
-let pool;
-
-const connectToDatabase = async () => {
-  try {
-    if (pool && pool.connected) {
-      return pool;
-    }
-
-    pool = await sql.connect(config);
-    console.log('成功连接到数据库');
-    return pool;
-  } catch (error) {
-    console.error('数据库连接失败:', error);
-    throw error;
-  }
-};
-
-const executeQuery = async (query, params = {}) => {
-  try {
-    const pool = await connectToDatabase();
-    const request = pool.request();
-
-    // 添加参数
-    Object.keys(params).forEach(key => {
-      request.input(key, params[key]);
+let poolPromise;
+function connectToDatabase() {
+  if (!poolPromise) {
+    const pool = new sql.ConnectionPool({
+      user: process.env.DB_USER, password: process.env.DB_PASSWORD,
+      server: process.env.DB_SERVER, database: process.env.DB_DATABASE,
+      port: Number(process.env.DB_PORT || 1433),
+      options: {
+        encrypt: process.env.DB_ENCRYPT === 'true',
+        trustServerCertificate: process.env.DB_TRUST_CERTIFICATE !== 'false',
+        enableArithAbort: true
+      },
+      requestTimeout: 30000
     });
-
-    const result = await request.query(query);
-    return result;
-  } catch (error) {
-    console.error('查询执行失败:', error);
-    throw error;
+    pool.on('error', error => console.error('MSSQL connection error:', error.code || 'DB_ERROR'));
+    poolPromise = pool.connect().catch(error => { poolPromise = null; throw error; });
   }
-};
-
-module.exports = {
-  connectToDatabase,
-  executeQuery,
-  sql
-};
+  return poolPromise;
+}
+async function executeQuery(query, params = {}) {
+  const pool = await connectToDatabase();
+  const request = pool.request();
+  for (const [key, value] of Object.entries(params)) request.input(key, value);
+  return request.query(query);
+}
+async function closeDatabase() {
+  if (poolPromise) { const pool = await poolPromise; poolPromise = null; await pool.close(); }
+}
+module.exports = { connectToDatabase, executeQuery, closeDatabase };

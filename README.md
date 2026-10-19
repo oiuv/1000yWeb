@@ -1,310 +1,100 @@
-# 云端千年-炎黄新章 - 账号注册系统
+# 云端千年 · 炎黄新章账号中心
 
-这是一个基于 Node.js 和 MSSQL 数据库的游戏账号注册登录系统，专为《云端千年-炎黄新章》游戏设计。
+游戏账号注册、登录与资料查看，人工充值登记及后台核款。使用 Express、现有 MSSQL 账号库和 SQLite；前端为原生 HTML/CSS/JavaScript，无前端构建步骤。
 
-## 功能特点
+## 本地运行与测试
 
-### 用户功能
-- ✅ 用户注册功能
-- ✅ 用户登录功能
-- ✅ 用户中心（查看资料、角色、修改密码）
-- ✅ 游戏充值登记（扫码支付+手动登记）
-- ✅ 表单验证（前端和后端）
-- ✅ 密码强度检测
-- ✅ 浮动通知提示
-- ✅ 响应式设计（移动端适配）
-- ✅ 错误处理和友好提示
+推荐 Node.js 22 LTS，安装与运行使用同一 Node 主版本。better-sqlite3 含原生扩展，切换 Node 主版本后需重新安装依赖。
 
-### 管理功能
-- ✅ 管理员登录识别（id=1）
-- ✅ 充值记录管理
-- ✅ 充值统计面板
-- ✅ 充值审核功能（通过/拒绝）
-- ✅ 分页和搜索筛选
-
-## 技术栈
-
-### 后端
-- Node.js
-- Express.js
-- MSSQL (mssql包) - 用户账号数据库
-- SQLite3 (better-sqlite3) - 充值记录数据库
-- express-validator (数据验证)
-- helmet (安全头)
-- cors (跨域支持)
-
-### 前端
-- HTML5
-- CSS3 (响应式设计)
-- JavaScript (原生)
-- Fetch API
-
-### 数据库
-- **Microsoft SQL Server** (用户数据)
-  - 数据库名: 1000y
-  - 数据表: dbo.account1000y
-  - 编码: GBK
-
-- **SQLite3** (充值记录)
-  - 文件: database/recharge.db
-  - 数据表: recharge_records
-
-## 项目结构
-
-```
-1000yh/
-├── config/
-│   └── database.js          # MSSQL数据库配置
-├── models/
-│   ├── User.js              # 用户数据模型
-│   └── Recharge.js          # 充值记录模型(SQLite)
-├── routes/
-│   ├── auth.js              # 认证路由
-│   ├── recharge.js          # 充值登记路由
-│   └── admin.js             # 管理员路由
-├── database/
-│   └── recharge.db          # SQLite3充值数据库
-├── public/
-│   ├── css/
-│   │   └── style.css        # 样式文件
-│   ├── js/
-│   │   ├── auth.js          # 前端通用函数
-│   │   └── recharge.js      # 充值页面脚本
-│   ├── images/
-│   │   └── wepay.jpg        # 收款二维码
-│   ├── index.html           # 主页
-│   ├── login.html           # 登录页面
-│   ├── register.html        # 注册页面
-│   ├── dashboard.html       # 用户中心
-│   ├── recharge.html        # 充值页面
-│   └── admin.html           # 管理中心
-├── .env                     # 环境变量配置
-├── .gitignore              # Git忽略文件
-├── package.json            # 项目依赖
-├── server.js               # 服务器入口文件
-└── README.md               # 项目说明文档
+```powershell
+npm ci
+npm test
+npm run preview
 ```
 
-## 安装和配置
+- `npm test`：合成账号、内存 SQLite 和临时文件测试，不加载 `.env`，不访问游戏账号库。
+- `npm run preview`：`http://127.0.0.1:4318`，全内存演示；玩家 `demo01 / Demo!234`，管理员 `admin01 / Admin!234`。退出即丢弃测试记录，严禁作为正式服务部署。
+- 正式运行前复制 `.env.example` 为 `.env` 并配置数据库，再执行 `npm start`；开发重载为 `npm run dev`。不要用真实数据库做页面试验。
 
-### 1. 安装依赖
+## 功能与处理流程
 
-```bash
-npm install
-```
+- 首页、注册、登录、用户中心、充值登记、管理中心采用统一的武侠风格及手机布局。
+- 注册账号为 5–12 位英文、数字或下划线；新密码为 6–20 位 ASCII 可打印字符，不含空格或逗号，需二次确认。手机号、邮箱只是登记资料，不代表已验证或具备找回密码能力。
+- 网页登录不修改游戏最后登录时间。改密码需原密码及两次新密码，成功后撤销该账号全部网站会话；不强制断开游戏连接。
+- 充值登记必须先登录炎黄账号，未登录访问时先跳转登录，成功后返回登记页。炎黄新章固定使用登录账号，角色从该账号自动读取，默认选中第一个，可下拉选择其它已有角色；账号和角色都不允许手填，接口校验账号及角色归属。无角色或读取失败时不能提交炎黄登记。
+- 神武奇章账号默认与登录账号相同，账号和角色均可手填。切换分区会重置为登录账号、清空手填角色并重新选择首个炎黄角色，请重新核对收货对象。
+- 填写付款时间、交易单号后六位、金额、分区、角色、付款项和数量。尾号不是全局唯一付款凭证，仍由 GM 对照真实账单人工核验。
+- 对付款时间、尾号、金额、账号、分区相同的未拒绝登记阻止重复提交；相同尾号但不同时间可以登记。网站不查支付平台，必须人工核实真实收款；炎黄月卡／年卡核准后自动充值 Paid，福袋、宝石及神武订单人工交付。
+- 登记归属于提交时的登录账号；即使神武收货账号不同，查询权限也不转给收货账号。没有登录归属的历史记录不自动关联个人中心，须联系 GM 查询。
+- 后台支持全量数据搜索、分区/付款项/状态筛选和分页。核款统计只合计“已核款”和“已交付”，不把待审核或拒绝算作收入，不受当前分页及筛选影响。
 
-### 2. 配置环境变量
+| 当前状态 | 允许操作 |
+| --- | --- |
+| 待审核 | 核款通过、拒绝 |
+| 已核款 | 时长未确认到账时重试；物品实际发放后确认交付。未提交 Paid 任务的记录可退回重审 |
+| 已拒绝 | 重新审核 |
+| 已交付 | 查看，不重复处理 |
 
-编辑 `.env` 文件，设置数据库连接信息：
+拒绝、退回重审须填写原因。状态变更和操作人、时间、备注一同事务保存；提交时校验页面原状态，防止覆盖他人处理。纯时长订单到账后自动标记交付；混合物品订单仍需完成物品发放。处理备注会显示给登记者，不填写内部凭据或敏感信息。
 
-```env
-# 数据库配置 - 云端千年-炎黄新章
-DB_SERVER=1000y_sql
-DB_DATABASE=1000y
-DB_USER=sa
-DB_PASSWORD=your_password_here
-DB_ENCRYPT=false
+## 炎黄自动充值 Paid
 
-# 服务器配置
-PORT=3000
-NODE_ENV=development
-```
+- 月卡 10 元／固定 30 天，年卡 100 元／固定 365 天；规格可分别选数量。按规格和数量计算，不按实付总金额推断，不用日历月或日历年。
+- 实付金额不能低于所选时长的价格之和。物品价格不在此自动核算，GM 必须核对整笔真实收款、全部商品及数量后通过；登记不是支付凭证。
+- 仅炎黄订单绑定的登录账号参与自动充值，角色不参与 Paid 计时。网站调用同机 Python 管理桥，无新增监听端口，不修改 Gate/TGS，也不使用游戏物品发放指令。
+- 在 `.env` 中配置现有文件绝对路径：`PAID_PYTHON`（Python 解释器）、`PAID_RECHARGE_SCRIPT`（Paid 的 `recharge.py`）、`PAID_DB_PATH`（运行 Paid 使用的 SQLite）。三项缺一不可；全部未配置时仍能登记，但不能核准炎黄时长订单。示例见 `.env.example`。
+- 网站服务账号需能执行脚本，并读写 Paid 库及其所在目录；代码、配置和数据库不放入 `public/`，不能使用网络共享 SQLite。桥接使用 stdin JSON，不启动 shell；单次超时 15 秒。
+- 新账号创建为 `100`；已有正常包时账号从 `max(当前到期时间, 当前时间)` 累加。试用 `001` 转 `100` 并从当前时间开始，不叠加试用时间；禁用 `000`、特殊模式 `200/400` 或账号大小写不一致转人工核对，不自动解禁或换模式。
+- 核款事务保存随机唯一任务号和核准天数；Paid 将该号的收据与续期原子提交。失败、超时或网站中断后，用后台“重试付费时长到账”续办，同号不会重复充值。不要重新建单或手工 `renew` 补同一笔。
+- 用户与管理员详情均显示到账状态、天数和原／新到期时间；重登游戏读取新期限，不主动刷新在线角色。混合订单只有时长自动到账，物品仍待人工交付，到账未确认不能标记完成。
+- 自动充值任务一旦提交，禁止退回重审；退款、改账号、冲正不通过状态回退执行，须核对 Paid 记录后单独处理。历史已核款记录不自动补发，缺少登录归属或数量的历史登记不自动充值。
+- 部署前备份网站与 Paid 两库。必须保留网站 `paid_recharges` 和 Paid `paid_orders` 的订单关联；不得清空任务／收据表或只回滚其中一个库，否则可能重复充值。正式路径启用前先以临时库验证，本站测试不访问生产库。
 
-### 3. 启动项目
+## 配置与部署边界
 
-```bash
-# 开发模式
-npm run dev
+- 默认监听 `127.0.0.1:3000`，通过 HTTPS 反向代理发布。生产设置 `NODE_ENV=production`，启用 Secure Cookie、HSTS；填写 `APP_ORIGIN=https://实际域名`。
+- `TRUST_PROXY` 只填写真实代理 IP/子网；同机代理可用 `loopback`，直接访问设 `false`，禁止 `true`。代理应覆盖 Host、X-Forwarded-For、X-Forwarded-Proto，防火墙禁止公网直连 Node 端口，否则 IP 限流和来源校验不可靠。参见 [Express 代理说明](https://expressjs.com/en/guide/behind-proxies/)。
+- `ADMIN_IDS` 为现有 `dbo.account1000y.id`，默认 `1`，可逗号分隔。身份和管理权限每次从服务端账号资料解析，前端不能指定管理员。
+- 使用专用、最小权限 MSSQL 账号；数据库端口只开放给可信内网。旧库可使用本机/受控网络的现有连接方式；跨网络应使用有效证书加密连接或加密隧道，不将 `DB_ENCRYPT=false` 视为公网部署方案。
+- SQL 字段沿用原应用：`id/account/password/username/telephone/email/ipaddr/makedate/lastdate/updated_at`、`char1`–`char5`；资料更新接口还使用 `birth/address`。部署前核对目标库字段、权限和字符集，不运行本文生成游戏账号表。
+- 原生 Login 使用现有密码字段，网站保持该协议，不单独把密码转换为 bcrypt。通过 HTTPS、数据库隔离及权限控制保护；任何日志不得记录密码、请求正文或原始数据库错误。
 
-# 生产模式 (PM2)
-pm2 start server.js --name "1000yh"
-pm2 restart 1000yh
-pm2 stop 1000yh
-```
+## SQLite 维护
 
-## API 接口
+`SQLITE_PATH` 默认为项目下 `database/recharge.db`，必须位于 `public/` 之外，仅服务账号可读写。不要删除它来重置网站。
 
-### 用户注册
-- **URL**: `POST /api/auth/register`
-- **参数**:
-  ```json
-  {
-    "account": "用户账号",
-    "password": "密码",
-    "confirmPassword": "确认密码",
-    "email": "邮箱"
-  }
-  ```
+启动会事务性创建缺失表（包括 `paid_recharges`）并为原充值表添加 `submitted_by`、`quantities`；保留原编号、金额、时间及状态。历史记录不推测数量、归属或审计记录，“已核款”不会自动升级为“已交付”。
 
-### 用户登录
-- **URL**: `POST /api/auth/login`
-- **参数**:
-  ```json
-  {
-    "account": "用户账号",
-    "password": "密码"
-  }
-  ```
-- **响应**:
-  ```json
-  {
-    "success": true,
-    "message": "登录成功！",
-    "user": {
-      "id": 1,
-      "account": "用户账号",
-      "email": "邮箱",
-      "isAdmin": true
-    }
-  }
-  ```
+升级前暂停网站，备份完整 SQLite 文件集（存在的 `.db`、`-wal`、`-shm`）及部署配置；运行中备份须用 SQLite 在线备份接口，不能只复制主文件。数据库备份包含玩家资料和有效会话，按敏感数据保护。恢复旧版本时使用与其匹配的备份，不手工删列。
 
-### 获取用户信息
-- **URL**: `GET /api/auth/profile`
-- **Headers**: `Authorization: Bearer <token>`
+## 会话与接口
 
-### 修改密码
-- **URL**: `POST /api/auth/change-password`
-- **Headers**: `Authorization: Bearer <token>`
-- **参数**:
-  ```json
-  {
-    "oldPassword": "原密码",
-    "newPassword": "新密码"
-  }
-  ```
+网站使用随机 HttpOnly / SameSite=Lax Cookie，SQLite 只存令牌摘要；会话绝对有效期 8 小时。写请求限同源 JSON，已登录请求还需 `X-CSRF-Token`。令牌由 `GET /api/auth/session` 或登录响应取得，不放 localStorage，不使用自造 Bearer 身份。
 
-### 提交充值登记
-- **URL**: `POST /api/recharge/submit`
-- **参数**:
-  ```json
-  {
-    "payment_time": "2024-01-01T12:00",
-    "transaction_id": "ABC123",
-    "amount": 10.00,
-    "items": ["月卡"],
-    "game_account": "账号",
-    "character_name": "角色名",
-    "server": "神武奇章",
-    "remark": "备注"
-  }
-  ```
+| 路径 | 用途 |
+| --- | --- |
+| `GET /api/auth/session` | 当前身份与 CSRF 令牌 |
+| `POST /api/auth/register`、`login`、`logout` | 注册、登录、退出 |
+| `GET /api/auth/profile` | 自己的资料和角色 |
+| `POST /api/auth/update-profile`、`change-password` | 更新允许字段、校验原密码后改密 |
+| `POST /api/recharge/submit` | 须登录；炎黄 `game_account` 固定且 `character_name` 须属于登录账号，神武两项均可填写；`quantities` 与 `items` 对应 |
+| `GET /api/recharge/mine` | 当前登录者提交的记录及处理历史 |
+| `GET /api/admin/recharge-records`、`recharge-stats` | 管理员列表与全量汇总 |
+| `POST /api/admin/update-status` | `id/status/expectedStatus/note` |
+| `POST /api/admin/retry-paid` | 管理员重试持久化充值任务；仅传数字 `id`，不能传账号或时长 |
 
-### 管理员 - 获取充值记录
-- **URL**: `GET /api/admin/recharge-records?page=1&status=pending`
-- **Headers**: `Authorization: Bearer <token>`
+分页 `page` 从 1 开始，`limit` 为 1–100，默认 20。管理列表接受 `search/status/server/item`。限制按可信客户端 IP 共享保存在 SQLite：通用 API 300 次/分钟，登录 30 次/15 分钟，注册 10 次/小时，改密 10 次/15 分钟，登记 20 次/15 分钟；超限返回 429 和 Retry-After。
 
-### 管理员 - 更新充值状态
-- **URL**: `POST /api/admin/update-status`
-- **参数**:
-  ```json
-  {
-    "id": 1,
-    "status": "verified"
-  }
-  ```
+## 目录与验证范围
 
-## 数据库表结构
+- `server.js`：正式入口及配置；`app.js`：可注入依赖的应用。
+- `config/`、`models/`：MSSQL 连接及账号/充值数据访问。
+- `storage/`、`lib/`：SQLite 初始化、会话、限流、校验。
+- `routes/`、`public/`：接口与页面；`tests/`、`scripts/preview.js`：隔离验证。
 
-### MSSQL - 用户表 (dbo.account1000y)
+测试覆盖权限伪造、会话撤销、CSRF、输入拒绝、登记归属、状态审计、全量统计、旧表迁移、月卡／年卡定价、充值失败重试及混合订单交付。设置 `TEST_PAID_PYTHON` 和 `TEST_PAID_SCRIPT` 为本机解释器与充值脚本绝对路径后运行 `npm test`，额外执行真实 Python 子进程到临时 Paid 库的集成测试；未设置时该项跳过。两项测试变量不包含正式库路径。
 
-```sql
-CREATE TABLE "account1000y" (
-    "id" INT identity(1,1) PRIMARY KEY,
-    "account" VARCHAR(20) NOT NULL,
-    "password" VARCHAR(20) NOT NULL,
-    "email" VARCHAR(50) NULL,
-    "char1" VARCHAR(50) NULL,     -- 角色位1
-    "char2" VARCHAR(50) NULL,     -- 角色位2
-    "char3" VARCHAR(50) NULL,     -- 角色位3
-    "char4" VARCHAR(50) NULL,     -- 角色位4
-    "char5" VARCHAR(50) NULL,     -- 角色位5
-    "ipaddr" VARCHAR(20) NULL,
-    "makedate" VARCHAR(50) NULL,  -- 注册时间
-    "lastdate" VARCHAR(50) NULL,  -- 游戏最后登录时间
-    "updated_at" DATETIME NULL
-);
-```
-
-### SQLite3 - 充值记录表 (recharge_records)
-
-```sql
-CREATE TABLE recharge_records (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    payment_time DATETIME NOT NULL,
-    transaction_id TEXT NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    items TEXT NOT NULL,           -- JSON数组
-    game_account TEXT NOT NULL,
-    character_name TEXT NOT NULL,
-    server TEXT NOT NULL,
-    remark TEXT,
-    status TEXT DEFAULT 'pending', -- pending/verified/rejected
-    ip_address TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-## 页面说明
-
-### 主页 (index.html)
-- 游戏诗句展示
-- 快速导航入口
-- 登录状态检测
-
-### 注册页面 (register.html)
-- 必填：账号、密码、确认密码、邮箱
-- 实时密码强度检测
-- 客户端和服务端双重验证
-
-### 登录页面 (login.html)
-- 账号密码登录
-- 自动更新登录状态
-- 区分普通用户和管理员
-
-### 用户中心 (dashboard.html)
-- 显示基本信息（账号、邮箱）
-- 显示游戏角色（char1~char5）
-- 修改密码功能
-- 管理员入口（id=1）
-
-### 充值页面 (recharge.html)
-- 收款码展示
-- 充值说明
-- 充值登记表单
-- 浮动通知提示
-
-### 管理中心 (admin.html)
-- 充值统计面板
-- 充值记录列表
-- 审核操作（通过/拒绝）
-- 分页和搜索功能
-
-## 字段更新规则
-
-| 字段 | 注册 | 网页登录 | 修改密码 | 游戏登录 | 说明 |
-|------|------|----------|----------|----------|------|
-| makedate | ✅ | ❌ | ❌ | ❌ | 注册时间 |
-| lastdate | ❌ | ❌ | ❌ | ✅ | 游戏最后登录时间（仅游戏客户端更新）|
-| ipaddr | ✅ | ❌ | ✅ | ❌ | 操作IP |
-| updated_at | ❌ | ❌ | ✅ | ❌ | 资料更新时间 |
-
-## 移动端适配
-
-- 响应式布局（768px、480px 断点）
-- 导航栏自动折叠
-- 表格横向滚动
-- 触摸友好的交互
-
-## 安全考虑
-
-1. **输入验证**: 前后端双重验证（express-validator）
-2. **SQL注入**: 参数化查询
-3. **XSS防护**: textContent 防止 XSS
-4. **CSRF**: 建议生产环境添加 CSRF 令牌
-5. **密码加密**: 当前使用明文，建议生产环境使用 bcrypt
-6. **IP记录**: 关键操作记录客户端IP
+测试不证明线上 MSSQL 的字段/权限、反向代理、实际付款或游戏交付已验收。上线前须在受控环境核对账号注册/登录/改密、两库备份及充值路径，并人工核验支付和交付流程。
 
 ## 许可证
 

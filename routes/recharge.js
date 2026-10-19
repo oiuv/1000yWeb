@@ -1,127 +1,58 @@
+'use strict';
 const express = require('express');
-const router = express.Router();
-const { body, validationResult } = require('express-validator');
-const Recharge = require('../models/Recharge');
+const { body, validate, account, pageQuery, asyncRoute, ITEMS, SERVERS } = require('../lib/validation');
+const { paidPlan } = require('../lib/products');
 
-// 提交充值登记
-router.post('/submit', [
-  body('payment_time')
-    .notEmpty()
-    .withMessage('请选择付款时间')
-    .isISO8601()
-    .withMessage('请输入有效的付款时间'),
-  body('transaction_id')
-    .notEmpty()
-    .withMessage('请输入交易单号')
-    .isLength({ min: 6, max: 6 })
-    .withMessage('交易单号必须为6位')
-    .matches(/^[a-zA-Z0-9]+$/)
-    .withMessage('交易单号只能包含字母和数字'),
-  body('amount')
-    .notEmpty()
-    .withMessage('请输入付款金额')
-    .isFloat({ min: 0.01 })
-    .withMessage('付款金额必须大于0'),
-  body('items')
-    .isArray({ min: 1 })
-    .withMessage('请至少选择一项付款项'),
-  body('game_account')
-    .notEmpty()
-    .withMessage('请输入游戏账号')
-    .isLength({ min: 5, max: 12 })
-    .withMessage('游戏账号长度必须在5-12个字符之间'),
-  body('character_name')
-    .notEmpty()
-    .withMessage('请输入角色名称')
-    .isLength({ min: 1, max: 20 })
-    .withMessage('角色名称长度必须在1-20个字符之间'),
-  body('server')
-    .notEmpty()
-    .withMessage('请选择游戏分区')
-    .isIn(['神武奇章', '炎黄新章'])
-    .withMessage('请选择有效的游戏分区'),
-  body('remark')
-    .optional()
-    .isLength({ max: 200 })
-    .withMessage('备注说明不能超过200个字符')
-], async (req, res) => {
-  try {
-    // 检查验证错误
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: '输入验证失败',
-        errors: errors.array()
-      });
+module.exports = ({ recharge, security, limits, users }) => {
+  const router = express.Router();
+  router.post('/submit', security.requireUser, limits.recharge, [
+    body('payment_time').isString().bail().matches(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)
+      .isISO8601({ strict: true }).withMessage('请选择有效的付款时间'),
+    body('transaction_id').isString().bail().trim().matches(/^[a-zA-Z0-9]{6}$/)
+      .withMessage('请输入交易单号后 6 位').toUpperCase(),
+    body('amount').custom(value => {
+      const text = String(value);
+      return /^(?:0|[1-9]\d{0,5})(?:\.\d{1,2})?$/.test(text) && Number(value) >= 0.01;
+    }).withMessage('金额为 0.01–999999.99 元，最多两位小数').toFloat(),
+    body('items').isArray({ min: 1, max: 4 }).bail()
+      .custom(items => items.every(item => ITEMS.includes(item)) && new Set(items).size === items.length)
+      .withMessage('请选择有效且不重复的付款项'),
+    body('quantities').isObject({ strict: true }).bail().custom((values, { req }) =>
+      Object.keys(values).every(key => ITEMS.includes(key) && req.body.items?.includes(key)) &&
+      Array.isArray(req.body.items) && req.body.items.every(item => Number.isInteger(values[item]) && values[item] >= 1 && values[item] <= 99)
+    ).withMessage('每个付款项的数量应为 1–99'),
+    account('game_account').bail().custom((value, { req }) =>
+      req.body.server !== '炎黄新章' || value === req.user.account
+    ).withMessage('炎黄新章充值账号必须为当前登录账号'),
+    body('character_name').isString().bail().trim().isLength({ min: 1, max: 20 }).withMessage('角色名为 1–20 个字符'),
+    body('server').isIn(SERVERS).withMessage('请选择游戏分区'),
+    body('remark').optional().isString().bail().isLength({ max: 200 }).withMessage('备注最多 200 个字符')
+  ], validate, asyncRoute(async (req, res) => {
+    const { payment_time, transaction_id, amount, items, quantities, game_account, character_name, server, remark = '' } = req.body;
+    try { paidPlan({ server, items, quantities, amount }); }
+    catch (error) { return res.status(400).json({ success: false, message: error.message }); }
+    if (server === '炎黄新章') {
+      const profile = await users.getProfile(req.user.account);
+      const names = (profile?.characters || []).map(entry => entry.split(':')[0].trim()).filter(Boolean);
+      if (!names.includes(character_name)) {
+        return res.status(400).json({ success: false, message: '请选择当前登录账号已有的炎黄角色；角色变化后请刷新页面' });
+      }
     }
-
-    const {
-      payment_time,
-      transaction_id,
-      amount,
-      items,
-      game_account,
-      character_name,
-      server,
-      remark
-    } = req.body;
-
-    // 检查交易单号是否已存在
-    const exists = Recharge.existsByTransactionId(transaction_id);
-    if (exists) {
-      return res.status(400).json({
-        success: false,
-        message: '该交易单号已提交，请勿重复提交'
-      });
-    }
-
-    // 获取客户端IP
-    const getClientIP = () => {
-      const xForwardedFor = req.headers['x-forwarded-for'];
-      if (xForwardedFor) {
-        return xForwardedFor.split(',')[0].trim();
-      }
-      const xRealIP = req.headers['x-real-ip'];
-      if (xRealIP) {
-        return xRealIP;
-      }
-      const xClientIP = req.headers['x-client-ip'];
-      if (xClientIP) {
-        return xClientIP;
-      }
-      const cfConnectingIP = req.headers['cf-connecting-ip'];
-      if (cfConnectingIP) {
-        return cfConnectingIP;
-      }
-      return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || '127.0.0.1';
-    };
-
-    // 创建充值记录
-    Recharge.create({
-      payment_time,
-      transaction_id,
-      amount,
-      items,
-      game_account,
-      character_name,
-      server,
-      remark,
-      ip_address: getClientIP()
+    const result = recharge.create({
+      payment_time, transaction_id, amount, items, quantities,
+      game_account: server === '炎黄新章' ? req.user.account : game_account,
+      character_name, server, remark,
+      ip_address: req.ip, submitted_by: req.user.account
     });
-
-    res.status(201).json({
-      success: true,
-      message: '充值登记提交成功！GM确认后24小时内完成交付，请耐心等待。'
-    });
-
-  } catch (error) {
-    console.error('提交充值登记失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '提交失败，请稍后再试'
-    });
-  }
-});
-
-module.exports = router;
+    if (result.duplicate) return res.status(409).json({ success: false, message: '相同付款信息已登记，请勿重复提交；如需更正请联系 GM' });
+    res.status(201).json({ success: true, id: result.id, message: '登记成功，请等待 GM 核款与交付' });
+  }));
+  router.get('/mine', security.requireUser, pageQuery, validate, (req, res) => {
+    const result = recharge.list(req.query, req.user.account);
+    result.records = result.records.map(({ ip_address, submitted_by, ...record }) => ({
+      ...record, history: recharge.history(record.id)
+    }));
+    res.json({ success: true, ...result });
+  });
+  return router;
+};

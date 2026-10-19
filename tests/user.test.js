@@ -1,0 +1,51 @@
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const database = require('../config/database');
+
+function adapter(t, results) {
+  const calls = [];
+  t.mock.method(database, 'executeQuery', async (sql, params) => {
+    calls.push({ sql, params });
+    assert.ok(results.length, 'Unexpected SQL query');
+    return results.shift();
+  });
+  delete require.cache[require.resolve('../models/User')];
+  return { User: require('../models/User'), calls };
+}
+
+test('account authentication trims CHAR padding but does not trim the supplied password', async t => {
+  const row = { id: 2, account: 'demo01   ', password: 'Demo!234   ' };
+  const { User, calls } = adapter(t, [{ recordset: [row] }, { recordset: [row] }]);
+  assert.equal(await User.authenticate('demo01', 'Demo!234'), row);
+  assert.equal(await User.authenticate('demo01', ' Demo!234'), null);
+  assert.match(calls[0].sql, /@account/);
+  assert.deepEqual(calls[0].params, { account: 'demo01' });
+});
+
+test('partial profile updates do not clear omitted fields or accept account/role/password changes', async t => {
+  const { User, calls } = adapter(t, [{ rowsAffected: [1] }]);
+  await User.updateProfile('demo01', { email: 'demo@example.invalid', account: 'admin01', id: 1, password: 'ignored' });
+  assert.deepEqual(calls[0].params, { account: 'demo01', email: 'demo@example.invalid' });
+  assert.match(calls[0].sql, /SET email=@email,updated_at/);
+  assert.doesNotMatch(calls[0].sql, /password=|username=|telephone=/);
+  await User.updateProfile('demo01', { id: 1 });
+  assert.equal(calls.length, 1);
+});
+
+test('password update uses parameters and the old password as a concurrent-update condition', async t => {
+  const { User, calls } = adapter(t, [
+    { recordset: [{ account: 'demo01', password: 'Demo!234' }] }, { rowsAffected: [1] }
+  ]);
+  assert.equal(await User.changePassword('demo01', 'Demo!234', "Next'234", '127.0.0.1'), true);
+  assert.match(calls[1].sql, /AND password=@oldPassword/);
+  assert.ok(!calls[1].sql.includes("Next'234"));
+  assert.equal(calls[1].params.newPassword, "Next'234");
+});
+
+test('profile exposes only public account fields and occupied character slots', async t => {
+  const { User } = adapter(t, [{ recordset: [{ account: 'demo01  ', username: '听雨 ', email: 'demo@example.invalid ',
+    char1: '听雨:云端  ', char2: null, char3: ':', char4: 'null', char5: '归舟:云端', lastdate: '2026-10-19' }] }]);
+  assert.deepEqual(await User.getProfile('demo01'), { account: 'demo01', username: '听雨', email: 'demo@example.invalid',
+    characters: ['听雨:云端', '归舟:云端'], lastdate: '2026-10-19' });
+});
