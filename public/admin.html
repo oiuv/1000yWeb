@@ -34,14 +34,17 @@
         <button class="button compact" type="submit">查询</button><button class="button secondary compact" type="button" id="reset-filters">重置</button>
       </form>
       <div class="status-line" id="list-state" aria-live="polite"></div>
-      <div class="table-wrap"><table class="record-table" id="records-table"><thead><tr><th>编号</th><th>付款时间 / 尾号</th><th>账号 / 角色</th><th>付款项</th><th>金额</th><th>状态</th><th>备注</th><th>操作</th></tr></thead><tbody></tbody></table></div>
+      <div class="table-wrap"><table class="record-table admin-records" id="records-table"><colgroup><col class="col-id"><col class="col-payment"><col><col class="col-items"><col class="col-amount"><col class="col-status"><col class="col-remark"><col class="col-action"></colgroup><thead><tr><th>编号</th><th>付款时间 / 尾号</th><th>账号 / 角色</th><th>付款项</th><th>金额</th><th>状态</th><th>备注</th><th>操作</th></tr></thead><tbody></tbody></table></div>
       <div class="pagination"><span id="page-info">正在读取…</span><div class="actions"><button id="prev-page" class="button secondary compact" type="button" disabled>上一页</button><button id="next-page" class="button secondary compact" type="button" disabled>下一页</button></div></div>
     </section>
   </div>
-  <dialog id="record-dialog">
-    <div class="dialog-heading"><h2>登记详情与处理</h2><button class="dialog-close" type="button" data-close-dialog aria-label="关闭登记详情">×</button></div>
-    <div id="record-detail"></div>
-    <form id="review-form" class="section-gap">
+  <dialog id="record-dialog" class="review-dialog" aria-labelledby="record-dialog-title">
+    <div class="dialog-heading"><h2 id="record-dialog-title">登记详情与处理</h2><button class="dialog-close" type="button" data-close-dialog aria-label="关闭登记详情">×</button></div>
+    <div class="review-layout">
+    <section class="review-details" aria-label="登记详情与处理记录"><div id="record-detail"></div></section>
+    <section class="review-controls" aria-labelledby="review-title">
+    <h3 id="review-title">处理登记</h3>
+    <form id="review-form">
       <div id="review-feedback" class="form-feedback" role="alert" hidden></div>
       <div class="field"><label for="review-action">处理操作</label><select id="review-action" name="status" required></select></div>
       <div class="field"><label for="review-note">处理备注</label><textarea id="review-note" name="note" maxlength="200" placeholder="拒绝或重新审核须填写原因；备注对登记用户可见。" rows="3"></textarea></div>
@@ -49,6 +52,8 @@
       <div class="actions section-gap"><button class="button" type="submit">确认处理</button><button class="button secondary" type="button" data-close-dialog>取消</button></div>
     </form>
     <p id="delivered-notice" class="notice section-gap" hidden>此记录已完成交付。处理历史已保留，不重复执行交付。</p>
+    </section>
+    </div>
   </dialog>
 </main>
 <footer class="site-footer" id="site-footer"></footer>

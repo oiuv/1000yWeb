@@ -20,7 +20,8 @@ function openRecord(record) {
   $('#review-action').replaceChildren(...available.map(([value,label])=>{
     const option=el('option','',label);option.value=value;return option;
   }));
-  updateNoteRequirement();$('#record-dialog').showModal();$('#record-dialog').scrollTop=0;
+  updateNoteRequirement();$('#record-dialog').showModal();
+  for(const pane of document.querySelectorAll('.review-layout, .review-details, .review-controls'))pane.scrollTop=0;
 }
 function updateNoteRequirement() {
   $('#review-note').required=['rejected','pending'].includes($('#review-action').value);

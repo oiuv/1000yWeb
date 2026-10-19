@@ -156,6 +156,16 @@ input[type="checkbox"],input[type="radio"] { width: 17px; height: 17px; accent-c
 .filters .search { flex:2 1 240px; }
 .filters input,.filters select { min-height:42px; }
 .table-wrap { overflow-x:auto; }
+.admin-records { table-layout:fixed;min-width:1120px; }
+.admin-records .col-id { width:72px; }
+.admin-records .col-payment { width:144px; }
+.admin-records .col-items { width:180px; }
+.admin-records .col-amount { width:100px; }
+.admin-records .col-status { width:104px; }
+.admin-records .col-remark { width:240px; }
+.admin-records .col-action { width:132px; }
+.admin-records td:first-child,.admin-records td:last-child .button { white-space:nowrap; }
+.admin-records .record-remark { display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden; }
 table { width:100%;border-collapse:collapse;text-align:left;font-size:13px; }
 th { background:#eeeae0;font-weight:600;color:#5b645b;white-space:nowrap; }
 th,td { padding:15px 12px;border-bottom:1px solid var(--line);vertical-align:top; }
@@ -176,6 +186,18 @@ dialog::backdrop { background:#15241dd9; }
 .dialog-heading { display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid var(--line);margin-bottom:22px;padding-bottom:15px; }
 .dialog-heading h2 { margin:0;font-size:26px; }
 .dialog-close { border:0;background:none;font-size:25px;color:var(--muted);padding:0 8px; }
+.review-dialog { width:min(1120px,calc(100vw - 32px));max-height:90vh;max-height:90dvh;padding:0;overflow:hidden; }
+.review-dialog[open] { display:flex;flex-direction:column; }
+.review-dialog .dialog-heading { flex-shrink:0;margin:0;padding:20px 28px;align-items:center; }
+.review-layout { display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);min-height:0;overflow:hidden; }
+.review-details,.review-controls { min-width:0;padding:24px 28px;overflow-y:auto;scrollbar-width:thin; }
+.review-details .profile-details { grid-template-columns:92px minmax(0,1fr);gap:8px 12px; }
+.review-details .history { margin-bottom:0; }
+.review-details p:last-child { margin-bottom:0; }
+.review-controls { border-left:1px solid var(--line);background:#faf7ef; }
+.review-controls h3 { margin-bottom:20px; }
+.review-controls .field { margin-bottom:18px; }
+.review-controls .section-gap { margin-top:20px; }
 .history { padding-left:20px;font-size:13px; }
 .history li { padding:6px 0; }
 .history p { margin:3px 0 0;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere; }
@@ -189,6 +211,9 @@ dialog::backdrop { background:#15241dd9; }
   .split-layout { grid-template-columns:270px minmax(0,1fr); }
 }
 @media (max-width:800px) {
+  .review-layout { display:block;overflow-y:auto;scrollbar-width:thin; }
+  .review-details,.review-controls { overflow:visible;padding:22px; }
+  .review-controls { border-left:0;border-top:1px solid var(--line); }
   .header-inner { flex-wrap:wrap;min-height:76px;padding:14px 20px; }
   .nav-toggle { display:block; }
   .site-nav { display:none;order:3;width:100%;flex-wrap:wrap;margin:0;gap:18px;padding:8px 0; }
@@ -235,6 +260,8 @@ dialog::backdrop { background:#15241dd9; }
   .pagination { flex-direction:column;align-items:stretch; }
   .pagination .actions { justify-content:space-between; }
   .record-table thead { display:none; }
+  .admin-records { min-width:0; }
+  .admin-records colgroup { display:none; }
   .record-table,.record-table tbody { display:block; }
   .record-table tr { display:block;border:1px solid var(--line);border-radius:6px;margin-bottom:14px;padding:8px 14px; }
   .record-table td { display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dotted var(--line); }
@@ -245,6 +272,10 @@ dialog::backdrop { background:#15241dd9; }
   .footer-inner { padding:22px 16px; }
   .footer-inner a { margin-left:0;margin-right:16px; }
   dialog { padding:20px; }
+  .review-dialog { padding:0; }
+  .review-dialog .dialog-heading { padding:16px 20px; }
+  .review-dialog .dialog-heading h2 { font-size:23px; }
+  .review-details,.review-controls { padding:20px; }
   .profile-details { grid-template-columns:80px 1fr; }
 }
 @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } * { transition:none !important; } }
