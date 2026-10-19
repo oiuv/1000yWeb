@@ -65,7 +65,7 @@ export async function init({ auth = false, admin = false } = {}) {
     '<span><strong>云端千年</strong><small>炎黄新章 · 江湖未远</small></span></a>' +
     '<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>' +
     '<nav class="site-nav" id="site-nav" aria-label="主导航">' +
-    '<a href="index.html">首页</a><a href="recharge.html">充值登记</a>' +
+    '<a href="index.html">首页</a><a href="leaderboard.html">每日英雄榜</a><a href="recharge.html">充值登记</a>' +
     '<a href="https://1000y.gameivy.com/download.html" target="_blank" rel="noopener noreferrer">客户端下载 ↗</a>' +
     '<a href="https://1000y.gameivy.com/" target="_blank" rel="noopener noreferrer">游戏官网 ↗</a>' +
     '<span class="nav-auth" id="nav-auth"><a href="login.html">登录</a><a class="button compact" href="register.html">注册账号</a></span></nav></div>';

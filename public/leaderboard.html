@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="云端千年·炎黄新章每日英雄榜，查看元气境界、年龄、浩然正气、三功与个人货币财富排名。">
+<title>每日英雄榜 · 云端千年·炎黄新章</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site-header" id="site-header"></header>
+<noscript><p class="notice">请启用 JavaScript 查看每日英雄榜。</p></noscript>
+<main class="container" id="main">
+  <div class="page-heading">
+    <div><span class="eyebrow">云端论英雄 / 炎黄新章</span><h1>每日英雄榜</h1><p>江湖岁月，修行有成。每日留名，共览群英。</p></div>
+    <div class="board-date field"><label for="board-date">榜单日期</label><select id="board-date" disabled><option>正在读取…</option></select></div>
+  </div>
+  <section class="panel" aria-label="英雄榜排名">
+    <div class="board-tabs" role="group" aria-label="选择榜单">
+      <button class="button compact" type="button" data-metric="energy" aria-pressed="true">元气榜</button>
+      <button class="button secondary compact" type="button" data-metric="age" aria-pressed="false">年龄榜</button>
+      <button class="button secondary compact" type="button" data-metric="virtue" aria-pressed="false">浩然正气榜</button>
+      <button class="button secondary compact" type="button" data-metric="inPower" aria-pressed="false">内功榜</button>
+      <button class="button secondary compact" type="button" data-metric="outPower" aria-pressed="false">外功榜</button>
+      <button class="button secondary compact" type="button" data-metric="magic" aria-pressed="false">武功榜</button>
+      <button class="button secondary compact" type="button" data-metric="wealth" aria-pressed="false">富豪榜</button>
+    </div>
+    <p class="status-line" id="board-summary" role="status" aria-live="polite">正在读取每日存档…</p>
+    <p class="notice" id="board-wealth-note" hidden>财富值统一折合钱币：钱币 × 1、银元 × 100、银钞 × 1,000、金钞 × 5,000、金元 × 10,000。仅统计角色存档中的背包、技术栏和摊位货币；不含福袋、门派仓库及其他物品估价，不合并同账号角色。</p>
+    <p class="form-feedback" id="board-error" role="alert" hidden></p>
+    <div class="table-wrap" id="board-results" aria-busy="true">
+      <table class="board-table record-table">
+        <caption class="sr-only">所选日期与类别的角色排名，相同数值并列</caption>
+        <thead><tr><th scope="col">名次</th><th scope="col">江湖名号</th><th scope="col">门派</th><th scope="col">境界</th><th scope="col" id="board-value-title">元气</th></tr></thead>
+        <tbody id="board-rows"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="board-pagination" hidden>
+      <span id="board-page"></span>
+      <div class="actions"><button class="button secondary compact" type="button" id="board-prev">上一页</button><button class="button secondary compact" type="button" id="board-next">下一页</button></div>
+    </div>
+  </section>
+  <p class="notice">每期仅统计该备份周期内有存档的角色，数据取各角色最后一次存档，并非实时状态。榜单日期以备份文件日期为准，常规生成时间为每日 03:00。境界按当前服务器境界表匹配；同值并列，不额外计算综合战力。</p>
+</main>
+<footer class="site-footer" id="site-footer"></footer>
+<script type="module" src="js/leaderboard.js"></script>
+</body>
+</html>

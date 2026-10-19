@@ -1,6 +1,6 @@
 # 云端千年 · 炎黄新章账号中心
 
-游戏账号注册、登录与资料查看，人工充值登记及后台核款。使用 Express、现有 MSSQL 账号库和 SQLite；前端为原生 HTML/CSS/JavaScript，无前端构建步骤。
+游戏账号注册、登录与资料查看，每日英雄榜、人工充值登记及后台核款。使用 Express、现有 MSSQL 账号库和 SQLite；前端为原生 HTML/CSS/JavaScript，无前端构建步骤。
 
 ## 本地运行与测试
 
@@ -13,7 +13,7 @@ npm run preview
 ```
 
 - `npm test`：合成账号、内存 SQLite 和临时文件测试，不加载 `.env`，不访问游戏账号库。
-- `npm run preview`：`http://127.0.0.1:4318`，全内存演示；玩家 `demo01 / Demo!234`，管理员 `admin01 / Admin!234`。退出即丢弃测试记录，严禁作为正式服务部署。
+- `npm run preview`：`http://127.0.0.1:4318`，全内存演示，含合成每日榜单；玩家 `demo01 / Demo!234`，管理员 `admin01 / Admin!234`。退出即丢弃测试记录，严禁作为正式服务部署。
 - 正式运行前复制 `.env.example` 为 `.env` 并配置数据库，再执行 `npm start`；开发重载为 `npm run dev`。不要用真实数据库做页面试验。
 
 ## 功能与处理流程
@@ -36,6 +36,18 @@ npm run preview
 | 已交付 | 查看，不重复处理 |
 
 拒绝、退回重审须填写原因。状态变更和操作人、时间、备注一同事务保存；提交时校验页面原状态，防止覆盖他人处理。纯时长订单到账后自动标记交付；混合物品订单仍需完成物品发放。处理备注会显示给登记者，不填写内部凭据或敏感信息。
+
+## 每日英雄榜
+
+- `leaderboard.html` 公开查看，无需登录。默认最新一期元气榜；可切换日期及年龄、浩然正气、内功、外功、武功、富豪榜。每页 25 个角色，同值并列（例如 1、1、3），不自创综合战力。
+- 在 `.env` 同时设置 `LEADERBOARD_DATA_DIR`（DB 的 `Userdata` 目录）与 `LEADERBOARD_POWER_LEVEL_FILE`（TGS 的 `Init/PowerLevel.sdb`）。两项均须为绝对路径且在 `public/` 之外；服务账号只需读取权限。不修改游戏数据、不连接游戏 DB 服务，不需要额外 Python 程序或数据库迁移。
+- `LEADERBOARD_HISTORY` 默认 30，范围 1–366，限制最近可查看的备份期数，不删除原文件。`LEADERBOARD_EXCLUDE_CHARACTERS` 为逗号分隔的管理员／测试角色名单，支持角色名或完整 `角色名:地区`；部署时必须按实际角色填写，不根据属性高低猜测管理员身份。
+- 仅读取 GBK 格式的 `UserDataYYYY-MM-DD.SDB`，不读取 `Today.SDB`、FDB 或 MDB。每期仅统计该备份周期内成功存档的角色，并使用周期内最后一次存档；不从历史补入缺席角色，也不以 `LastDate` 筛除持续在线角色。正常中国版本每日 03:00 输出，榜单日期采用文件名，不标记实时在线或在线时长。
+- 元气取 `Energy / 100`；境界按配置 `Name` 顺序、`PowerValue` 门槛和 `ViewName` 显示，等于门槛即入境，低于首门槛显示“未入境”。`LimitEnergy` 不用于判断境界；`CurrentGrade` 不是境界。历史元气按当日快照，境界名称按当前配置匹配，不保存历年配置版本。
+- 年龄为 `GetLevel(Light + Dark) / 100`，浩然正气为 `GetLevel(Virtue) / 100`；三功按 TGS `TAttribClass.Calculate` 换算，内／外功含 10.00 基础值，武功含 5.00 基础值，并加年龄一半（先按整数规则截断）。使用 `GetLevel` 而非 `GetAgeLevel`，保留大经验分支的整数截断顺序。这些是存档基础属性，不包含临时药效、装备等全部实战加成。算法位于 `lib/game-levels.js`、`lib/leaderboard.js`，游戏成长公式变更时需同步核对。
+- 富豪榜按单个角色持有货币排名，不合并同账号角色。财富值（整数钱币）= 钱币 + 银元 × 100 + 银钞 × 1,000 + 金钞 × 5,000 + 金元 × 10,000，按当前 `Item.sdb` 内部名称与面值识别；不对其他物品估价。统计 `HaveItem0–29`（背包）、`HaveMaterialItem0–4`（技术栏）、`HaveMarketItem0–9`（摊位，包括已收货款）的实际货币数量。依照 `Common/uDBProvider.pas` 的 `ChangeDataToStr`，数量是 `Name:Color:Count:...` 的第三段，不是颜色或摊位 `Cost` 标价。福袋、门派仓库不在角色快照中，不计入；缺失统计字段或货币数量无效时不以零代替。面值常量集中在 `lib/leaderboard.js`，游戏货币配置变更时同步核对。接口只公开总财富值，不提供货币明细。
+- 文件目录及已读快照缓存 30 秒，最多缓存 3 份已筛选的公开数据；新日备份和境界配置会自动刷新。文件写入后至少等待 5 秒，格式、编码不完整或读取中变化时不显示该期，不用其他日期冒充。页面显示失败时可重试最新一期。
+- 原始备份包含账号、密码、坐标和物品等隐私，禁止复制到公开目录或提供下载。API 只返回角色名、地区、门派及榜单属性，不输出账号、密码、位置、背包或原始记录；不得将真实快照纳入仓库或页面测试数据。
 
 ## 炎黄自动充值 Paid
 
@@ -73,6 +85,7 @@ npm run preview
 
 | 路径 | 用途 |
 | --- | --- |
+| `GET /api/leaderboard` | 公开每日榜单；可选 `date=YYYY-MM-DD`、`metric=energy/age/virtue/inPower/outPower/magic/wealth`、`page`，默认最新元气榜；响应含日期列表及排名 |
 | `GET /api/auth/session` | 当前身份与 CSRF 令牌 |
 | `POST /api/auth/register`、`login`、`logout` | 注册、登录、退出 |
 | `GET /api/auth/profile` | 自己的资料和角色 |

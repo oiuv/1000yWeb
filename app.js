@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const Recharge = require('./models/Recharge');
 const { createSecurity, sameOrigin, rateLimit } = require('./lib/security');
 
-function createApp({ db, users, config = {}, paid = null }) {
+function createApp({ db, users, config = {}, paid = null, leaderboard = null }) {
   if (!db || !users) throw new Error('Explicit database and account adapter are required');
   const app = express();
   app.disable('x-powered-by');
@@ -37,6 +37,7 @@ function createApp({ db, users, config = {}, paid = null }) {
   app.use('/api/auth', require('./routes/auth')(dependencies));
   app.use('/api/recharge', require('./routes/recharge')(dependencies));
   app.use('/api/admin', require('./routes/admin')(dependencies));
+  app.use('/api/leaderboard', require('./routes/leaderboard')({ leaderboard }));
   app.use('/api', (req, res) => res.status(404).json({ success: false, message: '接口不存在' }));
   app.use(express.static(path.join(__dirname, 'public'), { etag: true, maxAge: 0 }));
   app.use((req, res) => res.status(404).send('页面不存在，请返回首页。'));

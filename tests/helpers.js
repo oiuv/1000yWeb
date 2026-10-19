@@ -43,10 +43,10 @@ const registration = overrides => ({
   items: ['月卡'], quantities: { 月卡: 1 }, game_account: 'demo01',
   character_name: '听雨', server: '炎黄新章', remark: '', ...overrides
 });
-async function fixture(t, config, paid = null) {
+async function fixture(t, config, paid = null, leaderboard = null) {
   const db = openDatabase(':memory:');
   const users = fakeUsers();
-  const app = createApp({ db, users, config, paid });
+  const app = createApp({ db, users, config, paid, leaderboard });
   const server = app.listen(0, '127.0.0.1');
   await once(server, 'listening');
   t.after(async () => {
