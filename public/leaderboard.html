@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="云端千年·炎黄新章每日英雄榜，查看元气境界、年龄、浩然正气、三功与个人货币财富排名。">
+<meta name="description" content="云端千年·炎黄新章每日英雄榜，查看元气境界、年龄、浩然正气、三功、财富与职业熟练度排名。">
 <title>每日英雄榜 · 云端千年·炎黄新章</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -24,14 +24,18 @@
       <button class="button secondary compact" type="button" data-metric="outPower" aria-pressed="false">外功榜</button>
       <button class="button secondary compact" type="button" data-metric="magic" aria-pressed="false">武功榜</button>
       <button class="button secondary compact" type="button" data-metric="wealth" aria-pressed="false">富豪榜</button>
+      <button class="button secondary compact" type="button" data-metric="profession" aria-pressed="false">职业榜</button>
+    </div>
+    <div class="board-job field" id="board-job-filter" hidden>
+      <label for="board-job">职业</label>
+      <select id="board-job"><option value="1">铸造师</option><option value="2">炼丹师</option><option value="3">裁缝</option><option value="4">工匠</option></select>
     </div>
     <p class="status-line" id="board-summary" role="status" aria-live="polite">正在读取每日存档…</p>
-    <p class="notice" id="board-wealth-note" hidden>财富值统一折合钱币：钱币 × 1、银元 × 100、银钞 × 1,000、金钞 × 5,000、金元 × 10,000。仅统计角色存档中的背包、技术栏和摊位货币；不含福袋、门派仓库及其他物品估价，不合并同账号角色。</p>
     <p class="form-feedback" id="board-error" role="alert" hidden></p>
     <div class="table-wrap" id="board-results" aria-busy="true">
       <table class="board-table record-table">
         <caption class="sr-only">所选日期与类别的角色排名，相同数值并列</caption>
-        <thead><tr><th scope="col">名次</th><th scope="col">江湖名号</th><th scope="col">门派</th><th scope="col">境界</th><th scope="col" id="board-value-title">元气</th></tr></thead>
+        <thead><tr><th scope="col">名次</th><th scope="col">江湖名号</th><th scope="col">门派</th><th scope="col">职业</th><th scope="col" id="board-level-title">境界</th><th scope="col" id="board-value-title">元气</th></tr></thead>
         <tbody id="board-rows"></tbody>
       </table>
     </div>

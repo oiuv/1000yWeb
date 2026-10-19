@@ -204,10 +204,11 @@ dialog::backdrop { background:#15241dd9; }
 .record-remark { white-space:pre-wrap;overflow-wrap:anywhere; }
 .status-line { min-height:30px;color:var(--muted);font-size:13px; }
 .board-date { width:220px;flex-shrink:0;margin-bottom:0; }
+.board-job { max-width:220px; }
 .board-tabs { display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px; }
 .board-table { table-layout:fixed; }
 .board-table th:first-child { width:80px; }
-.board-table th:nth-child(2) { width:28%; }
+.board-table th:nth-child(2) { width:22%; }
 .board-rank { font:22px Georgia,serif; }
 .board-leading { color:var(--red);font-weight:bold; }
 .board-name { font-weight:600; }

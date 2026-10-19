@@ -2,6 +2,7 @@
 // Isolated UI preview: no .env, no MSSQL, no real SQLite file, loopback only.
 const { openDatabase } = require('../storage/database');
 const { createApp } = require('../app');
+const { JOB_NAMES, professionGrade } = require('../lib/leaderboard');
 const Recharge = require('../models/Recharge');
 const { fakeUsers, registration } = require('../tests/helpers');
 const db = openDatabase(':memory:');
@@ -21,7 +22,7 @@ for(let i=0;i<25;i++) {
 }
 const port = Number(process.env.PREVIEW_PORT || 4318);
 // Public leaderboard UI fixtures only; never read live backups in preview.
-const leaderboard = { async get({ date, metric = 'energy', page = 1 } = {}) {
+const leaderboard = { async get({ date, metric = 'energy', page = 1, job = 1 } = {}) {
   const dates = ['2026-10-19','2026-10-18','2026-10-17'];
   date = date || dates[0];
   if (!dates.includes(date)) throw Object.assign(new Error('该日期暂无可查看的榜单'), { status: 404 });
@@ -31,9 +32,13 @@ const leaderboard = { async get({ date, metric = 'energy', page = 1 } = {}) {
     guild: i % 3 ? '烟雨江南' : '', realm: 162300 - i * 300 >= 162000 ? '泰山北斗' : '空前绝后',
     energy: 162300 - i * 300, age: 6000 - i * 40, virtue: 9900 - i * 100,
     inPower: 12000 - i * 80, outPower: 11000 - i * 60, magic: 9000 - i * 35,
-    wealth: i === 0 ? 12345678901 : (28 - i) * 12345
-  })).sort((a,b) => b[metric] - a[metric]).map((row,i) => ({rank:i+1,...row}));
-  return { dates, date, metric, page, pages: Math.ceil(rows.length/25), total:rows.length,
+    wealth: i === 0 ? 12345678901 : (28 - i) * 12345,
+    jobKind: i % 5, jobName: JOB_NAMES.get(i % 5) || '',
+    profession: i % 5 ? 9999 - i * 170 : null,
+    jobGrade: i % 5 ? professionGrade(9999 - i * 170) : ''
+  })).filter(row => metric !== 'profession' || row.jobKind === job)
+    .sort((a,b) => b[metric] - a[metric]).map((row,i) => ({rank:i+1,...row}));
+  return { dates, date, metric, ...(metric === 'profession' ? { job } : {}), page, pages: Math.ceil(rows.length/25), total:rows.length,
     rows:rows.slice((page-1)*25,page*25) };
 } };
 const server=createApp({db,users,leaderboard}).listen(port,'127.0.0.1',()=>{
