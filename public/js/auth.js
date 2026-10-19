@@ -136,8 +136,10 @@ export function timestamp(value, utc = false) {
   const date = new Date(value.replace(' ', 'T') + 'Z');
   return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('zh-CN', { hour12: false });
 }
+// Preserve stored item keys for existing records and filters.
+const itemLabels = new Map([['福袋', '储物袋'], ['宝石', '宝石福袋']]);
 export function itemText(record) {
-  return record.items.map(item => item + (record.quantities?.[item] ? ' ×' + record.quantities[item] : '（数量未记录）')).join('、');
+  return record.items.map(item => (itemLabels.get(item) || item) + (record.quantities?.[item] ? ' ×' + record.quantities[item] : '（数量未记录）')).join('、');
 }
 export function renderTable(table, records, onOpen, admin = false) {
   const body = table.querySelector('tbody'); body.replaceChildren();
