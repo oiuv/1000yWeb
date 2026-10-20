@@ -20,7 +20,9 @@
       <div>
         <h3>填写后六位即可</h3><p>订单尾号和付款时间用于人工对账，无需填写完整交易单号。</p>
         <h3>关于交付</h3><p>GM 确认后 24 小时内完成交付。填写错误或有疑问，请联系 QQ 群 2887111。</p>
-        <h3>月卡注意事项</h3><p>未付费账号默认每次游戏 1 小时后需重新登录；月卡账号到期后无法登录。仓库小号是否充值，请按实际需要决定。</p>
+        <h3>炎黄账号与时长</h3><p>月卡、年卡按账号计费，同账号的 5 个角色共享权益，可同时登录。试玩账号每次在线 1 小时后需重新登录。</p>
+        <p>充值月卡或年卡后，账号转为包时身份，不再恢复试玩；到期后需续费才能继续登录。请在充值前确认。</p>
+        <h3>按需选购</h3><p>日常游玩可通过 NPC 存取仓库、积累材料完成装备升段。储物袋与宝石福袋提供随身仓库便利和升段成功保障，可按需选择。</p>
         <h3>公平游戏与反外挂</h3><p>游戏内置辅助，在游戏中输入 <code>@@</code> 即可启用。禁止使用任何第三方外挂，一经查实将封禁账号；因使用外挂被封禁的账号，已充值款项不予退款。请在充值前确认并遵守上述规则。</p>
       </div>
     </aside>
@@ -39,12 +41,13 @@
           <div class="field"><label id="character-label" for="character-select">收货角色名称</label><select id="character-select" name="character_name" aria-describedby="character-hint" required></select><input id="character_name" name="character_name" maxlength="20" placeholder="请输入神武奇章角色名称" aria-describedby="character-hint" required hidden disabled><small class="hint" id="character-hint">自动读取当前账号的炎黄角色。</small></div>
         </div>
         <div class="field section-gap"><span class="field-label" id="products-label">付款项与数量</span>
+          <p class="hint">下列价格与权益适用于炎黄新章。</p>
           <div class="product-list" role="group" aria-labelledby="products-label">
-            <div class="product"><label><input type="checkbox" name="items" value="月卡">月卡</label><div class="quantity"><label for="quantity-month">数量</label><input id="quantity-month" type="number" min="1" max="99" value="1" data-quantity="月卡" disabled></div></div>
-            <div class="product"><label><input type="checkbox" name="items" value="年卡">年卡</label><div class="quantity"><label for="quantity-year">数量</label><input id="quantity-year" type="number" min="1" max="99" value="1" data-quantity="年卡" disabled></div></div>
-            <div class="product"><label><input type="checkbox" name="items" value="福袋">储物袋</label><div class="quantity"><label for="quantity-bank">数量</label><input id="quantity-bank" type="number" min="1" max="99" value="1" data-quantity="福袋" disabled></div></div>
-            <div class="product"><label><input type="checkbox" name="items" value="宝石">宝石福袋</label><div class="quantity"><label for="quantity-gem">数量</label><input id="quantity-gem" type="number" min="1" max="99" value="1" data-quantity="宝石" disabled></div></div>
-          </div><small class="hint">炎黄月卡 10 元／30 天，年卡 100 元／365 天，核款通过后自动充入登录账号，重登游戏生效。储物袋、宝石福袋及神武订单人工交付。可多选，数量须与实际付款一致。</small>
+            <div class="product"><label><input type="checkbox" name="items" value="月卡">月卡</label><small class="hint">10 元／账号／30 天</small><small class="hint">同账号 5 个角色可同时在线，免去试玩每小时重登。</small><div class="quantity"><label for="quantity-month">数量</label><input id="quantity-month" type="number" min="1" max="99" value="1" data-quantity="月卡" disabled></div></div>
+            <div class="product"><label><input type="checkbox" name="items" value="年卡">年卡</label><small class="hint">100 元／账号／365 天</small><small class="hint">同账号 5 个角色可同时在线，比购买 12 张月卡省 20 元。</small><div class="quantity"><label for="quantity-year">数量</label><input id="quantity-year" type="number" min="1" max="99" value="1" data-quantity="年卡" disabled></div></div>
+            <div class="product"><label><input type="checkbox" name="items" value="福袋">储物袋</label><small class="hint">50 元／个；200 元／5 个</small><small class="hint">随身存取仓库。数量请填写实际购买个数。</small><div class="quantity"><label for="quantity-bank">数量</label><input id="quantity-bank" type="number" min="1" max="99" value="1" data-quantity="福袋" disabled></div></div>
+            <div class="product"><label><input type="checkbox" name="items" value="宝石">宝石福袋</label><small class="hint">258 元／个</small><small class="hint">内含宝石，用于保障对应装备升段成功。</small><div class="quantity"><label for="quantity-gem">数量</label><input id="quantity-gem" type="number" min="1" max="99" value="1" data-quantity="宝石" disabled></div></div>
+          </div><small class="hint">付款后请登记实际付款金额、商品及数量，由 GM 人工核对收款。炎黄月卡、年卡在核款通过后充入登录账号，重登游戏生效；储物袋、宝石福袋及神武订单由 GM 人工交付。</small>
         </div>
         <div class="field"><label for="remark">备注说明<span class="optional">选填</span></label><textarea id="remark" name="remark" maxlength="200" rows="3" placeholder="如需说明交付事项或留下联系 QQ，可在此填写。"></textarea><small class="hint"><span id="remark-count">0</span> / 200 字</small></div>
         <button class="button full" type="submit">提交登记 · 等待人工核款</button>
