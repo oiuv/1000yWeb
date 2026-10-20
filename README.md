@@ -4,13 +4,25 @@
 
 ## 本地运行与测试
 
-推荐 Node.js 22 LTS，安装与运行使用同一 Node 主版本。better-sqlite3 含原生扩展，切换 Node 主版本后需重新安装依赖。
+支持 Node.js 22.x 和 24.x，推荐使用 Node.js 24，安装与运行使用同一 Node 主版本。better-sqlite3 含原生扩展，不能在不同 Node 主版本间直接复用已安装的二进制模块。
 
 ```powershell
+node --version
 npm ci
 npm test
 npm run preview
 ```
+
+已有依赖从 Node 22 切换到 Node 24 后，若提示 `NODE_MODULE_VERSION` 不匹配，在项目目录使用目标 Node 版本重新安装 SQLite 原生模块，再运行测试：
+
+```powershell
+npm rebuild better-sqlite3
+npm test
+```
+
+也可运行 `npm ci` 按锁文件完整重装依赖；切回其他 Node 主版本时同样需要重建或重装。不删除数据库文件来修复模块版本问题。
+
+项目通过 `package.json` 的 `allowScripts` 仅允许锁定版本 `better-sqlite3@12.5.0` 的安装脚本，供启用脚本审批的 npm 使用。以后升级此依赖时，需核对新版本安装脚本并更新该许可，可使用 `npm install-scripts approve better-sqlite3`。预编译模块下载失败时会回退到源码编译，Windows 本机需有 Python 和 Visual Studio C++ 构建工具。
 
 - `npm test`：合成账号、内存 SQLite 和临时文件测试，不加载 `.env`，不访问游戏账号库。
 - `npm run preview`：`http://127.0.0.1:4318`，全内存演示，含合成每日榜单；玩家 `demo01 / Demo!234`，管理员 `admin01 / Admin!234`。退出即丢弃测试记录，严禁作为正式服务部署。
