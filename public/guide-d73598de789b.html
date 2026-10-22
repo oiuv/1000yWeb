@@ -14,7 +14,7 @@
 <main class="container" id="main">
 <div class="breadcrumb"><a href="index.html">首页</a> / <a href="guide.html">游戏资料</a> / <a href="guide.html?category=skills">武功修炼</a></div>
 <div class="guide-heading"><div><span class="eyebrow">江湖藏书 · 武功修炼</span><h1>四大神功与绝世武功进阶</h1></div></div>
-<div class="guide-layout"><nav class="guide-toc" aria-label="本页目录"><h2>本页目录</h2><ol><li class="h2"><a href="#四大神功">四大神功</a></li><li class="h3"><a href="#任务牌对应目标">任务牌对应目标</a></li><li class="h2"><a href="#绝世攻击武功">绝世攻击武功</a></li><li class="h2"><a href="#资料依据">资料依据</a></li></ol><a class="guide-back" href="guide.html?category=skills">← 返回武功修炼</a></nav>
+<div class="guide-layout"><nav class="guide-toc" aria-label="本页目录"><h2>本页目录</h2><ol><li class="h2"><a href="#四大神功">四大神功</a></li><li class="h3"><a href="#任务牌对应目标">任务牌对应目标</a></li><li class="h2"><a href="#绝世攻击武功">绝世攻击武功</a></li><li class="h2"><a href="#参考资料">参考资料</a></li></ol><a class="guide-back" href="guide.html?category=skills">← 返回武功修炼</a></nav>
 <article class="guide-article">
 <p>四大神功属于绝世护体武功，与绝世攻击武功采用不同的晋级流程。这里的“一、二、三级”是武功层级，不是装备锻造段数，也不是角色境界。</p>
 <p>晋级前须将对应层级修炼到 <code>99.99</code>。提交升级或参加考核时，还须启用要升级的武功；仅持有满级武功不等于当前正在使用它。</p>
@@ -50,44 +50,37 @@
 <thead>
 <tr>
 <th scope="col">任务牌</th>
-<th scope="col">配置中的目标内部名</th>
-<th scope="col">玩家可见名称</th>
+<th scope="col">任务目标</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><span class="item-icon icon-518" aria-hidden="true"></span>火王牌</td>
-<td>火王变身</td>
-<td>火王</td>
+<td>火王（变身后）</td>
 </tr>
 <tr>
 <td><span class="item-icon icon-519" aria-hidden="true"></span>霸王牌</td>
-<td>石大王2</td>
 <td>石大王</td>
 </tr>
 <tr>
 <td><span class="item-icon icon-520" aria-hidden="true"></span>妖狐牌</td>
-<td>九尾狐变身</td>
-<td>九尾狐</td>
+<td>九尾狐（变身后）</td>
 </tr>
 <tr>
 <td><span class="item-icon icon-521" aria-hidden="true"></span>术士牌</td>
-<td>魔道士1</td>
 <td>魔道士</td>
 </tr>
 <tr>
 <td><span class="item-icon icon-522" aria-hidden="true"></span>公子牌</td>
 <td>太极公子</td>
-<td>太极公子</td>
 </tr>
 <tr>
 <td><span class="item-icon icon-523" aria-hidden="true"></span>守护牌</td>
-<td>上古雨中客父像</td>
 <td>雨中客</td>
 </tr>
 </tbody>
 </table></div>
-<p>任务牌配置在任务掉落字段中，不能把它理解为所有同名怪物都无条件掉落。保留任务卷轴，并按任务条件寻找对应目标；同一显示名称可能对应不同内部记录。</p>
+<p>请保留任务卷轴，并按任务指引寻找对应目标；同名怪物不一定都掉落任务牌，也不是每次击杀都能获得。</p>
 <h2 id="绝世攻击武功">绝世攻击武功</h2>
 <p>按武器类别寻找对应 NPC，选择二级或三级考核。</p>
 <div class="guide-table" tabindex="0" role="region" aria-label="资料表格"><table>
@@ -126,15 +119,12 @@
 <li>关闭境界，按 NPC 提示卸下带属性装备并停用受限武功。</li>
 <li>准备二级考核所需的 60 金元，或三级考核所需的 80 金元。</li>
 <li>等待考场空闲并通过入场检查；费用在进入考场前收取。</li>
-<li>在专用考场完成挑战。考场不允许用药，不能以缴费或进入考场代替完成考核；成功后由服务器执行晋级。</li>
+<li>在专用考场完成挑战。考场不允许用药，不能以缴费或进入考场代替完成考核；成功后武功晋级。</li>
 </ol>
 <p>各类属性资料见本目录的绝世拳、剑、刀、槌、枪法页面。本页不涉及招式武功消耗真气的升级操作，不能将这套 NPC 考核流程套用到招式上。</p>
-<h2 id="资料依据">资料依据</h2>
+<h2 id="参考资料">参考资料</h2>
 <ul>
 <li>官网主题参考：<a href="https://www.1000y.com.tw/article_view.mspx?id=105">三层武功升级说明</a>，查阅日期：2026-10-20。</li>
-<li>申请和消耗核对：<code>tgs1000/bin/Script/老侠客.txt</code>、<code>捕盗大将.txt</code>、<code>晋级黑捕校.txt</code>、<code>晋级白捕校.txt</code>、<code>牛俊.txt</code>、<code>梅花夫人.txt</code> 及二／三级考官脚本。</li>
-<li>任务牌核对 <code>Init/Monster.sdb</code> 的 <code>QuestNum</code>、<code>QuestHaveItem</code>；考场核对 <code>Init/Map.sdb</code> 编号 78–87。</li>
-<li>满级和当前使用检查见 <a href="https://github.com/oiuv/1000yDocs/blob/master/help/TGS%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81/UUser.pas">UUser.pas</a> 的 <code>SCheckCurUseMagicByGrade</code>、<a href="https://github.com/oiuv/1000yDocs/blob/master/help/TGS%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81/uUserSub.pas">uUserSub.pas</a> 的 <code>THaveMagicClass.GetPossibleGrade</code>。玩家层级一、二、三级对应内部 <code>rGrade</code> 的 0、1、2。</li>
 </ul>
 
 <div class="guide-source">游戏通用参考资料。本服特色与调整另行说明。<a href="https://github.com/oiuv/1000yDocs/blob/master/help/%E7%82%8E%E9%BB%84%E6%96%B0%E7%AB%A0%E6%B8%B8%E6%88%8F%E8%B5%84%E6%96%99/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8/%E6%AD%A6%E5%8A%9F%E4%BB%8B%E7%BB%8D/%E5%9B%9B%E5%A4%A7%E7%A5%9E%E5%8A%9F%E4%B8%8E%E7%BB%9D%E4%B8%96%E6%AD%A6%E5%8A%9F%E8%BF%9B%E9%98%B6.md" target="_blank" rel="noopener noreferrer">查看资料原文</a></div>

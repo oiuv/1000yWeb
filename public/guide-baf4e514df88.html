@@ -14,7 +14,7 @@
 <main class="container" id="main">
 <div class="breadcrumb"><a href="index.html">首页</a> / <a href="guide.html">游戏资料</a> / <a href="guide.html?category=basics">入门与背景</a></div>
 <div class="guide-heading"><div><span class="eyebrow">江湖藏书 · 入门与背景</span><h1>狐狸洞介绍</h1></div></div>
-<div class="guide-layout"><nav class="guide-toc" aria-label="本页目录"><h2>本页目录</h2><ol><li class="h2"><a href="#地图与通路">地图与通路</a></li><li class="h2"><a href="#火把机关">火把机关</a></li><li class="h2"><a href="#任务资料">任务资料</a></li><li class="h2"><a href="#资料依据">资料依据</a></li></ol><a class="guide-back" href="guide.html?category=basics">← 返回入门与背景</a></nav>
+<div class="guide-layout"><nav class="guide-toc" aria-label="本页目录"><h2>本页目录</h2><ol><li class="h2"><a href="#地图与通路">地图与通路</a></li><li class="h2"><a href="#火把机关">火把机关</a></li><li class="h2"><a href="#任务资料">任务资料</a></li><li class="h2"><a href="#参考资料">参考资料</a></li></ol><a class="guide-back" href="guide.html?category=basics">← 返回入门与背景</a></nav>
 <article class="guide-article">
 <p>狐狸洞是围绕狐狸、死狼女和妖华展开的探索与兑换区域。玩家需要区分狐狸洞主区域与修炼洞，不能只凭屏幕上的怪物名称判断任务目标。</p>
 <h2 id="地图与通路">地图与通路</h2>
@@ -22,41 +22,34 @@
 <thead>
 <tr>
 <th scope="col">区域</th>
-<th scope="col">地图编号</th>
-<th scope="col">地图文件</th>
 <th scope="col">主要内容</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>狐狸洞</td>
-<td>19</td>
-<td><code>fox.map</code></td>
 <td>火狐狸、白狐狸和死狼女，收集任务材料</td>
 </tr>
 <tr>
 <td>修炼洞</td>
-<td>20</td>
-<td><code>foxtrain.map</code></td>
 <td>火把机关、召出死狼女和妖华</td>
 </tr>
 </tbody>
 </table></div>
-<p>当前配置有长城以南 <code>(142, 264)</code>、<code>(134, 270)</code> 两条入口记录，均通往狐狸洞 <code>(60, 116)</code>，要求满 30 岁，并受周期开放限制。</p>
+<p>从长城以南 <code>(142, 264)</code>、<code>(134, 270)</code> 两处入口，均通往狐狸洞 <code>(60, 116)</code>，要求满 30 岁，并受周期开放限制。</p>
 <p>狐狸洞通向修炼洞的入口从一组候选坐标中变化，不能把攻略图片上的一个洞口永久当作有效入口。修炼洞 <code>(14, 23)</code> 的出口通回狐狸洞 <code>(78, 95)</code>。</p>
 <h2 id="火把机关">火把机关</h2>
-<p>修炼洞四个火把的配置坐标为 <code>(35, 24)</code>、<code>(29, 18)</code>、<code>(17, 30)</code>、<code>(23, 36)</code>，点火材料为火石。</p>
+<p>修炼洞四个火把位于 <code>(35, 24)</code>、<code>(29, 18)</code>、<code>(17, 30)</code>、<code>(23, 36)</code>，点火材料为火石。</p>
 <ul>
-<li>点亮计数达到 2 时，脚本在 <code>(24, 34)</code> 召出内部名为 <code>死狼女实像</code> 的怪物。</li>
-<li>点亮计数达到 4 时，脚本在 <code>(37, 50)</code> 召出妖华。</li>
+<li>点亮两盏火把时，在 <code>(24, 34)</code> 出现死狼女。</li>
+<li>点亮四盏火把时，在 <code>(37, 50)</code> 出现妖华。</li>
 <li>火把熄灭会影响召出对象的保留，不应把它们视为永久刷新的固定 NPC。</li>
 </ul>
 <h2 id="任务资料">任务资料</h2>
 <p>先看<a href="guide-82f38baffa89.html">狐狸洞攻略</a>中的适用说明，再查<a href="guide-f6b552d395c9.html">怪物</a>和<a href="guide-dcdaea825a76.html">物品</a>。</p>
-<p>妖华的兑换、九尾狐酒母的材料检查以及白玫瑰的取得是不同环节。存在兑换配置，不代表所有旧版材料取得方式都在当前程序中有效。</p>
-<h2 id="资料依据">资料依据</h2>
+<p>当前不能使用玫瑰脱色药把红玫瑰变成白玫瑰；如已持有兑换材料，可按妖华和九尾狐酒母各自的要求兑换。</p>
+<h2 id="参考资料">参考资料</h2>
 <p>官网区域参考：<a href="https://www.1000y.com.tw/article_view.mspx?id=90">狐狸洞介绍</a>，查阅日期：2026-10-20。</p>
-<p>当前配置核对 <code>tgs1000/bin/Init/Map.sdb</code>、<code>Init/DynamicObject.sdb</code>、<code>Setting/CreateGate.sdb</code>、<code>Setting/CreateDynamicObject20.sdb</code>、<code>Script/狐狸火.txt</code>。字段与脚本行为参见<a href="https://github.com/oiuv/1000yDocs/blob/master/help/CreateGate.SDB.md">传送门配置</a>、<a href="https://github.com/oiuv/1000yDocs/blob/master/help/Init_DynamicObject.Sdb.md">动态对象配置</a>和<a href="guide-82f38baffa89.html">现有任务资料</a>。</p>
 
 <div class="guide-source">游戏通用参考资料。本服特色与调整另行说明。<a href="https://github.com/oiuv/1000yDocs/blob/master/help/%E7%82%8E%E9%BB%84%E6%96%B0%E7%AB%A0%E6%B8%B8%E6%88%8F%E8%B5%84%E6%96%99/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8/%E7%89%88%E6%9C%AC%E4%BB%8B%E7%BB%8D/%E7%8B%90%E7%8B%B8%E6%B4%9E%E4%BB%8B%E7%BB%8D.md" target="_blank" rel="noopener noreferrer">查看资料原文</a></div>
 <div class="guide-related"><a class="button secondary" href="guide.html?category=basics">同类资料</a><a class="button subtle" href="guide.html">全部资料</a></div>

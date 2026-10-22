@@ -14,39 +14,18 @@
 <main class="container" id="main">
 <div class="breadcrumb"><a href="index.html">首页</a> / <a href="guide.html">游戏资料</a> / <a href="guide.html?category=basics">入门与背景</a></div>
 <div class="guide-heading"><div><span class="eyebrow">江湖藏书 · 入门与背景</span><h1>帝王陵介绍</h1></div></div>
-<div class="guide-layout"><nav class="guide-toc" aria-label="本页目录"><h2>本页目录</h2><ol><li class="h2"><a href="#区域与进入">区域与进入</a></li><li class="h2"><a href="#基本规则">基本规则</a></li><li class="h2"><a href="#相关资料">相关资料</a></li><li class="h2"><a href="#资料依据">资料依据</a></li></ol><a class="guide-back" href="guide.html?category=basics">← 返回入门与背景</a></nav>
+<div class="guide-layout"><nav class="guide-toc" aria-label="本页目录"><h2>本页目录</h2><ol><li class="h2"><a href="#区域与进入">区域与进入</a></li><li class="h2"><a href="#基本规则">基本规则</a></li><li class="h2"><a href="#相关资料">相关资料</a></li><li class="h2"><a href="#参考资料">参考资料</a></li></ol><a class="guide-back" href="guide.html?category=basics">← 返回入门与背景</a></nav>
 <article class="guide-article">
 <p>帝王陵是以古代陵墓为背景的探索区域，包含忍者、机关和宝箱。基本区域为王陵一层、二层；王陵三层及其迷宫属于<a href="guide-438a8c893ebf.html">重返王陵</a>资料范围。</p>
 <h2 id="区域与进入">区域与进入</h2>
-<div class="guide-table" tabindex="0" role="region" aria-label="资料表格"><table>
-<thead>
-<tr>
-<th scope="col">区域</th>
-<th scope="col">地图编号</th>
-<th scope="col">地图文件</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>王陵一层</td>
-<td>3</td>
-<td><code>tomb1.map</code></td>
-</tr>
-<tr>
-<td>王陵二层</td>
-<td>4</td>
-<td><code>tomb2.map</code></td>
-</tr>
-</tbody>
-</table></div>
-<p>当前配置中，从长城以南 <code>(716, 672)</code> 的入口进入王陵一层，落点为 <code>(37, 63)</code>。入口有周期性开放限制，不能把到达入口理解为随时可以进入。</p>
-<p>入口周期 <code>360000</code>、开放长度 <code>30000</code>，按服务端计时单位折算为约 60 分钟一轮、每轮开放约 5 分钟。这是运行计时周期，不应理解为现实钟表每个整点必定开放。进入及剩余时间以游戏提示为准。</p>
+<p>从长城以南 <code>(716, 672)</code> 的入口进入王陵一层，落点为 <code>(37, 63)</code>。入口有周期性开放限制，不能把到达入口理解为随时可以进入。</p>
+<p>入口约 60 分钟一轮，每轮开放约 5 分钟，不一定在现实钟表的整点开放。进入及剩余时间以游戏提示为准。</p>
 <h2 id="基本规则">基本规则</h2>
 <ul>
-<li>一、二层均配置周期刷新和死亡移出；死亡移出目标为长城以南 <code>(699, 689)</code>。</li>
+<li>一、二层均会周期刷新；角色死亡后会被移出；移出后到达长城以南 <code>(699, 689)</code>。</li>
 <li>通往二层的普通通道设有清场条件；另一个传送符通道采用年龄／物品条件，两者不能混为一谈。</li>
-<li>宝箱、机关、怪物采用不同配置。宝箱出现不代表必出稀有装备，也不能把所有箱子概括为固定攻击次数即可获得奖励。</li>
-<li>行动前预留补给及物品栏空间，遇到机关和守卫时留意服务器提示。</li>
+<li>宝箱、机关和怪物的应对方式各不相同。宝箱出现不代表必出稀有装备，也不能把所有箱子概括为固定攻击次数即可获得奖励。</li>
+<li>行动前预留补给及物品栏空间，遇到机关和守卫时留意游戏提示。</li>
 </ul>
 <h2 id="相关资料">相关资料</h2>
 <ul>
@@ -55,9 +34,8 @@
 <li><a href="guide-39f308644f8b.html">帝王陵物品</a></li>
 <li><a href="guide-253673324bea.html">帝王陵装备</a></li>
 </ul>
-<h2 id="资料依据">资料依据</h2>
+<h2 id="参考资料">参考资料</h2>
 <p>官网背景参考：<a href="https://www.1000y.com.tw/article_view.mspx?id=88">帝王陵介绍</a>，查阅日期：2026-10-20。</p>
-<p>地图、坐标及条件核对 <code>tgs1000/bin/Init/Map.sdb</code>、<code>Setting/CreateGate.sdb</code>；字段与计时说明见 <a href="https://github.com/oiuv/1000yDocs/blob/master/help/Init_map.sdb.md">地图配置</a>、<a href="https://github.com/oiuv/1000yDocs/blob/master/help/CreateGate.SDB.md">传送门配置</a>。本页描述配置对应行为，不将官网体验性叙述作为强制规则。</p>
 
 <div class="guide-source">游戏通用参考资料。本服特色与调整另行说明。<a href="https://github.com/oiuv/1000yDocs/blob/master/help/%E7%82%8E%E9%BB%84%E6%96%B0%E7%AB%A0%E6%B8%B8%E6%88%8F%E8%B5%84%E6%96%99/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8/%E7%89%88%E6%9C%AC%E4%BB%8B%E7%BB%8D/%E5%B8%9D%E7%8E%8B%E9%99%B5%E4%BB%8B%E7%BB%8D.md" target="_blank" rel="noopener noreferrer">查看资料原文</a></div>
 <div class="guide-related"><a class="button secondary" href="guide.html?category=basics">同类资料</a><a class="button subtle" href="guide.html">全部资料</a></div>
