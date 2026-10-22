@@ -65,11 +65,11 @@ export async function init({ auth = false, admin = false } = {}) {
     '<span><strong>云端千年</strong><small>炎黄新章 · 江湖未远</small></span></a>' +
     '<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>' +
     '<nav class="site-nav" id="site-nav" aria-label="主导航">' +
-    '<a href="index.html">首页</a><a href="leaderboard.html">每日英雄榜</a><a href="recharge.html">充值登记</a>' +
+    '<a href="index.html">首页</a><a href="about.html">关于云端</a><a href="leaderboard.html">每日英雄榜</a><a href="recharge.html">充值登记</a>' +
     '<a href="download.html">客户端下载</a>' +
     '<span class="nav-auth" id="nav-auth"><a href="login.html">登录</a><a class="button compact" href="register.html">注册账号</a></span></nav></div>';
   $('#site-footer').innerHTML = '<div class="footer-inner"><span>云端千年 · 炎黄新章<span class="muted">　武林霸业谈笑中，不胜千年一场醉。</span></span>' +
-    '<span><a href="download.html">客户端下载</a> · <span>玩家 QQ 群 · 2887111</span></span></div>';
+    '<span><a href="about.html">关于云端</a><a href="download.html">客户端下载</a> · <span>玩家 QQ 群 · 2887111</span></span></div>';
   $('.nav-toggle').addEventListener('click', event => {
     const open = $('#site-nav').classList.toggle('open');
     event.currentTarget.setAttribute('aria-expanded', String(open));

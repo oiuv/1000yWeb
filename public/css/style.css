@@ -101,6 +101,11 @@ input[type="checkbox"],input[type="radio"] { width: 17px; height: 17px; accent-c
 .hero .actions { margin-top: 28px; }
 .hero-caption { color: var(--muted); font-size: 12px; letter-spacing: .15em; margin-top: 30px; }
 .home-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; }
+.home-origin { display: flex; align-items: center; justify-content: space-between; gap: 32px; margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--line); }
+.home-origin > div { max-width: 760px; }
+.home-origin .eyebrow { margin-bottom: 12px; }
+.home-origin p { margin-bottom: 0; color: var(--muted); font-size: 14px; }
+.home-origin > .button { flex-shrink: 0; }
 .entry-card { padding: 26px; background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--gold); border-radius: var(--radius); }
 .entry-card .number { color: var(--gold); font: 22px Georgia,serif; display: block; margin-bottom: 20px; }
 .entry-card h2 { font-size: 25px; }
@@ -238,6 +243,7 @@ dialog::backdrop { background:#15241dd9; }
   .hero-content { padding-inline:24px; }
   .hero::before { opacity:.45;background-position:65% center; }
   .home-grid { grid-template-columns:1fr;gap:14px; }
+  .home-origin { flex-direction:column;align-items:start;gap:20px; }
   .entry-card { padding:22px; }
   .entry-card .number { float:right; }
   .entry-card p { min-height:0; }
