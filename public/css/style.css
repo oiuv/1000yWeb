@@ -196,7 +196,9 @@ dialog::backdrop { background:#15241dd9; }
 .review-dialog .dialog-heading { flex-shrink:0;margin:0;padding:20px 28px;align-items:center; }
 .review-layout { display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);min-height:0;overflow:hidden; }
 .review-details,.review-controls { min-width:0;padding:24px 28px;overflow-y:auto;scrollbar-width:thin; }
-.review-details .profile-details { grid-template-columns:92px minmax(0,1fr);gap:8px 12px; }
+#record-detail .profile-details { grid-template-columns:max-content minmax(0,1fr);column-gap:16px;align-items:baseline; }
+#record-detail .profile-details dt { white-space:nowrap; }
+.review-details .profile-details { row-gap:8px; }
 .review-details .history { margin-bottom:0; }
 .review-details p:last-child { margin-bottom:0; }
 .review-controls { border-left:1px solid var(--line);background:#faf7ef; }
