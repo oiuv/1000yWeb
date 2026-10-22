@@ -1,0 +1,62 @@
+@charset "UTF-8";
+.download-primary { border-top: 3px solid var(--gold); }
+.download-layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 32px; align-items: start; }
+.download-order { color: var(--green); font-size: 14px; margin-bottom: 8px; }
+.download-steps { list-style: none; margin: 0; padding: 0; }
+.download-steps > li { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 24px 0; border-bottom: 1px solid var(--line); }
+.download-step-number { align-self: start; color: var(--gold); font: 24px/1.2 Georgia, serif; }
+.download-step-copy { min-width: 0; }
+.download-step-copy h3 { margin-bottom: 7px; }
+.download-step-copy p { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+.download-source { font-size: 11px; color: var(--muted); }
+.download-steps .button { white-space: nowrap; }
+.download-steps > .download-launch { grid-template-columns: 36px minmax(0, 1fr); border-bottom: 0; padding-bottom: 0; }
+.download-launch h3 { color: var(--green); }
+.download-guide { padding: 22px; background: var(--wash); border-radius: 4px; font-size: 13px; }
+.download-guide h3 { font-size: 15px; }
+.download-guide p { color: var(--muted); }
+.download-guide strong { color: var(--ink); }
+.download-account { border-top: 1px solid #cfd9cf; margin-top: 24px; padding-top: 22px; }
+.download-account .button { font-size: 14px; }
+.download-help { margin: 22px 0 0; font-size: 12px; }
+.download-legacy { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 32px; align-items: center; }
+.download-legacy p { font-size: 14px; }
+.download-legacy p:last-child { margin-bottom: 0; }
+.download-legacy .small { font-size: 13px; }
+.download-secondary { scroll-margin-top: 20px; }
+.download-layout code, .download-legacy code { color: var(--ink); overflow-wrap: anywhere; }
+.client-guide { scroll-margin-top: 20px; }
+.client-guide-intro { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+.client-guide-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.client-guide-card { min-width: 0; padding: 24px; border: 1px solid var(--line); border-radius: 4px; font-size: 14px; }
+.client-guide-card h3 { color: var(--green); margin-bottom: 16px; font-size: 18px; }
+.client-guide-card p { margin-bottom: 14px; }
+.client-guide-card ul { padding-left: 20px; }
+.client-guide-card li + li { margin-top: 8px; }
+.client-guide-card code { color: var(--green); overflow-wrap: anywhere; }
+.client-guide-card kbd { display: inline-block; padding: 0 5px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; font: inherit; font-size: 13px; background: var(--paper); }
+.client-guide-commands { margin: 18px 0; }
+.client-guide-commands > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding: 7px 0; }
+.client-guide-commands dd { margin: 0; color: var(--muted); font-size: 12px; }
+.client-guide-card .client-guide-fps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0; margin: 18px 0; list-style: none; }
+.client-guide-fps li { padding: 7px 10px; background: var(--wash); border-radius: 3px; }
+.client-guide-fps li + li { margin-top: 0; }
+.client-guide-card .client-guide-note { border-top: 1px solid var(--line); padding-top: 14px; margin: 18px 0 0; color: var(--muted); font-size: 12px; }
+@media (max-width: 1050px) {
+  .download-layout { grid-template-columns: minmax(0, 1fr) 240px; gap: 24px; }
+  .download-steps > li { grid-template-columns: 32px minmax(0, 1fr); gap: 12px; }
+  .download-steps .button { grid-column: 2; justify-self: start; }
+}
+@media (max-width: 800px) {
+  .download-layout, .download-legacy, .client-guide-grid { grid-template-columns: 1fr; }
+  .download-guide { margin-top: 4px; }
+  .download-legacy { gap: 20px; }
+  .download-legacy > .button { justify-self: start; }
+}
+@media (max-width: 560px) {
+  .page-heading > .button { margin-top: 18px; }
+  .download-steps > li { padding-block: 20px; }
+  .download-steps > .download-launch { grid-template-columns: 32px minmax(0, 1fr); }
+  .download-guide { padding: 18px; }
+  .client-guide-card { padding: 18px; }
+}

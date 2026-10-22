@@ -66,11 +66,10 @@ export async function init({ auth = false, admin = false } = {}) {
     '<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>' +
     '<nav class="site-nav" id="site-nav" aria-label="主导航">' +
     '<a href="index.html">首页</a><a href="leaderboard.html">每日英雄榜</a><a href="recharge.html">充值登记</a>' +
-    '<a href="https://1000y.gameivy.com/download.html" target="_blank" rel="noopener noreferrer">客户端下载 ↗</a>' +
-    '<a href="https://1000y.gameivy.com/" target="_blank" rel="noopener noreferrer">游戏官网 ↗</a>' +
+    '<a href="download.html">客户端下载</a>' +
     '<span class="nav-auth" id="nav-auth"><a href="login.html">登录</a><a class="button compact" href="register.html">注册账号</a></span></nav></div>';
   $('#site-footer').innerHTML = '<div class="footer-inner"><span>云端千年 · 炎黄新章<span class="muted">　武林霸业谈笑中，不胜千年一场醉。</span></span>' +
-    '<span><a href="https://1000y.gameivy.com/" target="_blank" rel="noopener noreferrer">游戏官网</a><span>玩家 QQ 群 · 2887111</span></span></div>';
+    '<span><a href="download.html">客户端下载</a> · <span>玩家 QQ 群 · 2887111</span></span></div>';
   $('.nav-toggle').addEventListener('click', event => {
     const open = $('#site-nav').classList.toggle('open');
     event.currentTarget.setAttribute('aria-expanded', String(open));
