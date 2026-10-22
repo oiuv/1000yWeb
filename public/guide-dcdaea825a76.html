@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="炎黄新章游戏参考资料：物品：狐狸洞">
+<title>物品：狐狸洞 · 云端千年游戏资料</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/guide.css">
+<link rel="stylesheet" href="css/item-icons.css">
+</head>
+<body data-nav="guide.html">
+<header class="site-header" id="site-header"></header>
+<main class="container" id="main">
+<div class="breadcrumb"><a href="index.html">首页</a> / <a href="guide.html">游戏资料</a> / <a href="guide.html?category=items">物品材料</a></div>
+<div class="guide-heading"><div><span class="eyebrow">江湖藏书 · 物品材料</span><h1>【物品】简介：狐狸洞</h1></div></div>
+<div class="guide-layout"><nav class="guide-toc" aria-label="本页目录"><h2>本页目录</h2><ol><li class="h2"><a href="#白玫瑰取得方式的限制">白玫瑰取得方式的限制</a></li><li class="h2"><a href="#妖华兑换">妖华兑换</a></li><li class="h2"><a href="#资料依据">资料依据</a></li></ol><a class="guide-back" href="guide.html?category=items">← 返回物品材料</a></nav>
+<article class="guide-article">
+<p>本页整理狐狸洞探索与兑换涉及的通用物品。括号或代码中的名称是配置主键，不一定与物品栏显示文字完全相同。</p>
+<div class="guide-table" tabindex="0" role="region" aria-label="资料表格"><table>
+<thead>
+<tr>
+<th scope="col">物品</th>
+<th scope="col">已核对的来源或用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="item-icon icon-159" aria-hidden="true"></span>火石</td>
+<td>火狐狸掉落材料；用于修炼洞火把</td>
+</tr>
+<tr>
+<td>狐狸指甲、狐狸裘、狐狸尾巴</td>
+<td>狐狸相关掉落材料；不要将普通狐狸尾巴当作妖华尾巴</td>
+</tr>
+<tr>
+<td><span class="item-icon icon-160" aria-hidden="true"></span>潜行术</td>
+<td>狐狸洞的死狼女掉落；交给阴阳师换取透视符，不是一本可直接学会的隐身武功</td>
+</tr>
+<tr>
+<td><span class="item-icon icon-86" aria-hidden="true"></span>透视符</td>
+<td>阴阳师以 1 本潜行术兑换 1 张，需留出物品栏空间</td>
+</tr>
+<tr>
+<td><span class="item-icon icon-158" aria-hidden="true"></span>骨钥匙</td>
+<td>风兄或牛美的制作选项检查并消耗 2 个骨头；存在该道具不表示所有洞口都要求它</td>
+</tr>
+<tr>
+<td><span class="item-icon icon-88" aria-hidden="true"></span>仙豆</td>
+<td>补给品，内部名 <code>仙豆一</code>；将 5 个交给妖华可换妖华尾巴</td>
+</tr>
+<tr>
+<td><span class="item-icon icon-164" aria-hidden="true"></span>妖华尾巴</td>
+<td>与 99 朵白玫瑰一起交给九尾狐酒母兑换狐狸内丹</td>
+</tr>
+<tr>
+<td><span class="item-icon icon-161" aria-hidden="true"></span>红玫瑰</td>
+<td>内部名 <code>红玫瑰一</code>，狐狸洞的 <code>死狼女虚像</code> 掉落</td>
+</tr>
+<tr>
+<td><span class="item-icon icon-54" aria-hidden="true"></span>玫瑰脱色药</td>
+<td>修炼洞的 <code>死狼女实像</code> 掉落；物品类型为 <code>ITEM_KIND_CHANGER</code></td>
+</tr>
+<tr>
+<td><span class="item-icon icon-162" aria-hidden="true"></span>白玫瑰</td>
+<td>内部名 <code>白玫瑰一</code>；九尾狐酒母兑换时检查的材料</td>
+</tr>
+<tr>
+<td><span class="item-icon icon-163" aria-hidden="true"></span>狐狸内丹</td>
+<td>内部名 <code>狐狸内丹三</code>；交给妖华兑换其奖励池中的装备</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="白玫瑰取得方式的限制">白玫瑰取得方式的限制</h2>
+<p>物品表保留红玫瑰、玫瑰脱色药与白玫瑰的关联，但当前 <code>TItemObject.FieldProc</code> 中地面物品转换分支已被注释。不能指导玩家把药拖到地面红玫瑰上并承诺可以脱色成功，也不能仅凭配方字段断言有可用的制作入口。</p>
+<p>兑换材料已有独立来源时，酒母和妖华的兑换仍须按各自条件检查。这里不将材料表中的关系写成已经验证完整的任务闭环。类型限制见<a href="https://github.com/oiuv/1000yDocs/blob/master/help/constants/ITEM_KIND.md">物品类型说明</a>。</p>
+<h2 id="妖华兑换">妖华兑换</h2>
+<ul>
+<li><code>仙豆一 × 5</code>：换取 <code>妖华尾巴 × 1</code>。</li>
+<li><code>狐狸内丹三 × 1</code>：从配置奖励池中随机取得装备；不是一次取得全部装备。</li>
+</ul>
+<p>奖励池包括男女妖华袍、男女利齿靴，以及驱魔烈火弓、炎帝火灵斧、狼牙戟、月光刀、龙光剑、四季甲胄、狐狸手套。装备资料见<a href="guide-676e98a11818.html">狐狸洞装备</a>。</p>
+<h2 id="资料依据">资料依据</h2>
+<ul>
+<li>官网主题参考：<a href="https://www.1000y.com.tw/article_view.mspx?id=43">狐狸洞物品</a>，查阅日期：2026-10-20。</li>
+<li>配置与交互核对：<code>tgs1000/bin/Init/Item.sdb</code>、<code>Init/Monster.sdb</code>、<code>Script/阴阳师.txt</code>、<code>风兄.txt</code>、<code>牛美.txt</code>、<code>九尾狐酒母.txt</code>、<code>NpcSetting/妖华.txt</code>。</li>
+<li>转换限制核对当前 Pascal <code>TItemObject.FieldProc</code>；公开源码入口：<a href="https://github.com/oiuv/1000yDocs/blob/master/help/TGS%E6%A0%B8%E5%BF%83%E6%BA%90%E7%A0%81/BasicObj.pas">BasicObj.pas</a>。</li>
+</ul>
+
+<div class="guide-source">游戏通用参考资料。本服特色与调整另行说明。<a href="https://github.com/oiuv/1000yDocs/blob/master/help/%E7%82%8E%E9%BB%84%E6%96%B0%E7%AB%A0%E6%B8%B8%E6%88%8F%E8%B5%84%E6%96%99/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8/%E3%80%90%E7%89%A9%E5%93%81%E3%80%91%E7%AE%80%E4%BB%8B/%E3%80%90%E7%89%A9%E5%93%81%E3%80%91%E7%AE%80%E4%BB%8B%EF%BC%9A%E7%8B%90%E7%8B%B8%E6%B4%9E.md" target="_blank" rel="noopener noreferrer">查看资料原文</a></div>
+<div class="guide-related"><a class="button secondary" href="guide.html?category=items">同类资料</a><a class="button subtle" href="guide.html">全部资料</a></div>
+</article></div>
+</main>
+<footer class="site-footer" id="site-footer"></footer>
+<script type="module" src="js/home.js"></script>
+</body>
+</html>

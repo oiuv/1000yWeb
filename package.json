@@ -24,6 +24,7 @@
     "mssql": "^9.1.1"
   },
   "devDependencies": {
+    "markdown-it": "15.0.3",
     "nodemon": "^3.0.1"
   },
   "keywords": [

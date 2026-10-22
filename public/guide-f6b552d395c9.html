@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="炎黄新章游戏参考资料：怪物：狐狸洞">
+<title>怪物：狐狸洞 · 云端千年游戏资料</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/guide.css">
+<link rel="stylesheet" href="css/item-icons.css">
+</head>
+<body data-nav="guide.html">
+<header class="site-header" id="site-header"></header>
+<main class="container" id="main">
+<div class="breadcrumb"><a href="index.html">首页</a> / <a href="guide.html">游戏资料</a> / <a href="guide.html?category=monsters">怪物图鉴</a></div>
+<div class="guide-heading"><div><span class="eyebrow">江湖藏书 · 怪物图鉴</span><h1>【怪物】简介（狐狸洞）</h1></div></div>
+<div class="guide-layout"><nav class="guide-toc" aria-label="本页目录"><h2>本页目录</h2><ol><li class="h2"><a href="#如何辨认">如何辨认</a></li><li class="h2"><a href="#相关资料与依据">相关资料与依据</a></li></ol><a class="guide-back" href="guide.html?category=monsters">← 返回怪物图鉴</a></nav>
+<article class="guide-article">
+<p>下表区分玩家看到的名称与配置内部名称，列出探索时有用的材料关联；不是完整掉落清单，也不承诺每次击杀都取得物品。</p>
+<div class="guide-table" tabindex="0" role="region" aria-label="资料表格"><table>
+<thead>
+<tr>
+<th scope="col">玩家可见名称</th>
+<th scope="col">配置内部名称</th>
+<th scope="col">所在区域或来源</th>
+<th scope="col">相关材料</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>火狐狸</td>
+<td>火狐狸、火狐狸2、火狐狸3</td>
+<td>狐狸洞投放</td>
+<td>火石、狐狸指甲、肉块</td>
+</tr>
+<tr>
+<td>白狐狸</td>
+<td>白狐狸、白狐狸变身</td>
+<td>狐狸洞及其变身记录</td>
+<td>狐狸裘、狐狸尾巴、肉块</td>
+</tr>
+<tr>
+<td>死狼女</td>
+<td>死狼女虚像</td>
+<td>狐狸洞投放，初始点 <code>(136, 45)</code></td>
+<td>红玫瑰、潜行术</td>
+</tr>
+<tr>
+<td>死狼女</td>
+<td>死狼女实像</td>
+<td>修炼洞点亮两盏火后由脚本召出</td>
+<td>玫瑰脱色药、金元</td>
+</tr>
+<tr>
+<td>妖华</td>
+<td>妖华</td>
+<td>修炼洞点亮四盏火后召出</td>
+<td>接受仙豆、狐狸内丹进行兑换</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="如何辨认">如何辨认</h2>
+<p>两种死狼女的 <code>ViewName</code> 都是“死狼女”。阅读攻略时应同时看区域、出现条件和材料，不要只凭“实像／虚像”的文字判断。上表使用当前配置的内部名称。</p>
+<p>妖华属于动态对象，不是普通 <code>Monster.sdb</code> 怪物。将物品交给妖华的兑换，与击杀怪物取得掉落是两套不同交互。</p>
+<p>怪物初始投放点不代表移动后的固定站位；火把召出位置也不代表目标永远留在那里。</p>
+<h2 id="相关资料与依据">相关资料与依据</h2>
+<ul>
+<li><a href="guide-baf4e514df88.html">狐狸洞介绍</a>、<a href="guide-82f38baffa89.html">狐狸洞攻略</a>、<a href="guide-dcdaea825a76.html">狐狸洞物品</a>。</li>
+<li>官网主题参考：<a href="https://www.1000y.com.tw/article_view.mspx?id=18">狐狸洞怪物</a>，查阅日期：2026-10-20。内部名、区域及材料以本页核对结果为准。</li>
+<li>配置核对：<code>tgs1000/bin/Init/Monster.sdb</code> 的 <code>ViewName</code>、<code>HaveItem</code>，<code>Setting/CreateMonster19.sdb</code>，<code>Script/狐狸火.txt</code>，<code>NpcSetting/妖华.txt</code>。</li>
+<li>数据含义参见<a href="https://github.com/oiuv/1000yDocs/blob/master/help/Init_monster.sdb.md">怪物配置</a>、<a href="https://github.com/oiuv/1000yDocs/blob/master/help/Init_DynamicObject.Sdb.md">动态对象配置</a>。</li>
+</ul>
+
+<div class="guide-source">游戏通用参考资料。本服特色与调整另行说明。<a href="https://github.com/oiuv/1000yDocs/blob/master/help/%E7%82%8E%E9%BB%84%E6%96%B0%E7%AB%A0%E6%B8%B8%E6%88%8F%E8%B5%84%E6%96%99/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8/%E3%80%90%E6%80%AA%E7%89%A9%E3%80%91%E7%AE%80%E4%BB%8B/%E3%80%90%E6%80%AA%E7%89%A9%E3%80%91%E7%AE%80%E4%BB%8B%EF%BC%88%E7%8B%90%E7%8B%B8%E6%B4%9E%EF%BC%89.md" target="_blank" rel="noopener noreferrer">查看资料原文</a></div>
+<div class="guide-related"><a class="button secondary" href="guide.html?category=monsters">同类资料</a><a class="button subtle" href="guide.html">全部资料</a></div>
+</article></div>
+</main>
+<footer class="site-footer" id="site-footer"></footer>
+<script type="module" src="js/home.js"></script>
+</body>
+</html>
