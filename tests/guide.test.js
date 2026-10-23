@@ -252,6 +252,11 @@ test('skill levels, quest steps, profession groups and medicine recipes render s
   const quests = body('【炎黄新章】介绍——绿林峡谷任务.md');
   assert.equal([...quests.matchAll(/<h2 /g)].length, 3);
   assert.equal([...quests.matchAll(/>附加信息：<\/h3>/g)].length, 3);
+  for (const name of ['疾速靴', '噬月刀', '九转金丹']) {
+    assert.ok(quests.includes('<td>' + name + ' ×1</td>'), name + ' reward table');
+    assert.ok(quests.includes('获得' + name + ' ×1。'), name + ' quest steps');
+  }
+  assert.doesNotMatch(quests, /噬月刀1把|九转金丹1个/);
   assert.equal([...body('神武奇章任务浅谈.md').matchAll(/<ol>/g)].length, 5);
   assert.equal([...body('【职业技能】简介：职业之工匠.md').matchAll(/<h2 /g)].length, 4);
   const medicine = body('【炎黄新章】介绍——新增草药和药品.md');
