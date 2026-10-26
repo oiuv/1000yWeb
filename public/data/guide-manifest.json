@@ -1,11 +1,6 @@
 {
   "articles": [
     {
-      "source": "说明.md",
-      "file": "guide-d72e43be8697.html",
-      "sha256": "d90fea3ecf478fc7665c0b240022ecf89a643343c2516b35c617ca85183358b0"
-    },
-    {
       "source": "新手入门/【怪物】简介/【怪物】简介（大地图）.md",
       "file": "guide-040e5a2f5fb7.html",
       "sha256": "51a8086ad58cc33a05a8dea9aa9e1796efc7669727cb04b3d8ecca8095f6b154"
@@ -53,17 +48,17 @@
     {
       "source": "新手入门/【门派】简介/【门派】简介 门派申请条件.md",
       "file": "guide-0766aab7df54.html",
-      "sha256": "ff673a7782b9ab057cb627c19cc5f5680b1b0164cd1a014dc617415833045456"
+      "sha256": "dc72c1c33d04d6cce37f78c42b74e23ff694e5f5bc5e5c719e0cde0eb7e7207a"
     },
     {
       "source": "新手入门/【门派】简介/【门派】简介 门派指令.md",
       "file": "guide-a3e870f98030.html",
-      "sha256": "efc91cb2c1c2d338ed39dc529452b041849dc45f9a4e81558677cc789611b1cb"
+      "sha256": "0c668d1592477fcb8495aec100ee61468aad70faeb3f15315cf2b936da2fb9bf"
     },
     {
       "source": "新手入门/【门派】简介/【门派】门派石坐标.md",
       "file": "guide-f13118b8cf7c.html",
-      "sha256": "3aa0e440bc392935d6843b4f2ca61fd5b0219000b4c358ecd151e8dae8696eea"
+      "sha256": "781cb0e993e5c3547dab6a4e80a4c782a8a8bd95311eaf0a66dceb504429510d"
     },
     {
       "source": "新手入门/【物品】简介/【物品】简介：帝王陵.md",
@@ -178,7 +173,7 @@
     {
       "source": "新手入门/【装备】简介/【装备】简介：新手村装备.md",
       "file": "guide-9ea70a34b2e1.html",
-      "sha256": "74d91bff3435bc2cf5982314bce1bafe47d79379828003ac229b739640b9ab0f"
+      "sha256": "1b16fe99d1965e11910f12a45e781333d297d6c18ab6ce06a045c1bc0ffbba2a"
     },
     {
       "source": "新手入门/【装备】简介/【装备】简介：英雄系列与黄龙溪谷武器.md",
@@ -523,12 +518,12 @@
     {
       "source": "新手入门/炎黄新章/【炎黄新章】介绍——绿林峡谷任务.md",
       "file": "guide-3d9daf7dbd9e.html",
-      "sha256": "cf87c4419db6403614d680f2c7d9f32febef27adc106539d743cae2ce7c4eac7"
+      "sha256": "1876f0f19df4ceba6f1aa713e81788ebfb0df98881e1b76e1434c3f8e64707ee"
     },
     {
       "source": "新手入门/炎黄新章/【炎黄新章】介绍——绿林峡谷装备.md",
       "file": "guide-d66f05a258bb.html",
-      "sha256": "5cbc034f05dcbf125b596193c02fddb606a7ba23f7d382d13e21ae3ecc1b8100"
+      "sha256": "dedb4fcb7b3e27af4dcbca0ce9cea9c8af2493e44b1e59c5503ea25081484421"
     },
     {
       "source": "新手入门/炎黄新章/【炎黄新章】介绍——门派-门派场景.md",
@@ -579,6 +574,11 @@
       "source": "新手入门/炎黄新章/【炎黄新章】介绍——组队设定.md",
       "file": "guide-0708a483d55b.html",
       "sha256": "3448b7aa9439f15dea9ecdda590d5b006fc008d49e5e4b19c41c3a348b09851b"
+    },
+    {
+      "source": "云端千年.md",
+      "file": "guide-215fa283b647.html",
+      "sha256": "06d50e4738b3df04ee5685d1ab30f17429a715f3beeff831237fdf0f9bfe6b18"
     },
     {
       "source": "职业技能/【职业技能】简介：材料篇.md",

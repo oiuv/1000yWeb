@@ -277,18 +277,59 @@ test('reference topics are grouped by content while original titles remain intac
 });
 
 test('guild stone coordinates use a descriptive title and belong to gameplay systems', () => {
-  const article = manifest.articles.find(a => a.source === '说明.md');
+  const article = manifest.articles.find(a => a.source === '新手入门/【门派】简介/【门派】门派石坐标.md');
   assert.ok(article);
   const entry = index.find(a => a.id === article.file);
-  assert.equal(entry.title, '十大门派石坐标');
+  assert.equal(entry.title, '【门派】门派石坐标');
   assert.equal(entry.category, 'systems');
   const html = read(article.file);
-  assert.match(html, /<h1>十大门派石坐标<\/h1>/);
+  assert.match(html, /<h1>【门派】门派石坐标<\/h1>/);
   assert.match(html, /guide.html\?category=systems">玩法系统/);
   assert.equal([...html.matchAll(/<tbody>[\s\S]*?<\/tbody>/g)].length, 1);
-  for (const text of ['人龙石', '529，688', '血陵石', '570，319']) assert.ok(html.includes(text));
+  const table = html.match(/<tbody>([\s\S]*?)<\/tbody>/)[1];
+  const cells = [...table.matchAll(/<td>([\s\S]*?)<\/td>/g)].map(([, cell]) => cell.replace(/<[^>]+>/g, ''));
+  assert.deepEqual(cells, [
+    '河马石', '700，519', '巨象石', '662，246', '金鸡石', '653，757',
+    '人龙石', '529，679', '花窟石', '821，626', '玉猿石', '652，704',
+    '玉蟾石', '383，622', '玉犬石', '255，222', '血陵石', '570，312', '血狮石', '395，388'
+  ]);
+  assert.match(html, /<th scope="col">坐标<\/th>/);
+  assert.match(html, /门主加入成员名单/);
+  assert.doesNotMatch(html, /创建落点示例|建派后门石位置|创建时使用中间一列/);
   const basics = read('guide.html').match(/<section class="guide-category" data-guide-category="basics"[\s\S]*?<\/section>/)[0];
   assert.ok(!basics.includes(article.file));
+});
+
+test('cloud guide includes current beginner rewards, crafting and shops in pages and search', () => {
+  const article = manifest.articles.find(a => a.source === '云端千年.md');
+  assert.ok(article);
+  const html = read(article.file);
+  const entry = index.find(a => a.id === article.file);
+  assert.ok(entry);
+  assert.ok(read('guide.html').includes(article.file));
+  for (const heading of ['新手挑战奖励', '墨铁衣服制造', '留香花卉', '门派守卫']) {
+    assert.ok(html.includes('id="' + heading + '"'));
+    assert.ok(html.includes('href="#' + heading + '"'));
+    assert.ok(entry.text.includes(heading));
+  }
+  for (const text of ['男子天桃甲或女子天桃甲 ×1', '金元 ×1', '裁缝', '初级工', '100 万钱币', '留香蓝彼岸花']) {
+    assert.ok(html.includes(text), text);
+    assert.ok(entry.text.includes(text), text + ' searchable');
+  }
+  const crafting = html.match(/<h2 id="墨铁衣服制造">[\s\S]*?<tbody>([\s\S]*?)<\/tbody>/)[1];
+  const cells = [...crafting.matchAll(/<td>([\s\S]*?)<\/td>/g)].map(([, cell]) => cell.replace(/<[^>]+>/g, ''));
+  assert.deepEqual(cells, [
+    '男子墨铁战斗服', '10 品', '犀牛王角 ×1、熊掌 ×1、白老虎指甲 ×1',
+    '女子墨铁战斗服', '10 品', '犀牛王后角 ×1、熊掌 ×1、白老虎指甲 ×1',
+    '男子墨铁弓服', '9 品', '男子墨铁战斗服 ×1、火心 ×1、龟甲 ×1',
+    '女子墨铁弓服', '9 品', '女子墨铁战斗服 ×1、火心 ×1、龟甲 ×1'
+  ]);
+  const equipment = manifest.articles.find(a => a.source === '新手入门/【装备】简介/【装备】简介：新手村装备.md');
+  assert.ok(equipment);
+  const equipmentHtml = read(equipment.file);
+  assert.match(equipmentHtml, /裁缝初级工/);
+  assert.ok(equipmentHtml.includes('href="' + article.file + '#' + encodeURIComponent('墨铁衣服制造') + '"'));
+  assert.doesNotMatch(equipmentHtml, /墨铁弓服属于7品|需要技能工才能制作/);
 });
 
 test('search supports all categories, full text, multiple literal terms and empty results', async () => {
