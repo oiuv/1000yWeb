@@ -303,7 +303,7 @@
     {
       "source": "新手入门/版本介绍/狐狸洞介绍.md",
       "file": "guide-baf4e514df88.html",
-      "sha256": "93da857f1bfc503fb532781047405ffc329acf8ef31319d7dab60f37bb4ce8a3"
+      "sha256": "be7c55b4c06fa940713048ef7845539f505fa09dc20c3aba1b086c285c221f47"
     },
     {
       "source": "新手入门/版本介绍/极乐洞介绍.md",
@@ -328,7 +328,7 @@
     {
       "source": "新手入门/版本介绍/重返王陵介绍.md",
       "file": "guide-438a8c893ebf.html",
-      "sha256": "be38eee800358b69052adde226440aaa1396afb8f1025b0d8aa19cb10792443b"
+      "sha256": "a40abde65057fb21d2e37f596e403212cb01b5af0b2b0813f5593880d3612b4f"
     },
     {
       "source": "新手入门/背景介绍/时代背景.md",
@@ -338,7 +338,12 @@
     {
       "source": "新手入门/地图介绍/基础地图导览.md",
       "file": "guide-2359ee67b5ef.html",
-      "sha256": "84952338177bfeeecb974def8f90dfedb18813bb26586ac4b0e5ebf4f093ebd2"
+      "sha256": "1e6e209b3a6cf186d3c56bba464ff71c4f8ab041f1afaea1f313551b6d0a7562"
+    },
+    {
+      "source": "新手入门/角色成长/年龄增长表.md",
+      "file": "guide-3b12e6bad5d8.html",
+      "sha256": "3630ddc92ed81bc4e9b3650cb0ca56ac145598585b74dc07e5e23c035b42d3e6"
     },
     {
       "source": "新手入门/任务介绍/帝王陵攻略.md",
@@ -541,16 +546,6 @@
       "sha256": "ea34d7c36812a51d2d4b0405f0a293d8ceffd3830205ba7c023914de5de254be"
     },
     {
-      "source": "新手入门/炎黄新章/【炎黄新章】介绍——门派-门派领土设定1.md",
-      "file": "guide-05050aee0f5b.html",
-      "sha256": "68b907dac4211ba97a465f55c78f1c0c9b644af524f3d4b8dcaa9c5d08c6d46e"
-    },
-    {
-      "source": "新手入门/炎黄新章/【炎黄新章】介绍——门派-门派领土设定2.md",
-      "file": "guide-e26015fb5a65.html",
-      "sha256": "0b75291ee38fe0685728a610e854aedb2826ab40497a8840e563b95303d27d44"
-    },
-    {
       "source": "新手入门/炎黄新章/【炎黄新章】介绍——门派-门派战争.md",
       "file": "guide-d7694194a3fc.html",
       "sha256": "3050023746337635a0a89259510099c232c0279614c3d28405144e719b6a47de"
@@ -578,7 +573,7 @@
     {
       "source": "云端千年.md",
       "file": "guide-215fa283b647.html",
-      "sha256": "06d50e4738b3df04ee5685d1ab30f17429a715f3beeff831237fdf0f9bfe6b18"
+      "sha256": "68dcd4072c8a6abbcacbd0eee13c6fdc687ff759e0886fab879dd11801580304"
     },
     {
       "source": "职业技能/【职业技能】简介：材料篇.md",

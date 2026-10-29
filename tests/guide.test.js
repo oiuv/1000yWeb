@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { readFileSync, existsSync } = require('node:fs');
+const { readFileSync, existsSync, readdirSync } = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const { fixture } = require('./helpers');
@@ -12,9 +12,11 @@ const index = JSON.parse(read('data/guide-search.json'));
 
 test('all reference articles are public static pages, readable without client rendering', async t => {
   const { base } = await fixture(t);
-  assert.equal(manifest.articles.length, 123);
-  assert.equal(new Set(manifest.articles.map(a => a.file)).size, 123);
-  assert.equal(index.length, 123);
+  assert.equal(manifest.articles.length, 122);
+  assert.equal(new Set(manifest.articles.map(a => a.file)).size, 122);
+  assert.equal(index.length, 122);
+  assert.deepEqual(readdirSync(root).filter(file => /^guide-.*\.html$/.test(file)).sort(),
+    manifest.articles.map(a => a.file).sort());
   for (const file of ['guide.html', manifest.articles[0].file, 'css/guide.css', 'css/item-icons.css', 'images/item.png', 'data/guide-search.json']) {
     const response = await fetch(base + '/' + file);
     assert.equal(response.status, 200, file);
@@ -22,8 +24,8 @@ test('all reference articles are public static pages, readable without client re
     if (file.endsWith('.html')) assert.equal(await response.text(), read(file));
     else await response.arrayBuffer();
   }
-  assert.match(read('guide.html'), /123 篇资料/);
-  assert.equal([...read('guide.html').matchAll(/data-guide-entry=/g)].length, 123);
+  assert.match(read('guide.html'), /122 篇资料/);
+  assert.equal([...read('guide.html').matchAll(/data-guide-entry=/g)].length, 122);
   for (const { file } of manifest.articles) {
     assert.match(read(file), /<article class="guide-article">[\s\S]+<\/article>/);
     assert.ok(index.some(a => a.id === file));
@@ -165,33 +167,32 @@ test('Taiji quest reference keeps eligibility, regions and stages in their corre
   assert.match(body, /两分钟的时间限制/);
 });
 
-test('Wangling crafting chapters separate explanations from headings and retain every material table', () => {
-  const pages = ['重返王陵材料加工', '重返王陵介绍'].map(title => {
+test('Wangling introduction links to the complete crafting reference without duplicating it', () => {
+  const articles = ['重返王陵材料加工', '重返王陵介绍'].map(title => {
     const source = manifest.articles.find(a => a.source === '新手入门/版本介绍/' + title + '.md');
     assert.ok(source, title);
-    return read(source.file).match(/<article class="guide-article">([\s\S]*?)<\/article>/)[1];
+    return source;
   });
-  for (const [i, body] of pages.entries()) {
-    const chapter = i === 0 ? 2 : 3;
-    assert.ok(body.includes('>（二）、添加物品属性</h' + chapter + '>'));
-    assert.ok(body.includes('>1、道具说明</h' + (chapter + 1) + '>\n<p>除了王陵神器加工'));
-    assert.ok(body.includes('>2、增加属性的方法说明</h' + (chapter + 1) + '>\n<p>增加物品属性'));
-    assert.ok(body.includes('>3、各种装备品系划分</h' + (chapter + 1) + '>'));
-    assert.equal([...body.matchAll(/<blockquote>/g)].length, 2);
-    assert.equal([...body.matchAll(/<th scope="col">等级<\/th>/g)].length, 4);
-    assert.doesNotMatch(body, /<li>(?:（[一二三1-3]）|[1-6]、|三、)/);
-    for (const title of ['（1）灵符', '（2）饰品', '（3）卷轴']) {
-      assert.ok(body.includes('>' + title + '</h' + (chapter + 2) + '>'));
-    }
+  const [body, introduction] = articles.map(article =>
+    read(article.file).match(/<article class="guide-article">([\s\S]*?)<\/article>/)[1]);
+  assert.ok(body.includes('>（二）、添加物品属性</h2>'));
+  assert.ok(body.includes('>1、道具说明</h3>\n<p>除了王陵神器加工'));
+  assert.ok(body.includes('>2、增加属性的方法说明</h3>\n<p>增加物品属性'));
+  assert.ok(body.includes('>3、各种装备品系划分</h3>'));
+  assert.equal([...body.matchAll(/<blockquote>/g)].length, 2);
+  assert.equal([...body.matchAll(/<th scope="col">等级<\/th>/g)].length, 4);
+  assert.doesNotMatch(body, /<li>(?:（[一二三1-3]）|[1-6]、|三、)/);
+  for (const title of ['（1）灵符', '（2）饰品', '（3）卷轴']) {
+    assert.ok(body.includes('>' + title + '</h4>'));
   }
-  const tables = pages.map(body => [...body.matchAll(/<table>[\s\S]*?<\/table>/g)].map(m => m[0]));
-  assert.equal(tables[0].length, 10);
-  assert.equal(tables[1].length, 7);
-  assert.deepEqual(tables[0].slice(0, 7), tables[1]);
-  assert.match(pages[0], />属性物品获取汇总<\/h2>/);
+  assert.equal([...body.matchAll(/<table>/g)].length, 10);
+  assert.match(body, />属性物品获取汇总<\/h2>/);
   for (const title of ['灵符', '饰品', '卷轴']) {
-    assert.ok(pages[0].includes('>' + title + '</h3>'));
+    assert.ok(body.includes('>' + title + '</h3>'));
   }
+  assert.match(introduction, />三、全新的加工体系<\/h2>/);
+  assert.ok(introduction.includes('href="' + articles[0].file + '">重返王陵材料加工</a>'));
+  assert.doesNotMatch(introduction, /<table>/);
 });
 
 test('source HTML and unsafe URLs cannot become executable markup', async () => {
@@ -332,12 +333,68 @@ test('cloud guide includes current beginner rewards, crafting and shops in pages
   assert.doesNotMatch(equipmentHtml, /墨铁弓服属于7品|需要技能工才能制作/);
 });
 
+test('age guide retains all 100 rows, year conversions, contents and searchable text', () => {
+  const article = manifest.articles.find(a => a.source === '新手入门/角色成长/年龄增长表.md');
+  assert.ok(article);
+  const html = read(article.file);
+  const entry = index.find(a => a.id === article.file);
+  assert.ok(entry);
+  assert.equal(entry.category, 'basics');
+  assert.ok(read('guide.html').includes(article.file));
+  for (const heading of ['增长规则', '在线时间对照表']) {
+    assert.ok(html.includes('id="' + heading + '"'));
+    assert.ok(html.includes('href="#' + heading + '"'));
+  }
+  assert.match(html, /累计在线折合年/);
+  assert.ok(entry.text.includes('累计在线折合年'));
+  const table = html.match(/<tbody>([\s\S]*?)<\/tbody>/)[1];
+  const rows = [...table.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map(([, row]) =>
+    [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map(([, cell]) => cell));
+  assert.equal(rows.length, 100);
+  assert.ok(rows.every(row => row.length === 4));
+  assert.deepEqual(rows.map(row => row[0]), [
+    ...Array.from({ length: 99 }, (_, i) => String(i + 1)), '99.99'
+  ]);
+  assert.equal(rows[1][2], '&lt;0.01');
+  for (const [age, time, years] of [
+    ['70', '1120天 21:39:00', '3.07'], ['80', '2969天 11:08:04', '8.14'],
+    ['90', '6628天 22:27:55', '18.16'], ['99.99', '12552天 13:07:13', '34.39']
+  ]) {
+    assert.deepEqual(rows.find(row => row[0] === age).slice(0, 3), [age, time, years]);
+    assert.ok(entry.text.includes(time));
+    assert.ok(entry.text.includes(years));
+  }
+});
+
+test('cloud guide publishes ice and fire map rules and weapon lists in pages and search', () => {
+  const article = manifest.articles.find(a => a.source === '云端千年.md');
+  const html = read(article.file);
+  const entry = index.find(a => a.id === article.file);
+  const section = html.match(/<h2 id="冰火地图与武器属性">([\s\S]*?)(?=<h2 )/)[1];
+  assert.ok(html.includes('href="#冰火地图与武器属性"'));
+  for (const text of ['活力上限', '实际穿戴', '竹筒', '万毒门', '不属于冰火环境',
+    '本馆', '黄金沙漠', '北海雪原', '黄龙溪谷', '血皇城', '血皇塔一层',
+    '血皇塔二层', '血皇塔三层', '血皇塔顶', '护国神拳', '护国神剑', '百炼四季甲胄']) {
+    assert.ok(section.includes(text), text);
+    assert.ok(entry.text.includes(text), text + ' searchable');
+  }
+  const tables = [...section.matchAll(/<tbody>([\s\S]*?)<\/tbody>/g)].map(([, body]) =>
+    [...body.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map(([, row]) =>
+      [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map(([, cell]) => cell.replace(/<[^>]+>/g, ''))));
+  assert.deepEqual(tables.map(rows => rows.length), [2, 9, 7]);
+  assert.deepEqual(tables[1][0], ['本馆', '冰', '8 秒', '活力上限的 20%']);
+  assert.deepEqual(tables[1][1], ['黄金沙漠', '火', '10 秒', '30.00 点']);
+  for (const column of [1, 2]) {
+    assert.equal(tables[2].flatMap(row => row[column].split('、')).length, 17);
+  }
+});
+
 test('search supports all categories, full text, multiple literal terms and empty results', async () => {
   const { filterGuides, categories } = await import('../public/js/guide-search.mjs');
   assert.equal(categories.length, 9);
   const entries = index.map(e => ({ ...e, text: e.title + ' ' + e.text }));
-  assert.equal(filterGuides(entries).length, 123);
-  assert.equal(filterGuides(entries, '  ', 'unknown').length, 123);
+  assert.equal(filterGuides(entries).length, 122);
+  assert.equal(filterGuides(entries, '  ', 'unknown').length, 122);
   const matches = filterGuides(entries, '英雄铠甲', 'equipment');
   assert.ok(matches.length >= 1);
   assert.ok(matches.every(e => e.category === 'equipment' && e.text.includes('英雄铠甲')));
