@@ -366,27 +366,48 @@ test('age guide retains all 100 rows, year conversions, contents and searchable 
   }
 });
 
-test('cloud guide publishes ice and fire map rules and weapon lists in pages and search', () => {
+test('cloud guide publishes ice and fire map rules and equipment lists in pages and search', () => {
   const article = manifest.articles.find(a => a.source === '云端千年.md');
   const html = read(article.file);
   const entry = index.find(a => a.id === article.file);
-  const section = html.match(/<h2 id="冰火地图与武器属性">([\s\S]*?)(?=<h2 )/)[1];
-  assert.ok(html.includes('href="#冰火地图与武器属性"'));
+  const section = html.match(/<h2 id="冰火地图与装备属性">([\s\S]*?)(?=<h2 )/)[1];
+  assert.ok(html.includes('href="#冰火地图与装备属性"'));
   for (const text of ['活力上限', '实际穿戴', '竹筒', '万毒门', '不属于冰火环境',
     '本馆', '黄金沙漠', '北海雪原', '黄龙溪谷', '血皇城', '血皇塔一层',
-    '血皇塔二层', '血皇塔三层', '血皇塔顶', '护国神拳', '护国神剑', '百炼四季甲胄']) {
+    '血皇塔二层', '血皇塔三层', '血皇塔顶', '护国神拳', '护国神剑', '百炼四季甲胄',
+    '耀月拳套', '冷月剑', '圆月斧', '撼日刀', '追日枪', '女子月光护腕', '女子逐日靴', '男子披星帽']) {
     assert.ok(section.includes(text), text);
     assert.ok(entry.text.includes(text), text + ' searchable');
   }
   const tables = [...section.matchAll(/<tbody>([\s\S]*?)<\/tbody>/g)].map(([, body]) =>
     [...body.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map(([, row]) =>
       [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map(([, cell]) => cell.replace(/<[^>]+>/g, ''))));
-  assert.deepEqual(tables.map(rows => rows.length), [2, 9, 7]);
+  assert.deepEqual(tables.map(rows => rows.length), [2, 9, 7, 3]);
   assert.deepEqual(tables[1][0], ['本馆', '冰', '8 秒', '活力上限的 20%']);
   assert.deepEqual(tables[1][1], ['黄金沙漠', '火', '10 秒', '30.00 点']);
-  for (const column of [1, 2]) {
-    assert.equal(tables[2].flatMap(row => row[column].split('、')).length, 17);
+  for (const [column, count] of [[1, 19], [2, 20]]) {
+    assert.equal(tables[2].flatMap(row => row[column].split('、')).length, count);
   }
+  assert.deepEqual(tables[3], [
+    ['女子月光护腕', '女', '冰，抗炎热'],
+    ['女子逐日靴', '女', '火，抗严寒'],
+    ['男子披星帽', '男', '火，抗严寒']
+  ]);
+  assert.match(section, /全系列仍有耐久，可与玩家交换，不可升段/);
+  assert.doesNotMatch(section, /SpecialItemType|ARR_WEAPON|覆盖优先级|检查顺序/);
+});
+
+test('cloud guide keeps gem gift trading and reward restrictions concise in pages and search', () => {
+  const article = manifest.articles.find(a => a.source === '云端千年.md');
+  const html = read(article.file);
+  const entry = index.find(a => a.id === article.file);
+  const section = html.match(/<h2 id="宝石福袋">([\s\S]*?)(?=<h2 )/)[1];
+  for (const text of ['珍珠、翡翠、水晶、琥珀各一颗', '四个物品栏空格',
+    '宝石福袋可交易', '开启后获得的四种宝石仍不可交易']) {
+    assert.ok(section.includes(text), text);
+    assert.ok(entry.text.includes(text), text + ' searchable');
+  }
+  assert.doesNotMatch(section, /宝石福袋不可交易|用于交换装备或物品/);
 });
 
 test('search supports all categories, full text, multiple literal terms and empty results', async () => {
