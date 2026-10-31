@@ -64,7 +64,7 @@ function renderPaid(records) {
 }
 
 export function createAdminLists() {
-  const lists = { users: { page: 1, version: 0 }, paid: { page: 1, version: 0 } };
+  const lists = { users: { page: 1, pages: 1, ready: false, version: 0 }, paid: { page: 1, pages: 1, ready: false, version: 0 } };
   const dialog = $('#disable-dialog'), form = $('#disable-form'), cancelButton = $('#disable-cancel');
   let selectedAccount = null, disabling = false;
   function openDisable(account) {
@@ -95,9 +95,25 @@ export function createAdminLists() {
       });
     } finally { disabling = false; cancelButton.disabled = false; }
   });
+  function updatePagination(kind, ready) {
+    const list = lists[kind], prefix = '#' + kind;
+    list.ready = ready;
+    for (const action of ['first', 'prev']) $(prefix + '-' + action).disabled = !ready || list.page <= 1;
+    for (const action of ['next', 'last']) $(prefix + '-' + action).disabled = !ready || list.page >= list.pages;
+    const input = $(prefix + '-page-input');
+    input.disabled = $(prefix + '-page-go').disabled = !ready || list.pages <= 1;
+    if (ready) { input.value = String(list.page); input.max = String(list.pages); }
+  }
+  function goToPage(kind, page) {
+    const list = lists[kind];
+    if (!list.ready || !Number.isInteger(page) || page < 1 || page > list.pages || page === list.page) return;
+    list.page = page;
+    return load(kind);
+  }
   function cancel(kind) {
     const list = lists[kind]; if (!list) return;
     list.version++; list.request?.abort();
+    updatePagination(kind, false);
     $('#' + kind + '-panel').removeAttribute('aria-busy');
   }
   async function load(kind) {
@@ -105,7 +121,6 @@ export function createAdminLists() {
     const version = ++list.version, request = new AbortController(); list.request = request;
     const current = () => version === list.version && !request.signal.aborted;
     const prefix = '#' + kind;
-    $(prefix + '-prev').disabled = true; $(prefix + '-next').disabled = true;
     $(prefix + '-panel').setAttribute('aria-busy', 'true');
     $(prefix + '-state').textContent = '正在读取' + (kind === 'users' ? '注册账号' : '付费记录') + '…';
     $(prefix + '-page-info').textContent = '正在读取…';
@@ -115,12 +130,13 @@ export function createAdminLists() {
     try {
       const data = await api('/api/admin/' + (kind === 'users' ? 'users' : 'paid-users') + '?' + params, { signal: request.signal });
       if (!current()) return;
-      if (list.page > Math.max(1, data.pages)) { list.page = Math.max(1, data.pages); return load(kind); }
+      list.pages = Math.max(1, data.pages);
+      if (list.page > list.pages) { list.page = list.pages; return load(kind); }
       if (kind === 'users') renderUsers(data.records, openDisable);
       else renderPaid(data.records);
       $(prefix + '-state').textContent = '共 ' + data.total + (kind === 'users' ? ' 个符合条件的账号' : ' 条符合条件的付费记录');
-      $(prefix + '-page-info').textContent = '第 ' + list.page + ' / ' + Math.max(1, data.pages) + ' 页 · 每页 ' + data.limit + ' 条';
-      $(prefix + '-prev').disabled = list.page <= 1; $(prefix + '-next').disabled = !data.hasMore;
+      $(prefix + '-page-info').textContent = '第 ' + list.page + ' / ' + list.pages + ' 页 · 每页 ' + data.limit + ' 条';
+      updatePagination(kind, true);
       if (kind === 'users' && data.paidAvailability !== 'available') {
         const notice = $('#users-paid-notice'); notice.hidden = false;
         notice.textContent = data.paidAvailability === 'unconfigured'
@@ -138,12 +154,18 @@ export function createAdminLists() {
   }
   for (const kind of Object.keys(lists)) {
     const prefix = '#' + kind, form = $(prefix + '-filter-form');
-    const search = () => { lists[kind].page = 1; load(kind); };
-    form.addEventListener('submit', event => { event.preventDefault(); search(); });
+    const search = () => { lists[kind].page = 1; return load(kind); };
+    form.addEventListener('submit', event => { event.preventDefault(); return search(); });
     for (const select of form.querySelectorAll('select')) select.addEventListener('change', search);
-    $(prefix + '-reset').addEventListener('click', () => { form.reset(); search(); });
-    $(prefix + '-prev').addEventListener('click', () => { lists[kind].page--; load(kind); });
-    $(prefix + '-next').addEventListener('click', () => { lists[kind].page++; load(kind); });
+    $(prefix + '-reset').addEventListener('click', () => { form.reset(); return search(); });
+    $(prefix + '-first').addEventListener('click', () => goToPage(kind, 1));
+    $(prefix + '-prev').addEventListener('click', () => goToPage(kind, lists[kind].page - 1));
+    $(prefix + '-next').addEventListener('click', () => goToPage(kind, lists[kind].page + 1));
+    $(prefix + '-last').addEventListener('click', () => goToPage(kind, lists[kind].pages));
+    $(prefix + '-page-form').addEventListener('submit', event => {
+      event.preventDefault();
+      return goToPage(kind, Number($(prefix + '-page-input').value));
+    });
   }
   return { load, cancel };
 }

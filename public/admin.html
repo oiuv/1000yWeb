@@ -31,7 +31,10 @@
       <div id="users-paid-notice" class="notice small" role="status" hidden></div>
       <div class="status-line" id="users-state" aria-live="polite"></div>
       <div class="table-wrap"><table class="record-table account-records" id="users-table"><thead><tr><th>注册账号</th><th>玩家角色</th><th>注册时间</th><th>最后游戏时间</th><th>付费状态 / 到期时间</th><th>操作</th></tr></thead><tbody></tbody></table></div>
-      <div class="pagination"><span id="users-page-info">正在读取…</span><div class="actions"><button id="users-prev" class="button secondary compact" type="button" disabled>上一页</button><button id="users-next" class="button secondary compact" type="button" disabled>下一页</button></div></div>
+      <div class="pagination admin-pagination"><span id="users-page-info">正在读取…</span><div class="pagination-controls">
+        <div class="actions"><button id="users-first" class="button secondary compact" type="button" disabled>首页</button><button id="users-prev" class="button secondary compact" type="button" disabled>上一页</button><button id="users-next" class="button secondary compact" type="button" disabled>下一页</button><button id="users-last" class="button secondary compact" type="button" disabled>末页</button></div>
+        <form id="users-page-form" class="page-jump" aria-label="用户列表页码跳转"><label for="users-page-input">跳至</label><input id="users-page-input" type="number" min="1" max="1" step="1" value="1" inputmode="numeric" aria-describedby="users-page-info" required disabled><span>页</span><button id="users-page-go" class="button secondary compact" type="submit" disabled>跳转</button></form>
+      </div></div>
     </section>
     <section id="paid-panel" class="panel" role="tabpanel" aria-labelledby="tab-paid" hidden>
       <div class="panel-title"><h2>账号付费状态</h2><span class="small muted">当前模式与有效期</span></div>
@@ -44,7 +47,10 @@
       </form>
       <div class="status-line" id="paid-state" aria-live="polite"></div>
       <div class="table-wrap"><table class="record-table paid-records" id="paid-table"><thead><tr><th>游戏账号</th><th>付费模式</th><th>当前状态</th><th>到期时间</th><th>建立记录时间</th><th>最后更新时间</th></tr></thead><tbody></tbody></table></div>
-      <div class="pagination"><span id="paid-page-info">尚未读取</span><div class="actions"><button id="paid-prev" class="button secondary compact" type="button" disabled>上一页</button><button id="paid-next" class="button secondary compact" type="button" disabled>下一页</button></div></div>
+      <div class="pagination admin-pagination"><span id="paid-page-info">尚未读取</span><div class="pagination-controls">
+        <div class="actions"><button id="paid-first" class="button secondary compact" type="button" disabled>首页</button><button id="paid-prev" class="button secondary compact" type="button" disabled>上一页</button><button id="paid-next" class="button secondary compact" type="button" disabled>下一页</button><button id="paid-last" class="button secondary compact" type="button" disabled>末页</button></div>
+        <form id="paid-page-form" class="page-jump" aria-label="付费列表页码跳转"><label for="paid-page-input">跳至</label><input id="paid-page-input" type="number" min="1" max="1" step="1" value="1" inputmode="numeric" aria-describedby="paid-page-info" required disabled><span>页</span><button id="paid-page-go" class="button secondary compact" type="submit" disabled>跳转</button></form>
+      </div></div>
     </section>
     <section id="recharges-panel" role="tabpanel" aria-labelledby="tab-recharges" hidden>
     <p class="notice">核对实际付款凭证、规格与数量后再通过。炎黄月卡／年卡自动充值，物品与神武订单人工交付。</p>

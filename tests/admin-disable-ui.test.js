@@ -35,7 +35,8 @@ async function ui(t, fetch) {
   const nodes = new Map(), body = new Element('body');
   const node = (id, tag = 'div') => { const item = new Element(tag); nodes.set('#' + id, item); return item; };
   for (const kind of ['users', 'paid']) {
-    for (const suffix of ['panel', 'state', 'page-info', 'prev', 'next', 'reset']) node(kind + '-' + suffix);
+    for (const suffix of ['panel', 'state', 'page-info', 'first', 'prev', 'next', 'last', 'reset', 'page-input', 'page-go']) node(kind + '-' + suffix);
+    node(kind + '-page-form', 'form');
     node(kind + '-filter-form', 'form'); node(kind + '-table', 'table').append(new Element('tbody'));
   }
   node('users-paid-notice'); const dialog = node('disable-dialog', 'dialog');
@@ -47,7 +48,7 @@ async function ui(t, fetch) {
   const replacements = { document: { body, createElement: tag => new Element(tag),
     createTextNode: text => Object.assign(new Element('text'), { textContent: text }),
     querySelector: selector => nodes.get(selector) || body.querySelector(selector) },
-  FormData: class { constructor() { return new Map([['limit', '20']]); } }, fetch };
+  FormData: class { constructor(form) { return new Map(form.values || [['limit', '20']]); } }, fetch };
   for (const [key, value] of Object.entries(replacements)) {
     const descriptor = Object.getOwnPropertyDescriptor(globalThis, key);
     Object.defineProperty(globalThis, key, { configurable: true, writable: true, value });
@@ -100,4 +101,62 @@ test('late user-list response cannot replace a refreshed disabled account with a
   const old = state.lists.load('users'); await state.lists.load('users');
   release(response(page(false))); await old;
   assert.equal(state.action().disabled, true); assert.equal(state.action().textContent, '已禁用');
+});
+
+test('large user and Paid lists jump directly to last or chosen pages while preserving filters', async t => {
+  const requests = [];
+  const state = await ui(t, async url => {
+    const request = new URL(url, 'http://localhost'); requests.push(request);
+    return response({ ...page(false), records: [], total: 1800, pages: 18, limit: 100,
+      hasMore: Number(request.searchParams.get('page')) < 18 });
+  });
+  for (const kind of ['users', 'paid']) {
+    const get = suffix => state.nodes.get('#' + kind + '-' + suffix);
+    get('filter-form').values = [['limit', '100'], ['search', '测试账号'], ...(kind === 'paid' ? [['status', 'active']] : [])];
+    await state.lists.load(kind);
+    assert.equal(get('first').disabled, true);
+    const before = requests.length;
+    await get('last').emit('click');
+    assert.equal(requests.length, before + 1);
+    assert.equal(requests.at(-1).searchParams.get('page'), '18');
+    assert.equal(get('last').disabled, true); assert.equal(get('next').disabled, true);
+    assert.equal(get('page-input').value, '18'); assert.equal(get('page-input').max, '18');
+    get('page-input').value = '9'; await get('page-form').emit('submit');
+    assert.equal(requests.at(-1).searchParams.get('page'), '9');
+    assert.equal(requests.at(-1).searchParams.get('limit'), '100');
+    assert.equal(requests.at(-1).searchParams.get('search'), '测试账号');
+    if (kind === 'paid') assert.equal(requests.at(-1).searchParams.get('status'), 'active');
+    const afterJump = requests.length;
+    for (const value of ['', '0', '-1', '19', '1.5', 'invalid']) {
+      get('page-input').value = value; await get('page-form').emit('submit');
+    }
+    assert.equal(requests.length, afterJump);
+    await get('filter-form').emit('submit');
+    assert.equal(requests.at(-1).searchParams.get('page'), '1');
+    await get('last').emit('click'); await get('first').emit('click');
+    assert.equal(requests.at(-1).searchParams.get('page'), '1');
+    assert.equal(get('prev').disabled, true);
+  }
+});
+
+test('pending jumps cannot be duplicated and shrinking results recover to a valid page', async t => {
+  const requests = []; let release, empty = false;
+  const state = await ui(t, async url => {
+    requests.push(Number(new URL(url, 'http://localhost').searchParams.get('page')));
+    const data = { ...page(false), records: [], total: empty ? 0 : 1800, pages: empty ? 0 : 18, limit: 100 };
+    if (requests.length === 2) return new Promise(resolve => { release = () => resolve(response(data)); });
+    return response(data);
+  });
+  const get = suffix => state.nodes.get('#users-' + suffix);
+  await state.lists.load('users');
+  const pending = get('last').emit('click');
+  assert.equal(get('first').disabled, true); assert.equal(get('page-input').disabled, true);
+  await get('last').emit('click');
+  get('page-input').value = '9'; await get('page-form').emit('submit');
+  assert.deepEqual(requests, [1, 18]);
+  release(); await pending;
+  empty = true; await state.lists.load('users');
+  assert.deepEqual(requests, [1, 18, 18, 1]);
+  assert.equal(get('page-input').value, '1'); assert.equal(get('page-input').max, '1');
+  for (const suffix of ['first', 'prev', 'next', 'last', 'page-input', 'page-go']) assert.equal(get(suffix).disabled, true);
 });
