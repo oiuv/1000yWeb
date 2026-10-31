@@ -176,8 +176,8 @@ test('Wangling introduction links to the complete crafting reference without dup
   const [body, introduction] = articles.map(article =>
     read(article.file).match(/<article class="guide-article">([\s\S]*?)<\/article>/)[1]);
   assert.ok(body.includes('>（二）、添加物品属性</h2>'));
-  assert.ok(body.includes('>1、道具说明</h3>\n<p>除了王陵神器加工'));
-  assert.ok(body.includes('>2、增加属性的方法说明</h3>\n<p>增加物品属性'));
+  assert.match(body, />1、道具说明<\/h3>\r?\n<p>除了王陵神器加工/);
+  assert.match(body, />2、增加属性的方法说明<\/h3>\r?\n<p>增加物品属性/);
   assert.ok(body.includes('>3、各种装备品系划分</h3>'));
   assert.equal([...body.matchAll(/<blockquote>/g)].length, 2);
   assert.equal([...body.matchAll(/<th scope="col">等级<\/th>/g)].length, 4);
