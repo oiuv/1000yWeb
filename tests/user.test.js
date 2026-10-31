@@ -49,3 +49,29 @@ test('profile exposes only public account fields and occupied character slots', 
   assert.deepEqual(await User.getProfile('demo01'), { account: 'demo01', username: '听雨', email: 'demo@example.invalid',
     characters: ['听雨:云端', '归舟:云端'], lastdate: '2026-10-19' });
 });
+
+test('administrator account query uses bounded stable pagination and literal parameterized search', async t => {
+  const { User, calls } = adapter(t, [
+    { recordset: [{ total: 22 }] },
+    { recordset: [{ id: 2, account: 'demo01  ', char1: '听雨:云端  ', char2: ':', char3: 'null', char4: null,
+      char5: '归舟:云端', makedate: '2026-01-01 12:30:00 ', lastdate: '2026-10-30 ', password: 'secret' }] }
+  ]);
+  const result = await User.listForAdmin({ page: 2, limit: 20, search: "听雨%_[~'" });
+  assert.deepEqual(result.records, [{ account: 'demo01', characters: [{ name: '听雨', region: '云端' }, { name: '归舟', region: '云端' }],
+    registeredAt: '2026-01-01 12:30:00', lastGameAt: '2026-10-30' }]);
+  assert.equal(result.total, 22); assert.equal(result.hasMore, false);
+  assert.deepEqual(calls[0].params, { search: "%听雨~%~_~[~~'%" });
+  assert.deepEqual(calls[1].params, { search: "%听雨~%~_~[~~'%", offset: 20, limit: 20 });
+  assert.match(calls[1].sql, /ROW_NUMBER\(\) OVER \(ORDER BY id DESC\)/);
+  assert.match(calls[1].sql, /row_number > @offset AND row_number <= @offset \+ @limit/);
+  for (const call of calls) {
+    assert.doesNotMatch(call.sql, /SELECT \*|password|masterkey|telephone|听雨/);
+    assert.match(call.sql, /char5 LIKE @search ESCAPE '~'/);
+  }
+});
+
+test('administrator account query handles a page beyond the end', async t => {
+  const { User, calls } = adapter(t, [{ recordset: [{ total: 0 }] }, { recordset: [] }]);
+  assert.deepEqual(await User.listForAdmin(), { records: [], total: 0, page: 1, limit: 20, pages: 0, hasMore: false });
+  assert.deepEqual(calls[0].params, {});
+});

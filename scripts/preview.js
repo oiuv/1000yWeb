@@ -7,6 +7,41 @@ const Recharge = require('../models/Recharge');
 const { fakeUsers, registration } = require('../tests/helpers');
 const db = openDatabase(':memory:');
 const users = fakeUsers();
+for (let i = 1; i <= 37; i++) {
+  users.rows.set('player' + String(i).padStart(3, '0'), {
+    id: i + 10, account: 'player' + String(i).padStart(3, '0'), password: 'Preview!234',
+    characters: i % 7 === 0 ? [] : [(['听雨', '归舟', '青山', '踏雪寻梅'][i % 4] + i) + ':云端',
+      ...(i % 5 === 0 ? ['长风万里' + i + ':云端', '江湖客' + i + ':云端'] : [])],
+    registeredAt: '2026-10-' + String((i % 28) + 1).padStart(2, '0') + ' 12:30:00',
+    lastGameAt: i % 7 === 0 ? null : '2026-10-30'
+  });
+}
+const paidRows = [...users.rows.values()].filter((row, i) => i % 5 !== 0).map((row, i) => ({
+  account: row.account, mode: i % 4 === 2 ? '000' : i % 4 === 3 ? '001' : '100',
+  status: i % 4 === 2 ? 'disabled' : i % 4 === 1 ? 'expired' : 'active',
+  enddate: i % 4 === 1 ? '2020-10-30 12:00:00' : '2031-10-30 12:00:00',
+  createdAt: '2026-10-01 12:00:00', updatedAt: '2026-10-30 12:00:00'
+}));
+paidRows.push({ account: 'paid_only01', mode: '100', status: 'unknown', enddate: '记录异常',
+  createdAt: '2026-10-01 12:00:00', updatedAt: '2026-10-30 12:00:00' });
+const paidStatus = {
+  forAccounts(accounts) { return new Map(paidRows.filter(row => accounts.includes(row.account)).map(row => [row.account, row])); },
+  list({ page = 1, limit = 20, search = '', status = '' } = {}) {
+    const selected = paidRows.filter(row => (!search || row.account.toLowerCase().includes(search.toLowerCase())) && (!status || row.status === status));
+    return { records: selected.slice((page - 1) * limit, page * limit), total: selected.length, page, limit,
+      pages: Math.ceil(selected.length / limit), hasMore: page * limit < selected.length };
+  }
+};
+const paidAdmin = {
+  disable({ account }) {
+    const row = paidRows.find(row => row.account === account);
+    const alreadyDisabled = row?.mode === '000';
+    if (row) { row.mode = '000'; row.status = 'disabled'; }
+    else paidRows.push({ account, mode: '000', status: 'disabled', enddate: '2026-10-31 12:00:00',
+      createdAt: '2026-10-31 12:00:00', updatedAt: '2026-10-31 12:00:00' });
+    return { account, status: 'disabled', alreadyDisabled };
+  }
+};
 const store = new Recharge(db);
 for(let i=0;i<25;i++) {
   const record = registration({
@@ -41,7 +76,7 @@ const leaderboard = { async get({ date, metric = 'energy', page = 1, job = 1 } =
   return { dates, date, metric, ...(metric === 'profession' ? { job } : {}), page, pages: Math.ceil(rows.length/25), total:rows.length,
     rows:rows.slice((page-1)*25,page*25) };
 } };
-const server=createApp({db,users,leaderboard}).listen(port,'127.0.0.1',()=>{
+const server=createApp({db,users,paidStatus,paidAdmin,leaderboard}).listen(port,'127.0.0.1',()=>{
   console.log('示例预览（仅内存数据）: http://127.0.0.1:'+port);
   console.log('玩家 demo01 / Demo!234；管理员 admin01 / Admin!234');
 });

@@ -3,6 +3,31 @@ const { executeQuery } = require('../config/database');
 const { sameSecret } = require('../lib/security');
 
 class User {
+  static async listForAdmin({ page = 1, limit = 20, search = '' } = {}) {
+    // Search is literal text; SQL LIKE metacharacters are not administrator filters.
+    const params = { offset: (page - 1) * limit, limit };
+    const columns = ['account', 'char1', 'char2', 'char3', 'char4', 'char5'];
+    const where = search ? 'WHERE ' + columns.map(column =>
+      column + " LIKE @search ESCAPE '~'").join(' OR ') : '';
+    if (search) params.search = '%' + search.replace(/[~%_\[]/g, '~$&') + '%';
+    const count = await executeQuery('SELECT COUNT(*) AS total FROM dbo.account1000y ' + where,
+      search ? { search: params.search } : {});
+    const total = Number(count.recordset[0].total);
+    const result = await executeQuery('SELECT id,account,char1,char2,char3,char4,char5,makedate,lastdate FROM (' +
+      'SELECT id,account,char1,char2,char3,char4,char5,makedate,lastdate,' +
+      'ROW_NUMBER() OVER (ORDER BY id DESC) AS row_number FROM dbo.account1000y ' + where +
+      ') AS accounts WHERE row_number > @offset AND row_number <= @offset + @limit ORDER BY row_number', params);
+    const records = result.recordset.map(row => ({
+      account: String(row.account || '').trimEnd(),
+      characters: Array.from({ length: 5 }, (_, i) => String(row['char' + (i + 1)] || '').trim())
+        .filter(value => value && value.toLowerCase() !== 'null' && value !== ':')
+        .map(value => { const [name, ...region] = value.split(':'); return { name, region: region.join(':') }; })
+        .filter(character => character.name),
+      registeredAt: typeof row.makedate === 'string' ? row.makedate.trim() || null : row.makedate || null,
+      lastGameAt: typeof row.lastdate === 'string' ? row.lastdate.trim() || null : row.lastdate || null
+    }));
+    return { records, total, page, limit, pages: Math.ceil(total / limit), hasMore: page * limit < total };
+  }
   static async findByAccount(account) {
     const result = await executeQuery('SELECT * FROM dbo.account1000y WHERE RTRIM(account) = @account', { account });
     return result.recordset[0] || null;

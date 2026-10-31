@@ -73,6 +73,10 @@ class Recharge {
       'WHERE record_id = ? ORDER BY id').all(id);
   }
   paidJob(id) { return this.db.prepare('SELECT * FROM paid_recharges WHERE record_id=?').get(id); }
+  get(id) {
+    const row = this.db.prepare('SELECT * FROM recharge_records WHERE id=?').get(id);
+    return row ? this.parse(row) : null;
+  }
   updateStatus(id, status, expectedStatus, actor, note, paidEnabled = false) {
     return this.db.transaction(() => {
       const record = this.db.prepare('SELECT * FROM recharge_records WHERE id=?').get(id);

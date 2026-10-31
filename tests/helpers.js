@@ -12,6 +12,16 @@ function fakeUsers() {
   ]);
   return {
     rows,
+    async listForAdmin({ page = 1, limit = 20, search = '' } = {}) {
+      const selected = [...rows.values()].filter(row => !search ||
+        [row.account, ...(row.characters || [])].some(value => value.toLowerCase().includes(search.toLowerCase())))
+        .sort((a, b) => b.id - a.id);
+      return { records: selected.slice((page - 1) * limit, page * limit).map(row => ({
+        account: row.account,
+        characters: (row.characters || []).map(value => { const [name, region = ''] = value.split(':'); return { name, region }; }),
+        registeredAt: row.registeredAt || '2026-10-01 12:00:00', lastGameAt: row.lastGameAt ?? null
+      })), total: selected.length, page, limit, pages: Math.ceil(selected.length / limit), hasMore: page * limit < selected.length };
+    },
     async findByAccount(account) { return rows.get(account.toLowerCase()) || null; },
     async authenticate(account, password) {
       const row = await this.findByAccount(account);
@@ -43,10 +53,10 @@ const registration = overrides => ({
   items: ['月卡'], quantities: { 月卡: 1 }, game_account: 'demo01',
   character_name: '听雨', server: '炎黄新章', remark: '', ...overrides
 });
-async function fixture(t, config, paid = null, leaderboard = null) {
+async function fixture(t, config, paid = null, leaderboard = null, paidStatus = null, paidAdmin = null) {
   const db = openDatabase(':memory:');
   const users = fakeUsers();
-  const app = createApp({ db, users, config, paid, leaderboard });
+  const app = createApp({ db, users, config, paid, leaderboard, paidStatus, paidAdmin });
   const server = app.listen(0, '127.0.0.1');
   await once(server, 'listening');
   t.after(async () => {

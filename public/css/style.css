@@ -161,6 +161,24 @@ input[type="checkbox"],input[type="radio"] { width: 17px; height: 17px; accent-c
 .filters .search { flex:2 1 240px; }
 .filters input,.filters select { min-height:42px; }
 .table-wrap { overflow-x:auto; }
+.management-tabs { display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:26px; }
+.management-tabs button { background:none;border:0;border-bottom:3px solid transparent;padding:12px 22px;color:var(--muted);font-weight:600; }
+.management-tabs button[aria-selected="true"] { border-bottom-color:var(--red);color:var(--red); }
+.management-tabs button:hover { color:var(--red);background:var(--panel); }
+.filters .page-size { flex:0 1 120px; }
+.account-records,.paid-records { min-width:880px; }
+.account-records button { white-space:nowrap; }
+#disable-dialog { max-width:560px; }
+#disable-account { overflow-wrap:anywhere; }
+.account-records td,.paid-records td { font-variant-numeric:tabular-nums; }
+.account-records td:first-child,.paid-records td:first-child { font-weight:600; }
+.account-characters { display:flex;flex-wrap:wrap;gap:10px 18px; }
+.character-entry { min-width:4em; }
+.character-entry small { margin-top:0; }
+.badge.paid-state.active { color:#385b31;background:#e0eadd; }
+.badge.paid-state.expired { color:#75561e;background:#f1e4c5; }
+.badge.paid-state.disabled,.badge.paid-state.unavailable { color:#8b3b2c;background:#f4e0d9; }
+.badge.paid-state.unknown,.badge.paid-state.trial,.badge.paid-state.unconfigured { color:var(--muted);background:#ebe8e0; }
 .admin-records { table-layout:fixed;min-width:1120px; }
 .admin-records .col-id { width:72px; }
 .admin-records .col-payment { width:144px; }
@@ -261,6 +279,10 @@ dialog::backdrop { background:#15241dd9; }
   .panel { padding:22px; }
 }
 @media (max-width:560px) {
+  .management-tabs { gap:0; }
+  .management-tabs button { flex:1;padding:12px 6px; }
+  .account-records,.paid-records { min-width:0; }
+  .account-characters { justify-content:flex-end; }
   .container { padding-inline:16px; }
   .panel,.auth-form { padding:20px; }
   .panel-title { flex-direction:column;align-items:start;gap:8px; }

@@ -12,9 +12,42 @@
 <noscript><p class="notice">账号与充值操作需要启用 JavaScript。</p></noscript>
 <main class="container wide" id="main">
   <div class="breadcrumb"><a href="index.html">首页</a> / 管理中心</div>
-  <div class="page-heading"><div><span class="eyebrow">云端账簿 · 人工核款</span><h1>充值管理</h1><p>核对实际付款凭证、规格与数量后再通过。炎黄月卡／年卡自动充值，物品与神武订单人工交付。</p></div><div class="actions"><a class="button secondary compact" href="dashboard.html">用户中心</a><button class="button compact" type="button" id="refresh-all">刷新数据</button></div></div>
+  <div class="page-heading"><div><span class="eyebrow">云端账簿 · 账号与充值</span><h1>管理中心</h1><p>查看注册账号与付费期限，核对并处理充值登记。</p></div><div class="actions"><a class="button secondary compact" href="dashboard.html">用户中心</a><button class="button compact" type="button" id="refresh-all">刷新数据</button></div></div>
   <div id="admin-feedback" class="form-feedback" role="alert" hidden></div>
   <div id="admin-content" hidden>
+    <div class="management-tabs" role="tablist" aria-label="管理功能">
+      <button type="button" id="tab-users" role="tab" aria-selected="true" aria-controls="users-panel" data-admin-tab="users">用户管理</button>
+      <button type="button" id="tab-paid" role="tab" aria-selected="false" aria-controls="paid-panel" data-admin-tab="paid" tabindex="-1">付费状态</button>
+      <button type="button" id="tab-recharges" role="tab" aria-selected="false" aria-controls="recharges-panel" data-admin-tab="recharges" tabindex="-1">充值管理</button>
+    </div>
+    <section id="users-panel" class="panel" role="tabpanel" aria-labelledby="tab-users">
+      <div class="panel-title"><h2>注册账号</h2><span class="small muted">按注册顺序由新到旧</span></div>
+      <p class="small muted">角色列显示账号已创建的角色；最后游戏时间按游戏记录的原有精度显示。</p>
+      <form class="filters" id="users-filter-form">
+        <div class="field search"><label for="users-search">账号或角色名</label><input id="users-search" name="search" type="search" maxlength="100" placeholder="输入账号或角色名"></div>
+        <div class="field page-size"><label for="users-limit">每页条数</label><select id="users-limit" name="limit"><option value="20">20 条</option><option value="50">50 条</option><option value="100">100 条</option></select></div>
+        <button class="button compact" type="submit">查询</button><button class="button secondary compact" type="button" id="users-reset">重置</button>
+      </form>
+      <div id="users-paid-notice" class="notice small" role="status" hidden></div>
+      <div class="status-line" id="users-state" aria-live="polite"></div>
+      <div class="table-wrap"><table class="record-table account-records" id="users-table"><thead><tr><th>注册账号</th><th>玩家角色</th><th>注册时间</th><th>最后游戏时间</th><th>付费状态 / 到期时间</th><th>操作</th></tr></thead><tbody></tbody></table></div>
+      <div class="pagination"><span id="users-page-info">正在读取…</span><div class="actions"><button id="users-prev" class="button secondary compact" type="button" disabled>上一页</button><button id="users-next" class="button secondary compact" type="button" disabled>下一页</button></div></div>
+    </section>
+    <section id="paid-panel" class="panel" role="tabpanel" aria-labelledby="tab-paid" hidden>
+      <div class="panel-title"><h2>账号付费状态</h2><span class="small muted">当前模式与有效期</span></div>
+      <p class="small muted">这里显示已建立的付费记录，与充值登记的核款、交付状态分别查看。未建立付费记录的账号为不限时试用，无固定到期日，可在“用户管理”查看。</p>
+      <form class="filters" id="paid-filter-form">
+        <div class="field search"><label for="paid-search">游戏账号</label><input id="paid-search" name="search" type="search" maxlength="100" placeholder="输入游戏账号"></div>
+        <div class="field"><label for="paid-status">付费状态</label><select id="paid-status" name="status"><option value="">全部状态</option><option value="active">有效</option><option value="expired">已到期</option><option value="disabled">已禁用</option><option value="unknown">待核查</option></select></div>
+        <div class="field page-size"><label for="paid-limit">每页条数</label><select id="paid-limit" name="limit"><option value="20">20 条</option><option value="50">50 条</option><option value="100">100 条</option></select></div>
+        <button class="button compact" type="submit">查询</button><button class="button secondary compact" type="button" id="paid-reset">重置</button>
+      </form>
+      <div class="status-line" id="paid-state" aria-live="polite"></div>
+      <div class="table-wrap"><table class="record-table paid-records" id="paid-table"><thead><tr><th>游戏账号</th><th>付费模式</th><th>当前状态</th><th>到期时间</th><th>建立记录时间</th><th>最后更新时间</th></tr></thead><tbody></tbody></table></div>
+      <div class="pagination"><span id="paid-page-info">尚未读取</span><div class="actions"><button id="paid-prev" class="button secondary compact" type="button" disabled>上一页</button><button id="paid-next" class="button secondary compact" type="button" disabled>下一页</button></div></div>
+    </section>
+    <section id="recharges-panel" role="tabpanel" aria-labelledby="tab-recharges" hidden>
+    <p class="notice">核对实际付款凭证、规格与数量后再通过。炎黄月卡／年卡自动充值，物品与神武订单人工交付。</p>
     <section class="stats" aria-label="全部登记统计">
       <div class="stat"><span>登记总数</span><strong id="stat-total">—</strong></div>
       <div class="stat"><span>待审核</span><strong id="stat-pending">—</strong></div>
@@ -37,7 +70,18 @@
       <div class="table-wrap"><table class="record-table admin-records" id="records-table"><colgroup><col class="col-id"><col class="col-payment"><col><col class="col-items"><col class="col-amount"><col class="col-status"><col class="col-remark"><col class="col-action"></colgroup><thead><tr><th>编号</th><th>付款时间 / 尾号</th><th>账号 / 角色</th><th>付款项</th><th>金额</th><th>状态</th><th>备注</th><th>操作</th></tr></thead><tbody></tbody></table></div>
       <div class="pagination"><span id="page-info">正在读取…</span><div class="actions"><button id="prev-page" class="button secondary compact" type="button" disabled>上一页</button><button id="next-page" class="button secondary compact" type="button" disabled>下一页</button></div></div>
     </section>
+    </section>
   </div>
+  <dialog id="disable-dialog" aria-labelledby="disable-title" aria-describedby="disable-description">
+    <h2 id="disable-title">禁用账号</h2>
+    <p>即将禁用：<strong id="disable-account"></strong></p>
+    <p id="disable-description" class="notice">禁用后不能通过充值解除禁用。网站不提供启用功能；特殊情况需通过 Paid 服务管理删除禁用记录，恢复默认试用。禁用在下次付费校验时生效，本操作不会强制踢出已在线角色。</p>
+    <form id="disable-form">
+      <div id="disable-feedback" class="form-feedback" role="alert" hidden></div>
+      <div class="field"><label for="disable-reason">禁用原因（选填）</label><textarea id="disable-reason" maxlength="200" rows="3" placeholder="记录违规情况，方便后续核查"></textarea></div>
+      <div class="actions section-gap"><button class="button" type="submit">确认禁用</button><button id="disable-cancel" class="button secondary" type="button" autofocus>取消</button></div>
+    </form>
+  </dialog>
   <dialog id="record-dialog" class="review-dialog" aria-labelledby="record-dialog-title">
     <div class="dialog-heading"><h2 id="record-dialog-title">登记详情与处理</h2><button class="dialog-close" type="button" data-close-dialog aria-label="关闭登记详情">×</button></div>
     <div class="review-layout">

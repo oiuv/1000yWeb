@@ -14,7 +14,9 @@ function start() {
   const appOrigin = process.env.APP_ORIGIN ? new URL(process.env.APP_ORIGIN).origin : undefined;
   const dbPath = path.resolve(__dirname, process.env.SQLITE_PATH || 'database/recharge.db');
   const paidConfig = { python: process.env.PAID_PYTHON, script: process.env.PAID_RECHARGE_SCRIPT, database: process.env.PAID_DB_PATH };
-  const paid = Object.values(paidConfig).some(Boolean) ? require('./lib/paid').createPaidBridge(paidConfig) : null;
+  const paid = paidConfig.python || paidConfig.script ? require('./lib/paid').createPaidBridge(paidConfig) : null;
+  const paidStatus = paidConfig.database ? require('./lib/paid-status').createPaidStatusReader({ database: paidConfig.database }) : null;
+  const paidAdmin = paidConfig.database ? require('./lib/paid-admin').createPaidAdmin({ database: paidConfig.database }) : null;
   const leaderboard = require('./lib/leaderboard').createLeaderboard({
     directory: process.env.LEADERBOARD_DATA_DIR,
     powerLevels: process.env.LEADERBOARD_POWER_LEVEL_FILE,
@@ -22,7 +24,7 @@ function start() {
     excludeCharacters: (process.env.LEADERBOARD_EXCLUDE_CHARACTERS || '').split(',').map(value => value.trim()).filter(Boolean)
   });
   const db = openDatabase(dbPath);
-  const app = createApp({ db, users, paid, leaderboard, config: {
+  const app = createApp({ db, users, paid, paidStatus, paidAdmin, leaderboard, config: {
     trustProxy: trustProxy === 'false' ? false : trustProxy, adminIds, appOrigin,
     secureCookies: process.env.NODE_ENV === 'production'
   } });

@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const Recharge = require('./models/Recharge');
 const { createSecurity, sameOrigin, rateLimit } = require('./lib/security');
 
-function createApp({ db, users, config = {}, paid = null, leaderboard = null }) {
+function createApp({ db, users, config = {}, paid = null, paidStatus = null, paidAdmin = null, leaderboard = null }) {
   if (!db || !users) throw new Error('Explicit database and account adapter are required');
   const app = express();
   app.disable('x-powered-by');
@@ -33,7 +33,7 @@ function createApp({ db, users, config = {}, paid = null, leaderboard = null }) 
     if (['GET','HEAD','OPTIONS'].includes(req.method)) return next();
     security.csrf(req, res, next);
   });
-  const dependencies = { users, security, limits, paid, recharge: new Recharge(db) };
+  const dependencies = { users, security, limits, paid, paidStatus, paidAdmin, recharge: new Recharge(db) };
   app.use('/api/auth', require('./routes/auth')(dependencies));
   app.use('/api/recharge', require('./routes/recharge')(dependencies));
   app.use('/api/admin', require('./routes/admin')(dependencies));

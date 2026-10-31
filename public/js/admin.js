@@ -1,5 +1,7 @@
 import { $, init, api, submit, message, el, toast, renderTable, recordDetails } from './auth.js';
+import { createAdminLists } from './admin-lists.js';
 let page=1, request, selected;
+let activeTab='users', adminLists;
 const actions={
   pending:[['verified','核款通过 · 等待交付'],['rejected','拒绝登记']],
   verified:[['delivered','确认已完成实际交付'],['pending','退回重新审核']],
@@ -28,18 +30,20 @@ function updateNoteRequirement() {
 }
 async function loadRecords() {
   request?.abort();request=new AbortController();
+  const current=request;
   $('#prev-page').disabled=true;$('#next-page').disabled=true;
   $('#list-state').textContent='正在读取登记记录…';
   const params=new URLSearchParams(new FormData($('#filter-form')));params.set('page',page);
   try {
-    const data=await api('/api/admin/recharge-records?'+params,{signal:request.signal});
+    const data=await api('/api/admin/recharge-records?'+params,{signal:current.signal});
+    if(current.signal.aborted || request!==current)return;
     if(page>Math.max(1,data.pages)){page=Math.max(1,data.pages);return loadRecords();}
     renderTable($('#records-table'),data.records,openRecord,true);
     $('#list-state').textContent=data.total+' 条符合当前条件的记录';
     $('#page-info').textContent='第 '+page+' / '+Math.max(1,data.pages)+' 页 · 每页 20 条';
     $('#prev-page').disabled=page<=1;$('#next-page').disabled=!data.hasMore;
   } catch(error) {
-    if(error.name!=='AbortError'){$('#list-state').textContent='读取失败，请重试。';toast(error.message,true);}
+    if(error.name!=='AbortError' && request===current && !current.signal.aborted){$('#list-state').textContent='读取失败，请重试。';toast(error.message,true);}
   }
 }
 async function loadStats() {
@@ -50,12 +54,40 @@ async function loadStats() {
 }
 async function refresh() {
   message($('#admin-feedback'),'');
-  try {await Promise.all([loadRecords(),loadStats()]);}
+  try {
+    if(activeTab==='recharges')await Promise.all([loadRecords(),loadStats()]);
+    else await adminLists.load(activeTab);
+  }
   catch(error){message($('#admin-feedback'),error.message);}
 }
 async function setup() {
   if(!await init({auth:true,admin:true}))return;
   $('#admin-content').hidden=false;
+  adminLists=createAdminLists();
+  const tabs=[...document.querySelectorAll('[data-admin-tab]')];
+  function selectTab(name) {
+    if(!['users','paid','recharges'].includes(name))name='users';
+    adminLists.cancel('users');adminLists.cancel('paid');request?.abort();
+    activeTab=name;
+    for(const tab of tabs) {
+      const selected=tab.dataset.adminTab===name;
+      tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;
+      document.getElementById(tab.getAttribute('aria-controls')).hidden=!selected;
+    }
+    history.replaceState(null,'','#'+name);
+    return refresh();
+  }
+  for(const [index,tab] of tabs.entries()) {
+    tab.addEventListener('click',()=>selectTab(tab.dataset.adminTab));
+    tab.addEventListener('keydown',event=>{
+      let next;
+      if(event.key==='ArrowRight')next=(index+1)%tabs.length;
+      if(event.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;
+      if(event.key==='Home')next=0;if(event.key==='End')next=tabs.length-1;
+      if(next===undefined)return;
+      event.preventDefault();tabs[next].focus();selectTab(tabs[next].dataset.adminTab);
+    });
+  }
   $('#filter-form').addEventListener('submit',event=>{event.preventDefault();page=1;loadRecords();});
   for(const select of document.querySelectorAll('#filter-form select'))select.addEventListener('change',()=>{page=1;loadRecords();});
   $('#reset-filters').addEventListener('click',()=>{$('#filter-form').reset();page=1;loadRecords();});
@@ -75,6 +107,6 @@ async function setup() {
       $('#record-dialog').close();toast(result.message,!!result.paidPending);await refresh();
     });
   });
-  await refresh();
+  await selectTab(location.hash.slice(1));
 }
 setup().catch(error=>message($('#admin-feedback'),error.message));
