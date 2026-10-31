@@ -29,7 +29,7 @@ module.exports = ({ users, security, limits }) => {
     const user = await users.authenticate(req.body.account, req.body.password);
     if (!user) return res.status(401).json({ success: false, message: '账号或密码错误' });
     const identity = security.publicUser(user);
-    const csrfToken = security.issue(req, res, identity.account);
+    const csrfToken = security.issue(req, res, user);
     res.json({ success: true, user: identity, csrfToken });
   }));
   router.post('/logout', (req, res) => {

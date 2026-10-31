@@ -31,14 +31,14 @@ test('real login rotates opaque HttpOnly sessions; logout and expiry invalidate 
   db.prepare('UPDATE web_sessions SET expires=0').run();
   assert.equal((await agent.request('/api/auth/profile')).code, 401);
 });
-test('role is loaded from database, not client state; normal users cannot administer', async t => {
+test('normal users cannot administer; changed account identity invalidates the session', async t => {
   const { users, client } = await fixture(t);
   const user = client(); await user.login();
   assert.equal((await user.request('/api/admin/recharge-stats')).code, 403);
   const admin = client(); await admin.login('admin01');
   assert.equal((await admin.request('/api/admin/recharge-stats')).code, 200);
   users.rows.get('admin01').id = 9;
-  assert.equal((await admin.request('/api/admin/recharge-stats')).code, 403);
+  assert.equal((await admin.request('/api/admin/recharge-stats')).code, 401);
 });
 test('CSRF, cross-origin posts, non-JSON forms and malformed input are rejected', async t => {
   const { client, base } = await fixture(t);

@@ -20,7 +20,7 @@ test('disable requires current administrator authorization, CSRF and same origin
   assert.equal((await admin.request('/api/admin/users/disable', request, { 'X-CSRF-Token': '' })).code, 403);
   assert.equal((await admin.request('/api/admin/users/disable', request, { Origin: 'https://invalid.example' })).code, 403);
   users.rows.get('admin01').id = 9;
-  assert.equal((await admin.request('/api/admin/users/disable', request)).code, 403);
+  assert.equal((await admin.request('/api/admin/users/disable', request)).code, 401);
   assert.equal(paidData.db.prepare('SELECT COUNT(*) n FROM user_paid').get().n, 0);
 });
 

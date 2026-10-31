@@ -13,8 +13,8 @@ test('account and paid lists require a current administrator session', async t =
   }
   assert.equal((await admin.request('/api/admin/users')).code, 200);
   users.rows.get('admin01').id = 9;
-  assert.equal((await admin.request('/api/admin/users')).code, 403);
-  assert.equal((await admin.request('/api/admin/paid-users')).code, 403);
+  assert.equal((await admin.request('/api/admin/users')).code, 401);
+  assert.equal((await admin.request('/api/admin/paid-users')).code, 401);
 });
 
 test('user pages search accounts and characters and never expose account secrets', async t => {

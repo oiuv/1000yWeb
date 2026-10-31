@@ -2,10 +2,14 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const Database = require('better-sqlite3');
+const { privateDatabasePath } = require('../lib/private-files');
 
 // Importing modules never opens production data; only explicit startup does.
 function openDatabase(filename) {
-  if (filename !== ':memory:') fs.mkdirSync(path.dirname(filename), { recursive: true });
+  if (filename !== ':memory:') {
+    filename = privateDatabasePath(filename);
+    fs.mkdirSync(path.dirname(filename), { recursive: true });
+  }
   const db = new Database(filename);
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
@@ -37,9 +41,14 @@ function openDatabase(filename) {
       'error TEXT, old_enddate TEXT, enddate TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP,' +
       'updated_at TEXT DEFAULT CURRENT_TIMESTAMP);' +
       'CREATE TABLE IF NOT EXISTS web_sessions (' +
-      'token_hash TEXT PRIMARY KEY, account TEXT NOT NULL, csrf TEXT NOT NULL, expires INTEGER NOT NULL);' +
+      'token_hash TEXT PRIMARY KEY, account TEXT NOT NULL, csrf TEXT NOT NULL, expires INTEGER NOT NULL, credential_tag TEXT);' +
       'CREATE INDEX IF NOT EXISTS idx_session_account ON web_sessions(account);' +
       'CREATE INDEX IF NOT EXISTS idx_session_expiry ON web_sessions(expires);');
+    if (!db.pragma('table_info(web_sessions)').some(column => column.name === 'credential_tag')) {
+      db.exec('ALTER TABLE web_sessions ADD COLUMN credential_tag TEXT');
+    }
+    // Older sessions cannot prove which credentials authenticated them; require a fresh login.
+    db.exec('DELETE FROM web_sessions WHERE credential_tag IS NULL');
   })();
   return db;
 }
