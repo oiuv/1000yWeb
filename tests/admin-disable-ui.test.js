@@ -191,7 +191,12 @@ test('both lists preserve exact expiry and show its hint; Paid empty and error r
     const body = state.nodes.get('#' + kind + '-table').querySelector('tbody');
     assert.equal(body.children[0].children.length, kind === 'paid' ? 7 : 6);
     assert.ok(body.find(node => node.textContent === paid.enddate));
-    assert.equal(body.find(node => node.className === 'expiry-hint').textContent, '28天后到期');
+    assert.equal(body.find(node => node.className === 'expiry-hint').textContent,
+      kind === 'users' ? '包时（28天后到期）' : '28天后到期');
+    if (kind === 'users') {
+      const paidSummary = body.children[0].children[4].children[1].children[0];
+      assert.deepEqual(paidSummary.children.map(node => node.textContent), ['有效', '包时（28天后到期）', paid.enddate]);
+    }
   }
   const body = state.nodes.get('#paid-table').querySelector('tbody');
   empty = true; await state.lists.load('paid');

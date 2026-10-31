@@ -54,9 +54,9 @@ function renderUsers(records, onDisable) {
     paid.append(paidBadge(user.paid.status));
     if (user.paid.status === 'trial') paid.append(el('small', '', '无固定到期日'));
     else {
-      if (user.paid.mode) paid.append(el('small', '', modeLabels[user.paid.mode] || '未知模式'));
+      const hint = ['active', 'expired'].includes(user.paid.status) ? '（' + expiryText(user.paid) + '）' : '';
+      if (user.paid.mode) paid.append(el('small', hint ? 'expiry-hint' : '', (modeLabels[user.paid.mode] || '未知模式') + hint));
       if (user.paid.enddate) paid.append(el('small', '', dateText(user.paid.enddate)));
-      if (['active', 'expired'].includes(user.paid.status)) paid.append(el('small', 'expiry-hint', expiryText(user.paid)));
     }
     addCell(row, '付费状态 / 到期时间', paid);
     const button = el('button', 'button secondary compact', user.paid.status === 'disabled' ? '已禁用' : '禁用账号');
