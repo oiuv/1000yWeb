@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const Database = require('better-sqlite3');
-const { createPaidStatusReader, paidState } = require('../lib/paid-status');
+const { createPaidStatusReader, paidState, paidSecondsRemaining } = require('../lib/paid-status');
 
 function synthetic(t) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'yh-paid-read-'));
@@ -37,6 +37,23 @@ test('Paid status follows disabled precedence, local expiry and exact expiry bou
   }
   assert.equal(paidState('999', '2040-01-01 00:00:00', now), 'unknown');
   assert.equal(paidState('100', '2030-10-31 12:00:00.000001', now), 'active');
+  assert.equal(paidSecondsRemaining('2030-10-31 12:00:00.000001', now), 0.000001);
+});
+
+test('both Paid queries return signed remaining seconds using the same server time as their status', t => {
+  const { filename, reader } = synthetic(t);
+  const batch = reader.forAccounts(['active01', 'expired01', 'badDate01']);
+  assert.equal(batch.get('active01').remainingSeconds, 12 * 3600);
+  assert.equal(batch.get('expired01').remainingSeconds, 0);
+  assert.equal(batch.get('badDate01').remainingSeconds, null);
+  const listed = reader.list({ search: 'active01' }).records[0];
+  assert.deepEqual(listed, batch.get('active01'));
+  assert.equal(listed.enddate, '2030-11-01 00:00:00');
+  let clockReads = 0;
+  const later = createPaidStatusReader({ database: filename, now: () => { clockReads++; return new Date(2030, 10, 2); } });
+  const expired = later.list({ search: 'active01' }).records[0];
+  assert.equal(expired.status, 'expired'); assert.equal(expired.remainingSeconds, -86400);
+  assert.equal(clockReads, 1);
 });
 
 test('Paid lists paginate stably and filter literal accounts and mutually exclusive statuses', t => {

@@ -7,6 +7,22 @@ const statusLabels = {
 const modeLabels = { '000': '禁用', '001': '试用', '100': '包时', '200': 'IP 包时', '400': 'ID 计时' };
 const dateText = value => value ? String(value).replace('T', ' ').replace(/(?:\.000)?Z$/, ' UTC') : '—';
 
+export function expiryText(record) {
+  if (record.status === 'disabled' || record.mode === '000') return '已禁用';
+  if (record.status === 'trial') return '无固定到期日';
+  if (!['active', 'expired'].includes(record.status)) return statusLabels[record.status] || '待核查';
+  // Use the server's query-time duration, independent of the browser's clock and time zone.
+  const seconds = record.remainingSeconds;
+  if (!Number.isFinite(seconds)) return '—';
+  const absolute = Math.abs(seconds);
+  if (absolute < 60) return seconds > 0 ? '即将到期' : '刚刚到期';
+  const [unit, label] = [[365 * 86400, '年'], [86400, '天'], [3600, '小时'], [60, '分钟']]
+    .find(([unit]) => absolute >= unit);
+  const amount = label === '年' ? Math.round(absolute / unit * 10) / 10 : Math.floor(absolute / unit);
+  const duration = (label === '年' ? '约' : '') + amount + label;
+  return seconds > 0 ? duration + '后到期' : '已过期' + duration;
+}
+
 function paidBadge(status) {
   const known = Object.hasOwn(statusLabels, status) ? status : 'unknown';
   return el('span', 'badge paid-state ' + known, statusLabels[known]);
@@ -40,6 +56,7 @@ function renderUsers(records, onDisable) {
     else {
       if (user.paid.mode) paid.append(el('small', '', modeLabels[user.paid.mode] || '未知模式'));
       if (user.paid.enddate) paid.append(el('small', '', dateText(user.paid.enddate)));
+      if (['active', 'expired'].includes(user.paid.status)) paid.append(el('small', 'expiry-hint', expiryText(user.paid)));
     }
     addCell(row, '付费状态 / 到期时间', paid);
     const button = el('button', 'button secondary compact', user.paid.status === 'disabled' ? '已禁用' : '禁用账号');
@@ -52,12 +69,13 @@ function renderUsers(records, onDisable) {
 }
 function renderPaid(records) {
   const table = $('#paid-table'), body = table.querySelector('tbody'); body.replaceChildren();
-  if (!records.length) return emptyTable(table, 6, '暂无符合条件的付费记录');
+  if (!records.length) return emptyTable(table, 7, '暂无符合条件的付费记录');
   for (const record of records) {
     const row = el('tr'), mode = el('div', '', modeLabels[record.mode] || '未知模式');
     mode.append(el('small', '', record.mode || '—'));
     addCell(row, '游戏账号', record.account); addCell(row, '付费模式', mode);
     addCell(row, '当前状态', paidBadge(record.status)); addCell(row, '到期时间', dateText(record.enddate));
+    addCell(row, '到期提示', el('span', 'expiry-hint', expiryText(record)));
     addCell(row, '建立记录时间', dateText(record.createdAt)); addCell(row, '最后更新时间', dateText(record.updatedAt));
     body.append(row);
   }
@@ -124,7 +142,7 @@ export function createAdminLists() {
     $(prefix + '-panel').setAttribute('aria-busy', 'true');
     $(prefix + '-state').textContent = '正在读取' + (kind === 'users' ? '注册账号' : '付费记录') + '…';
     $(prefix + '-page-info').textContent = '正在读取…';
-    emptyTable($(prefix + '-table'), 6, '正在读取…');
+    emptyTable($(prefix + '-table'), kind === 'paid' ? 7 : 6, '正在读取…');
     if (kind === 'users') $('#users-paid-notice').hidden = true;
     const params = new URLSearchParams(new FormData($(prefix + '-filter-form'))); params.set('page', list.page);
     try {
@@ -147,7 +165,7 @@ export function createAdminLists() {
       if (!current() || error.name === 'AbortError') return;
       $(prefix + '-state').textContent = error.message;
       $(prefix + '-page-info').textContent = '数据未加载';
-      emptyTable($(prefix + '-table'), 6, '读取未完成，请点击“刷新数据”重试');
+      emptyTable($(prefix + '-table'), kind === 'paid' ? 7 : 6, '读取未完成，请点击“刷新数据”重试');
     } finally {
       if (current()) $(prefix + '-panel').removeAttribute('aria-busy');
     }

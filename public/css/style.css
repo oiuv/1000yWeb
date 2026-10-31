@@ -167,6 +167,8 @@ input[type="checkbox"],input[type="radio"] { width: 17px; height: 17px; accent-c
 .management-tabs button:hover { color:var(--red);background:var(--panel); }
 .filters .page-size { flex:0 1 120px; }
 .account-records,.paid-records { min-width:880px; }
+.paid-records { min-width:1000px; }
+.expiry-hint { white-space:nowrap; }
 .account-records button { white-space:nowrap; }
 #disable-dialog { max-width:560px; }
 #disable-account { overflow-wrap:anywhere; }

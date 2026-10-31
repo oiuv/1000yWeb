@@ -3,6 +3,7 @@
 const { openDatabase } = require('../storage/database');
 const { createApp } = require('../app');
 const { JOB_NAMES, professionGrade } = require('../lib/leaderboard');
+const { paidSecondsRemaining } = require('../lib/paid-status');
 const Recharge = require('../models/Recharge');
 const { fakeUsers, registration } = require('../tests/helpers');
 const db = openDatabase(':memory:');
@@ -25,10 +26,16 @@ const paidRows = [...users.rows.values()].filter((row, i) => i % 5 !== 0).map((r
 paidRows.push({ account: 'paid_only01', mode: '100', status: 'unknown', enddate: '记录异常',
   createdAt: '2026-10-01 12:00:00', updatedAt: '2026-10-30 12:00:00' });
 const paidStatus = {
-  forAccounts(accounts) { return new Map(paidRows.filter(row => accounts.includes(row.account)).map(row => [row.account, row])); },
+  forAccounts(accounts) {
+    const now = new Date();
+    return new Map(paidRows.filter(row => accounts.includes(row.account))
+      .map(row => [row.account, { ...row, remainingSeconds: paidSecondsRemaining(row.enddate, now) }]));
+  },
   list({ page = 1, limit = 20, search = '', status = '' } = {}) {
+    const now = new Date();
     const selected = paidRows.filter(row => (!search || row.account.toLowerCase().includes(search.toLowerCase())) && (!status || row.status === status));
-    return { records: selected.slice((page - 1) * limit, page * limit), total: selected.length, page, limit,
+    return { records: selected.slice((page - 1) * limit, page * limit)
+      .map(row => ({ ...row, remainingSeconds: paidSecondsRemaining(row.enddate, now) })), total: selected.length, page, limit,
       pages: Math.ceil(selected.length / limit), hasMore: page * limit < selected.length };
   }
 };

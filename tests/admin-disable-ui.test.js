@@ -160,3 +160,42 @@ test('pending jumps cannot be duplicated and shrinking results recover to a vali
   assert.equal(get('page-input').value, '1'); assert.equal(get('page-input').max, '1');
   for (const suffix of ['first', 'prev', 'next', 'last', 'page-input', 'page-go']) assert.equal(get(suffix).disabled, true);
 });
+
+test('expiry hints use server durations and respect trial, disabled, invalid and exact-expiry states', async () => {
+  const { expiryText } = await import('../public/js/admin-lists.js');
+  for (const [seconds, expected] of [
+    [28 * 86400, '28天后到期'], [-3 * 86400, '已过期3天'],
+    [365 * 86400, '约1年后到期'], [1.5 * 365 * 86400, '约1.5年后到期'], [-2 * 365 * 86400, '已过期约2年'],
+    [3600, '1小时后到期'], [-7200, '已过期2小时'], [60, '1分钟后到期'],
+    [0.000001, '即将到期'], [0, '刚刚到期'], [-59, '刚刚到期']
+  ]) {
+    assert.equal(expiryText({ status: seconds > 0 ? 'active' : 'expired', enddate: '1900-01-01 00:00:00', remainingSeconds: seconds }), expected);
+  }
+  assert.equal(expiryText({ status: 'trial', remainingSeconds: 0 }), '无固定到期日');
+  assert.equal(expiryText({ status: 'disabled', remainingSeconds: 365 * 86400 }), '已禁用');
+  assert.equal(expiryText({ status: 'unknown', remainingSeconds: 365 * 86400 }), '待核查');
+  for (const remainingSeconds of [null, undefined, '86400', NaN, Infinity]) {
+    assert.equal(expiryText({ status: 'active', remainingSeconds }), '—');
+  }
+});
+
+test('both lists preserve exact expiry and show its hint; Paid empty and error rows span seven columns', async t => {
+  const paid = { account: 'demo01', mode: '100', status: 'active', enddate: '2026-11-28 21:12:51', remainingSeconds: 28 * 86400 };
+  let empty = false, failed = false;
+  const state = await ui(t, async url => {
+    if (failed) throw new Error('synthetic read failure');
+    return response({ ...page(false), records: empty ? [] : url.includes('paid-users') ? [paid] : [{ ...page(false).records[0], paid }] });
+  });
+  for (const kind of ['users', 'paid']) {
+    await state.lists.load(kind);
+    const body = state.nodes.get('#' + kind + '-table').querySelector('tbody');
+    assert.equal(body.children[0].children.length, kind === 'paid' ? 7 : 6);
+    assert.ok(body.find(node => node.textContent === paid.enddate));
+    assert.equal(body.find(node => node.className === 'expiry-hint').textContent, '28天后到期');
+  }
+  const body = state.nodes.get('#paid-table').querySelector('tbody');
+  empty = true; await state.lists.load('paid');
+  assert.equal(body.children[0].children[0].colSpan, 7);
+  failed = true; await state.lists.load('paid');
+  assert.equal(body.children[0].children[0].colSpan, 7);
+});
