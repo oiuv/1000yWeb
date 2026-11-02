@@ -113,6 +113,19 @@ test('reference renderer retains facts and tables, rewrites internal links and d
   assert.match(result.text, /未知物品/);
 });
 
+test('equipment names fall back to male then female icons without affecting other categories', async () => {
+  const { renderArticle } = await import('../lib/guide-content.mjs');
+  const icons = { 太极手套: 195, 男子太极手套: 194, 男子青龙护腕: 203, 女子青龙护腕: 204, 女子太极鞋: 198 };
+  const markdown = '# 示例\n\n## 太极手套\n\n## 青龙护腕\n\n## 太极鞋\n';
+  const equipment = renderArticle('新手入门/【装备】简介/示例.md', markdown, new Set(), icons);
+  assert.match(equipment.html, /<h2 id="太极手套"><span class="item-icon icon-195"/);
+  assert.match(equipment.html, /<h2 id="青龙护腕"><span class="item-icon icon-203"/);
+  assert.match(equipment.html, /<h2 id="太极鞋"><span class="item-icon icon-198"/);
+  const items = renderArticle('新手入门/【物品】简介/示例.md', markdown, new Set(), icons);
+  assert.match(items.html, /<h2 id="青龙护腕">青龙护腕<\/h2>/);
+  assert.match(items.html, /<h2 id="太极鞋">太极鞋<\/h2>/);
+});
+
 test('equipment attributes and acquisition notes stay under their equipment, not in the contents', () => {
   const counts = {
     帝王陵: 13, 黑白龙系列: 10, 狐狸洞: 9, 黄龙系列: 13, 极乐洞: 14,
