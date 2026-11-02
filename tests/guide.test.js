@@ -122,8 +122,46 @@ test('equipment names fall back to male then female icons without affecting othe
   assert.match(equipment.html, /<h2 id="青龙护腕"><span class="item-icon icon-203"/);
   assert.match(equipment.html, /<h2 id="太极鞋"><span class="item-icon icon-198"/);
   const items = renderArticle('新手入门/【物品】简介/示例.md', markdown, new Set(), icons);
-  assert.match(items.html, /<h2 id="青龙护腕">青龙护腕<\/h2>/);
-  assert.match(items.html, /<h2 id="太极鞋">太极鞋<\/h2>/);
+  assert.match(items.html, /<h2 id="青龙护腕"><span class="item-icon icon-0"[^>]*><\/span>青龙护腕<\/h2>/);
+  assert.match(items.html, /<h2 id="太极鞋"><span class="item-icon icon-0"[^>]*><\/span>太极鞋<\/h2>/);
+});
+
+test('item material names fall back to a Chinese one suffix after exact matching', async () => {
+  const { renderArticle } = await import('../lib/guide-content.mjs');
+  const icons = { 肉: 150, 肉一: 151, 骨头一: 157 };
+  const markdown = '# 猎物\n\n| 名称 |\n| --- |\n| 肉 |\n| 骨头 |\n';
+  const items = renderArticle('新手入门/【物品】简介/示例.md', markdown, new Set(), icons);
+  assert.match(items.html, /<td><span class="item-icon icon-150"[^>]*><\/span>肉<\/td>/);
+  assert.match(items.html, /<td><span class="item-icon icon-157"[^>]*><\/span>骨头<\/td>/);
+  const equipment = renderArticle('新手入门/【装备】简介/示例.md', markdown, new Set(), icons);
+  assert.match(equipment.html, /<td><span class="item-icon icon-0"[^>]*><\/span>骨头<\/td>/);
+});
+
+test('generic name normalization covers grades, abbreviated genders and craft materials', async () => {
+  const { renderArticle } = await import('../lib/guide-content.mjs');
+  const icons = { 半月刀: 127, 男子战斗服: 5, 男子金鳞帽: 392, 骨头一: 157, 青铜原石: 80 };
+  const equipment = renderArticle('新手入门/【装备】简介/示例.md',
+    '# 装备\n\n## 半月刀1级\n\n| 名称 |\n| --- |\n| 男战斗服 |\n', new Set(), icons);
+  assert.match(equipment.html, /<h2 id="半月刀1级"><span class="item-icon icon-127"/);
+  assert.match(equipment.html, /<td><span class="item-icon icon-5"[^>]*><\/span>男战斗服<\/td>/);
+  const craft = renderArticle('职业技能/示例.md',
+    '# 职业技能\n\n| 名称 |\n| --- |\n| 男\\[女\\]子金鳞帽 |\n| 骨头 |\n| 青铜原石（6级） |\n', new Set(), icons);
+  assert.match(craft.html, /<td><span class="item-icon icon-392"[^>]*><\/span>男\[女\]子金鳞帽<\/td>/);
+  assert.match(craft.html, /<td><span class="item-icon icon-157"[^>]*><\/span>骨头<\/td>/);
+  assert.match(craft.html, /<td><span class="item-icon icon-80"[^>]*><\/span>青铜原石（6级）<\/td>/);
+});
+
+test('unmatched item table names use icon zero only in the first column of item categories', async () => {
+  const { renderArticle } = await import('../lib/guide-content.mjs');
+  const markdown = '# 示例\n\n## 说明\n\n| 名称 | 属性 |\n| --- | --- |\n| 未知道具 | 未知属性 |\n|  | 空白名称 |\n\n| 属性 | 数值 |\n| --- | --- |\n| 攻速 | 10 |\n';
+  const equipment = renderArticle('新手入门/【装备】简介/示例.md', markdown, new Set());
+  assert.match(equipment.html, /<h2 id="说明"><span class="item-icon icon-0"[^>]*><\/span>说明<\/h2>/);
+  assert.match(equipment.html, /<td><span class="item-icon icon-0"[^>]*><\/span>未知道具<\/td>/);
+  assert.match(equipment.html, /<td>未知属性<\/td>/);
+  assert.match(equipment.html, /<td><\/td>/);
+  assert.match(equipment.html, /<td>攻速<\/td>/);
+  const basic = renderArticle('新手入门/背景介绍/示例.md', markdown, new Set());
+  assert.match(basic.html, /<td>未知道具<\/td>/);
 });
 
 test('equipment attributes and acquisition notes stay under their equipment, not in the contents', () => {
