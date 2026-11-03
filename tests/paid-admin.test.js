@@ -17,7 +17,7 @@ test('disabling an unrecorded trial creates only a disabled entry and an atomic 
     { loginid: 'demo01', actor: 'admin01', reason: '违规核查', previous_mode: null, previous_enddate: null });
   assert.equal(db.prepare('SELECT enddate FROM user_paid').get().enddate, '2030-10-31 12:00:00');
   assert.equal(db.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE name='paid_orders'").get().n, 0);
-  assert.deepEqual(Object.keys(admin), ['disable']);
+  assert.deepEqual(Object.keys(admin), ['disable', 'unban']);
 });
 
 test('every existing mode preserves its expiry and creation date; repeated disables do not rewrite history', t => {

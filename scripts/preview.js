@@ -3,7 +3,7 @@
 const { openDatabase } = require('../storage/database');
 const { createApp } = require('../app');
 const { JOB_NAMES, professionGrade } = require('../lib/leaderboard');
-const { paidSecondsRemaining } = require('../lib/paid-status');
+const { paidSecondsRemaining, paidState } = require('../lib/paid-status');
 const Recharge = require('../models/Recharge');
 const { fakeUsers, registration } = require('../tests/helpers');
 const db = openDatabase(':memory:');
@@ -47,6 +47,12 @@ const paidAdmin = {
     else paidRows.push({ account, mode: '000', status: 'disabled', enddate: '2026-10-31 12:00:00',
       createdAt: '2026-10-31 12:00:00', updatedAt: '2026-10-31 12:00:00' });
     return { account, status: 'disabled', alreadyDisabled };
+  },
+  unban({ account }) {
+    const row = paidRows.find(row => row.account === account);
+    if (row?.mode !== '000') throw Object.assign(new Error('账号当前未封禁'), { code: 'PAID_NOT_DISABLED' });
+    row.mode = '100'; row.status = paidState(row.mode, row.enddate, new Date());
+    return { account, mode: row.mode, status: row.status, enddate: row.enddate };
   }
 };
 const store = new Recharge(db);

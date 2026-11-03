@@ -29,7 +29,8 @@ class Element {
 }
 const response = data => ({ ok: true, status: 200, json: async () => data });
 const page = disabled => ({ records: [{ account: 'demo01', characters: [], registeredAt: null, lastGameAt: null,
-  paid: disabled ? { mode: '000', status: 'disabled' } : { mode: '001', status: 'trial', enddate: null }, canDisable: !disabled }],
+  paid: disabled ? { mode: '000', status: 'disabled' } : { mode: '001', status: 'trial', enddate: null },
+  canDisable: !disabled, canUnban: disabled }],
   total: 1, pages: 1, limit: 20, hasMore: false, paidAvailability: 'available' });
 async function ui(t, fetch) {
   const nodes = new Map(), body = new Element('body');
@@ -41,6 +42,7 @@ async function ui(t, fetch) {
   }
   node('users-paid-notice'); const dialog = node('disable-dialog', 'dialog');
   node('disable-account'); const form = node('disable-form', 'form');
+  for (const suffix of ['title', 'target-label', 'description', 'reason-label']) node('disable-' + suffix);
   const feedback = node('disable-feedback'); feedback.className = 'form-feedback';
   const reason = node('disable-reason', 'textarea'), cancel = node('disable-cancel', 'button');
   const submit = new Element('button'); submit.type = 'submit'; submit.textContent = '确认禁用';
@@ -79,8 +81,8 @@ test('cancel makes no write; duplicate submit and escape cannot interrupt an in-
   assert.equal(state.cancel.disabled, true); assert.equal(state.submit.disabled, true);
   assert.equal((await state.dialog.emit('cancel')).defaultPrevented, true);
   complete(); await pending;
-  assert.equal(state.dialog.open, false); assert.equal(state.action().disabled, true);
-  assert.equal(state.action().textContent, '已禁用');
+  assert.equal(state.dialog.open, false); assert.equal(state.action().disabled, false);
+  assert.equal(state.action().textContent, '解封账号');
 });
 
 test('lost disable response refreshes status without claiming success or automatically sending again', async t => {
@@ -92,7 +94,8 @@ test('lost disable response refreshes status without claiming success or automat
   await state.lists.load('users'); await state.action().emit('click'); await state.form.emit('submit');
   assert.equal(posts, 1); assert.equal(state.dialog.open, true);
   assert.match(state.feedback.textContent, /结果未确认/);
-  assert.equal(state.action().disabled, true); assert.equal(state.cancel.disabled, false);
+  assert.equal(state.action().disabled, false); assert.equal(state.cancel.disabled, false);
+  assert.equal(state.action().textContent, '解封账号');
 });
 
 test('late user-list response cannot replace a refreshed disabled account with a stale trial row', async t => {
@@ -100,7 +103,60 @@ test('late user-list response cannot replace a refreshed disabled account with a
   const state = await ui(t, async () => ++calls === 1 ? new Promise(resolve => { release = resolve; }) : response(page(true)));
   const old = state.lists.load('users'); await state.lists.load('users');
   release(response(page(false))); await old;
-  assert.equal(state.action().disabled, true); assert.equal(state.action().textContent, '已禁用');
+  assert.equal(state.action().disabled, false); assert.equal(state.action().textContent, '解封账号');
+});
+
+test('unban requires confirmation, preserves cancellation and cannot be submitted twice in flight', async t => {
+  let banned = true, complete; const posts = [];
+  const state = await ui(t, async (url, options) => {
+    if (options.method !== 'POST') {
+      const result = page(banned);
+      if (!banned) result.records[0].paid = { mode: '100', status: 'expired', enddate: '2020-01-01 00:00:00' };
+      return response(result);
+    }
+    posts.push({ url, body: JSON.parse(options.body) });
+    return new Promise(resolve => { complete = () => { banned = false; resolve(response({ success: true, message: '账号已解封' })); }; });
+  });
+  await state.lists.load('users');
+  assert.equal(state.action().textContent, '解封账号'); assert.equal(state.action().disabled, false);
+  await state.action().emit('click');
+  assert.equal(state.nodes.get('#disable-title').textContent, '解封账号');
+  assert.match(state.nodes.get('#disable-description').textContent, /原到期时间不变.*不恢复默认试用/);
+  assert.equal(state.submit.textContent, '确认解封'); assert.equal(state.cancel.focused, true);
+  await state.cancel.emit('click'); assert.equal(posts.length, 0);
+  await state.action().emit('click'); state.reason.value = '已核实解除封禁';
+  const pending = state.form.emit('submit'); await state.form.emit('submit');
+  assert.deepEqual(posts, [{ url: '/api/admin/users/unban', body: { account: 'demo01', reason: '已核实解除封禁', confirmed: true } }]);
+  assert.equal(state.submit.disabled, true); assert.equal(state.cancel.disabled, true);
+  assert.equal((await state.dialog.emit('cancel')).defaultPrevented, true);
+  complete(); await pending;
+  assert.equal(state.dialog.open, false);
+  assert.equal(state.action().textContent, '禁用账号'); assert.equal(state.action().disabled, false);
+  await state.action().emit('click');
+  assert.equal(state.nodes.get('#disable-title').textContent, '禁用账号');
+  assert.equal(state.submit.textContent, '确认禁用'); assert.equal(state.reason.value, '');
+});
+
+test('lost unban response refreshes status without silently switching the pending operation to a ban', async t => {
+  let banned = true; const posts = [];
+  const state = await ui(t, async (url, options) => {
+    if (options.method !== 'POST') return response(page(banned));
+    posts.push(url); banned = false; throw new TypeError('synthetic lost response');
+  });
+  await state.lists.load('users'); await state.action().emit('click'); await state.form.emit('submit');
+  assert.deepEqual(posts, ['/api/admin/users/unban']);
+  assert.equal(state.dialog.open, true); assert.match(state.feedback.textContent, /解封结果未确认/);
+  assert.equal(state.action().textContent, '禁用账号');
+  assert.equal(state.submit.textContent, '确认解封');
+  await state.cancel.emit('click'); assert.equal(posts.length, 1);
+});
+
+test('a disabled account with no available unban writer cannot open an action dialog', async t => {
+  const data = page(true); data.records[0].canUnban = false;
+  const state = await ui(t, async () => response(data));
+  await state.lists.load('users');
+  assert.equal(state.action().textContent, '解封账号'); assert.equal(state.action().disabled, true);
+  await state.action().emit('click'); assert.notEqual(state.dialog.open, true);
 });
 
 test('large user and Paid lists jump directly to last or chosen pages while preserving filters', async t => {

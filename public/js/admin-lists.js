@@ -36,7 +36,7 @@ function emptyTable(table, columns, text) {
   const row = el('tr'), cell = el('td', 'empty-cell', text);
   cell.colSpan = columns; row.append(cell); table.querySelector('tbody').replaceChildren(row);
 }
-function renderUsers(records, onDisable) {
+function renderUsers(records, onAction) {
   const table = $('#users-table'), body = table.querySelector('tbody'); body.replaceChildren();
   if (!records.length) return emptyTable(table, 6, '暂无符合条件的注册账号');
   for (const user of records) {
@@ -59,11 +59,12 @@ function renderUsers(records, onDisable) {
       if (user.paid.enddate) paid.append(el('small', '', dateText(user.paid.enddate)));
     }
     addCell(row, '付费状态 / 到期时间', paid);
-    const button = el('button', 'button secondary compact', user.paid.status === 'disabled' ? '已禁用' : '禁用账号');
-    button.type = 'button'; button.disabled = !user.canDisable;
-    button.setAttribute('aria-label', '禁用账号 ' + user.account);
-    if (!user.canDisable && user.paid.status !== 'disabled') button.title = '禁用功能暂不可用，请检查付费数据来源';
-    button.addEventListener('click', () => onDisable(user.account));
+    const unban = user.paid.mode === '000', label = unban ? '解封账号' : '禁用账号';
+    const button = el('button', 'button secondary compact', label);
+    button.type = 'button'; button.disabled = !(unban ? user.canUnban : user.canDisable);
+    button.setAttribute('aria-label', label + ' ' + user.account);
+    if (button.disabled) button.title = '账号操作暂不可用，请检查付费数据来源';
+    button.addEventListener('click', () => { if (!button.disabled) onAction(user.account, unban ? 'unban' : 'disable'); });
     addCell(row, '操作', button); body.append(row);
   }
 }
@@ -84,34 +85,44 @@ function renderPaid(records) {
 export function createAdminLists() {
   const lists = { users: { page: 1, pages: 1, ready: false, version: 0 }, paid: { page: 1, pages: 1, ready: false, version: 0 } };
   const dialog = $('#disable-dialog'), form = $('#disable-form'), cancelButton = $('#disable-cancel');
-  let selectedAccount = null, disabling = false;
-  function openDisable(account) {
-    if (disabling) return;
-    selectedAccount = account; form.reset(); message($('#disable-feedback'), '');
+  let selectedAction = null, submitting = false;
+  function openAction(account, operation) {
+    if (submitting) return;
+    selectedAction = { account, operation }; form.reset(); message($('#disable-feedback'), '');
+    const unban = operation === 'unban', label = unban ? '解封' : '禁用';
     $('#disable-account').textContent = account;
+    $('#disable-title').textContent = label + '账号';
+    $('#disable-target-label').textContent = '即将' + label + '：';
+    $('#disable-description').textContent = unban
+      ? '解封仅将禁用（000）改为包时（100），原到期时间不变，不恢复默认试用，也不赠送时长。已到期的账号须充值后才能游戏。'
+      : '禁用后不能通过充值解除禁用。禁用在下次付费校验时生效，本操作不会强制踢出已在线角色。';
+    $('#disable-reason-label').textContent = label + '原因（选填）';
+    $('#disable-reason').placeholder = unban ? '记录解封原因，方便后续核查' : '记录违规情况，方便后续核查';
+    form.querySelector('[type="submit"]').textContent = '确认' + label;
     dialog.showModal(); cancelButton.focus();
   }
-  cancelButton.addEventListener('click', () => { if (!disabling) dialog.close(); });
-  dialog.addEventListener('cancel', event => { if (disabling) event.preventDefault(); });
-  dialog.addEventListener('close', () => { if (!disabling) selectedAccount = null; });
+  cancelButton.addEventListener('click', () => { if (!submitting) dialog.close(); });
+  dialog.addEventListener('cancel', event => { if (submitting) event.preventDefault(); });
+  dialog.addEventListener('close', () => { if (!submitting) selectedAction = null; });
   form.addEventListener('submit', async event => {
     event.preventDefault();
-    if (!selectedAccount || disabling) return;
-    const account = selectedAccount, reason = $('#disable-reason').value;
-    disabling = true; cancelButton.disabled = true;
+    if (!selectedAction || submitting) return;
+    const { account, operation } = selectedAction, reason = $('#disable-reason').value;
+    const label = operation === 'unban' ? '解封' : '禁用';
+    submitting = true; cancelButton.disabled = true;
     try {
       await submit(form, async () => {
         let result;
-        try { result = await api('/api/admin/users/disable', { body: { account, reason, confirmed: true } }); }
+        try { result = await api('/api/admin/users/' + operation, { body: { account, reason, confirmed: true } }); }
         catch (error) {
           await load('users');
-          if (!error.status) error.message = '禁用结果未确认，请刷新账号状态后再决定是否重试';
+          if (!error.status) error.message = label + '结果未确认，请刷新账号状态后再决定是否重试';
           throw error;
         }
-        selectedAccount = null; dialog.close(); toast(result.message);
+        selectedAction = null; dialog.close(); toast(result.message);
         await load('users');
       });
-    } finally { disabling = false; cancelButton.disabled = false; }
+    } finally { submitting = false; cancelButton.disabled = false; }
   });
   function updatePagination(kind, ready) {
     const list = lists[kind], prefix = '#' + kind;
@@ -150,7 +161,7 @@ export function createAdminLists() {
       if (!current()) return;
       list.pages = Math.max(1, data.pages);
       if (list.page > list.pages) { list.page = list.pages; return load(kind); }
-      if (kind === 'users') renderUsers(data.records, openDisable);
+      if (kind === 'users') renderUsers(data.records, openAction);
       else renderPaid(data.records);
       $(prefix + '-state').textContent = '共 ' + data.total + (kind === 'users' ? ' 个符合条件的账号' : ' 条符合条件的付费记录');
       $(prefix + '-page-info').textContent = '第 ' + list.page + ' / ' + list.pages + ' 页 · 每页 ' + data.limit + ' 条';

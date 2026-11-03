@@ -36,7 +36,8 @@ module.exports = ({ recharge, security, paid, users, paidStatus, paidAdmin }) =>
       }
     }
     result.records = result.records.map(row => ({ ...row,
-      canDisable: !!paidAdmin && availability === 'available' && paidRows.get(row.account)?.mode !== '000',
+      canDisable: typeof paidAdmin?.disable === 'function' && availability === 'available' && paidRows.get(row.account)?.mode !== '000',
+      canUnban: typeof paidAdmin?.unban === 'function' && availability === 'available' && paidRows.get(row.account)?.mode === '000',
       paid: availability === 'available'
         ? paidRows.get(row.account) || { status: 'trial', mode: '001', enddate: null }
         : { status: availability }
@@ -64,6 +65,30 @@ module.exports = ({ recharge, security, paid, users, paidStatus, paidAdmin }) =>
       res.status(mismatch ? 409 : 503).json({ success: false, message: mismatch
         ? '账号大小写与付费记录不一致，请通过 Paid 管理核对'
         : '禁用结果未确认，请刷新账号状态后重试' });
+    }
+  }));
+  router.post('/users/unban', [
+    body().custom(value => value && !Array.isArray(value) &&
+      Object.keys(value).every(key => ['account', 'confirmed', 'reason'].includes(key))).withMessage('解封请求包含无效字段'),
+    body('account').custom(validAccount).withMessage('账号格式无效'),
+    body('confirmed').custom(value => value === true).withMessage('请确认解封账号'),
+    body('reason').optional().isString().bail().trim().isLength({ max: 200 }).withMessage('解封原因最多 200 个字符')
+  ], validate, asyncRoute(async (req, res) => {
+    if (typeof paidAdmin?.unban !== 'function') return res.status(503).json({ success: false, message: '尚未配置账号解封功能' });
+    const user = await users.findByAccount(req.body.account);
+    if (!user) return res.status(404).json({ success: false, message: '注册账号不存在，请刷新列表' });
+    const account = user.account.trimEnd();
+    if (account !== req.body.account) return res.status(409).json({ success: false, message: '账号大小写不一致，请刷新列表后操作' });
+    try {
+      const result = await paidAdmin.unban({ account, actor: req.user.account, reason: req.body.reason || '' });
+      res.json({ success: true, ...result, message: '账号已解封，转为包时模式，原到期时间不变；已到期需充值后游戏' });
+    } catch (error) {
+      console.error('Paid unban failed:', error.code || error.name);
+      const mismatch = error.code === 'PAID_CASE_MISMATCH', changed = error.code === 'PAID_NOT_DISABLED';
+      res.status(mismatch || changed ? 409 : 503).json({ success: false, message: mismatch
+        ? '账号大小写与付费记录不一致，请通过 Paid 管理核对'
+        : changed ? '账号当前未封禁，请刷新列表'
+          : '解封结果未确认，请刷新账号状态后重试' });
     }
   }));
   router.get('/paid-users', [
