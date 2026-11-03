@@ -128,6 +128,10 @@ export async function init({ auth = false, admin = false } = {}) {
 export function badge(status) {
   return el('span', 'badge ' + (Object.hasOwn(statuses, status) ? status : 'pending'), statuses[status] || '未知状态');
 }
+function serverBadge(server) {
+  const theme = new Map([['炎黄新章', 'yanhuang'], ['神武奇章', 'shenwu']]).get(server);
+  return el('span', 'badge server-badge' + (theme ? ' ' + theme : ''), server);
+}
 export function money(value) { return '¥' + Number(value).toFixed(2); }
 export function timestamp(value, utc = false) {
   if (!value) return '暂无记录';
@@ -163,7 +167,11 @@ export function renderTable(table, records, onOpen, admin = false) {
       const cell = el('td'), content = el('div','cell-value');
       cell.append(el('span','cell-label',label));
       content.append(value instanceof Node ? value : el('span', label === '金额' ? 'money' : '', value));
-      if (secondary) content.append(el('small','',secondary));
+      if (admin && label === '账号 / 角色') {
+        const identity = el('small', 'recharge-identity');
+        identity.append(el('span', '', record.character_name), serverBadge(record.server));
+        content.append(identity);
+      } else if (secondary) content.append(el('small','',secondary));
       if (label === '备注') { content.title = record.remark || ''; content.classList.add('record-remark'); }
       cell.append(content); row.append(cell);
     }
@@ -177,7 +185,7 @@ export function recordDetails(container, record, admin = false) {
   container.replaceChildren();
   const detail = el('dl','profile-details');
   const fields = [
-    ['登记编号','#' + record.id], ['游戏分区',record.server], ['游戏账号',record.game_account],
+    ['登记编号','#' + record.id], ['游戏分区',admin ? serverBadge(record.server) : record.server], ['游戏账号',record.game_account],
     ['角色名称',record.character_name], ['付款时间',timestamp(record.payment_time)],
     ['订单尾号',record.transaction_id], ['金额',money(record.amount)], ['付款项',itemText(record)],
     ['状态',badge(record.status)], ['玩家备注',record.remark || '无']

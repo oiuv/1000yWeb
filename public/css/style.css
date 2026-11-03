@@ -170,6 +170,10 @@ input[type="checkbox"],input[type="radio"] { width: 17px; height: 17px; accent-c
 .paid-records { min-width:1000px; }
 .expiry-hint { white-space:nowrap; }
 .account-records button { white-space:nowrap; }
+.button.account-disable { color:#8b3028;background:#f9eae5;border-color:#d7a59a; }
+.button.account-disable:hover:not(:disabled) { color:#fff;background:var(--red);border-color:var(--red); }
+.button.account-unban { color:#285641;background:#e5f0e7;border-color:#9cbaa5; }
+.button.account-unban:hover:not(:disabled) { color:#fff;background:var(--green);border-color:var(--green); }
 #disable-dialog { max-width:560px; }
 #disable-account { overflow-wrap:anywhere; }
 .account-records td,.paid-records td { font-variant-numeric:tabular-nums; }
@@ -204,6 +208,10 @@ td small { display:block;color:var(--muted);font-size:11px;margin-top:4px; }
 .badge.verified { background:#e4eceb;color:#365c5a; }
 .badge.delivered { background:#e0eadd;color:#385b31; }
 .badge.rejected { background:#f4e0d9;color:#8b3b2c; }
+.record-table .recharge-identity { display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px; }
+.badge.server-badge { padding:2px 7px;font-size:11px;font-weight:600;color:var(--muted);background:#ebe8e0; }
+.badge.server-badge.yanhuang { color:#795414;background:#faedbd; }
+.badge.server-badge.shenwu { color:#285b7b;background:#e2eef6; }
 .pagination { display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:22px;font-size:13px;color:var(--muted); }
 .pagination .actions { flex-wrap:nowrap; }
 .admin-pagination { flex-wrap:wrap; }

@@ -60,7 +60,7 @@ function renderUsers(records, onAction) {
     }
     addCell(row, '付费状态 / 到期时间', paid);
     const unban = user.paid.mode === '000', label = unban ? '解封账号' : '禁用账号';
-    const button = el('button', 'button secondary compact', label);
+    const button = el('button', 'button compact ' + (unban ? 'account-unban' : 'account-disable'), label);
     button.type = 'button'; button.disabled = !(unban ? user.canUnban : user.canDisable);
     button.setAttribute('aria-label', label + ' ' + user.account);
     if (button.disabled) button.title = '账号操作暂不可用，请检查付费数据来源';
@@ -98,7 +98,9 @@ export function createAdminLists() {
       : '禁用后不能通过充值解除禁用。禁用在下次付费校验时生效，本操作不会强制踢出已在线角色。';
     $('#disable-reason-label').textContent = label + '原因（选填）';
     $('#disable-reason').placeholder = unban ? '记录解封原因，方便后续核查' : '记录违规情况，方便后续核查';
-    form.querySelector('[type="submit"]').textContent = '确认' + label;
+    const confirmButton = form.querySelector('[type="submit"]');
+    confirmButton.textContent = '确认' + label;
+    confirmButton.className = 'button ' + (unban ? 'account-unban' : 'account-disable');
     dialog.showModal(); cancelButton.focus();
   }
   cancelButton.addEventListener('click', () => { if (!submitting) dialog.close(); });

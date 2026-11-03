@@ -7,6 +7,7 @@ class Element {
   constructor(tag = 'div') { this.tagName = tag; this.children = []; this.attributes = new Map(); this.handlers = {}; this.value = ''; this.textContent = ''; }
   append(...nodes) { for (const node of nodes) { node.parent = this; this.children.push(node); } }
   replaceChildren(...nodes) { this.children = []; this.append(...nodes); }
+  get classList() { return { add: name => { this.className = ((this.className || '') + ' ' + name).trim(); } }; }
   setAttribute(name, value) { this.attributes.set(name, String(value)); }
   getAttribute(name) { return this.attributes.get(name) ?? null; }
   removeAttribute(name) { this.attributes.delete(name); }
@@ -50,7 +51,7 @@ async function ui(t, fetch) {
   const replacements = { document: { body, createElement: tag => new Element(tag),
     createTextNode: text => Object.assign(new Element('text'), { textContent: text }),
     querySelector: selector => nodes.get(selector) || body.querySelector(selector) },
-  FormData: class { constructor(form) { return new Map(form.values || [['limit', '20']]); } }, fetch };
+  Node: Element, FormData: class { constructor(form) { return new Map(form.values || [['limit', '20']]); } }, fetch };
   for (const [key, value] of Object.entries(replacements)) {
     const descriptor = Object.getOwnPropertyDescriptor(globalThis, key);
     Object.defineProperty(globalThis, key, { configurable: true, writable: true, value });
@@ -72,6 +73,8 @@ test('cancel makes no write; duplicate submit and escape cannot interrupt an in-
     return new Promise(resolve => { complete = () => { banned = true; resolve(response({ success: true, message: '账号已禁用' })); }; });
   });
   await state.lists.load('users'); await state.action().emit('click');
+  assert.match(state.action().className, /\baccount-disable\b/);
+  assert.equal(state.submit.className, 'button account-disable');
   assert.equal(state.dialog.open, true); assert.equal(state.cancel.focused, true);
   await state.cancel.emit('click'); assert.equal(state.dialog.open, false); assert.equal(posts, 0);
   await state.action().emit('click'); state.reason.value = '违规核查';
@@ -83,6 +86,7 @@ test('cancel makes no write; duplicate submit and escape cannot interrupt an in-
   complete(); await pending;
   assert.equal(state.dialog.open, false); assert.equal(state.action().disabled, false);
   assert.equal(state.action().textContent, '解封账号');
+  assert.match(state.action().className, /\baccount-unban\b/);
 });
 
 test('lost disable response refreshes status without claiming success or automatically sending again', async t => {
@@ -123,6 +127,7 @@ test('unban requires confirmation, preserves cancellation and cannot be submitte
   assert.equal(state.nodes.get('#disable-title').textContent, '解封账号');
   assert.match(state.nodes.get('#disable-description').textContent, /原到期时间不变.*不恢复默认试用/);
   assert.equal(state.submit.textContent, '确认解封'); assert.equal(state.cancel.focused, true);
+  assert.equal(state.submit.className, 'button account-unban');
   await state.cancel.emit('click'); assert.equal(posts.length, 0);
   await state.action().emit('click'); state.reason.value = '已核实解除封禁';
   const pending = state.form.emit('submit'); await state.form.emit('submit');
@@ -132,9 +137,11 @@ test('unban requires confirmation, preserves cancellation and cannot be submitte
   complete(); await pending;
   assert.equal(state.dialog.open, false);
   assert.equal(state.action().textContent, '禁用账号'); assert.equal(state.action().disabled, false);
+  assert.match(state.action().className, /\baccount-disable\b/);
   await state.action().emit('click');
   assert.equal(state.nodes.get('#disable-title').textContent, '禁用账号');
   assert.equal(state.submit.textContent, '确认禁用'); assert.equal(state.reason.value, '');
+  assert.equal(state.submit.className, 'button account-disable');
 });
 
 test('lost unban response refreshes status without silently switching the pending operation to a ban', async t => {
@@ -148,6 +155,7 @@ test('lost unban response refreshes status without silently switching the pendin
   assert.equal(state.dialog.open, true); assert.match(state.feedback.textContent, /解封结果未确认/);
   assert.equal(state.action().textContent, '禁用账号');
   assert.equal(state.submit.textContent, '确认解封');
+  assert.equal(state.submit.className, 'button account-unban');
   await state.cancel.emit('click'); assert.equal(posts.length, 1);
 });
 
@@ -156,7 +164,35 @@ test('a disabled account with no available unban writer cannot open an action di
   const state = await ui(t, async () => response(data));
   await state.lists.load('users');
   assert.equal(state.action().textContent, '解封账号'); assert.equal(state.action().disabled, true);
+  assert.match(state.action().className, /\baccount-unban\b/);
   await state.action().emit('click'); assert.notEqual(state.dialog.open, true);
+});
+
+test('admin recharge rows and details distinguish servers without changing labels or player history', async t => {
+  await ui(t, async () => response(page(false)));
+  const { renderTable, recordDetails } = await import('../public/js/auth.js');
+  const table = new Element('table'), body = new Element('tbody'); table.append(body);
+  const record = { id: 1, game_account: 'demo01', character_name: '<示例角色>',
+    payment_time: '2026-11-01T10:00', transaction_id: '123456', items: ['月卡'],
+    quantities: { 月卡: 1 }, amount: 10, status: 'pending', history: [], remark: '' };
+  let opened;
+  for (const [server, theme] of [['炎黄新章', 'yanhuang'], ['神武奇章', 'shenwu'], ['未知分区', '']]) {
+    const entry = { ...record, server };
+    renderTable(table, [entry], value => { opened = value; }, true);
+    const identity = body.querySelector('.recharge-identity'), badge = identity.querySelector('.server-badge');
+    assert.equal(identity.children[0].textContent, record.character_name);
+    assert.equal(badge.textContent, server);
+    assert.equal(badge.className, 'badge server-badge' + (theme ? ' ' + theme : ''));
+    assert.equal(body.children[0].children.length, 8);
+    await body.querySelector('button').emit('click'); assert.equal(opened, entry);
+    const detail = new Element(); recordDetails(detail, entry, true);
+    assert.equal(detail.querySelector('.server-badge').className, badge.className);
+    assert.equal(detail.querySelector('.server-badge').textContent, server);
+    renderTable(table, [entry], () => {}, false);
+    assert.equal(body.querySelector('.server-badge'), null);
+    assert.ok(body.find(node => node.textContent === record.character_name + ' · ' + server));
+    assert.equal(body.children[0].children.length, 7);
+  }
 });
 
 test('large user and Paid lists jump directly to last or chosen pages while preserving filters', async t => {
