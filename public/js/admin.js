@@ -1,7 +1,8 @@
 import { $, init, api, submit, message, el, toast, renderTable, recordDetails } from './auth.js';
 import { createAdminLists } from './admin-lists.js';
+import { createRechargeReview } from './recharge-review.js';
 let page=1, request, selected;
-let activeTab='users', adminLists;
+let activeTab='users', adminLists, rechargeReview;
 const actions={
   pending:[['verified','核款通过 · 等待交付'],['rejected','拒绝登记']],
   verified:[['delivered','确认已完成实际交付'],['pending','退回重新审核']],
@@ -22,6 +23,7 @@ function openRecord(record) {
   $('#review-action').replaceChildren(...available.map(([value,label])=>{
     const option=el('option','',label);option.value=value;return option;
   }));
+  rechargeReview.open(record,$('#review-action').value);
   updateNoteRequirement();$('#record-dialog').showModal();
   for(const pane of document.querySelectorAll('.review-layout, .review-details, .review-controls'))pane.scrollTop=0;
 }
@@ -64,6 +66,7 @@ async function setup() {
   if(!await init({auth:true,admin:true}))return;
   $('#admin-content').hidden=false;
   adminLists=createAdminLists();
+  rechargeReview=createRechargeReview();
   const tabs=[...document.querySelectorAll('[data-admin-tab]')];
   function selectTab(name) {
     if(!['users','paid','recharges'].includes(name))name='users';
@@ -94,14 +97,17 @@ async function setup() {
   $('#prev-page').addEventListener('click',()=>{page--;loadRecords();});
   $('#next-page').addEventListener('click',()=>{page++;loadRecords();});
   $('#refresh-all').addEventListener('click',refresh);
-  $('#review-action').addEventListener('change',updateNoteRequirement);
+  $('#review-action').addEventListener('change',()=>{
+    updateNoteRequirement();rechargeReview.update($('#review-action').value);
+  });
   $('#review-form').addEventListener('submit',event=>{
     event.preventDefault();const form=event.currentTarget;
     submit(form,async()=>{
       const action=$('#review-action').value;
       const result=await api(action==='retry_paid' ? '/api/admin/retry-paid' : '/api/admin/update-status',{body:
         action==='retry_paid' ? {id:selected.id} : {
-          id:selected.id,expectedStatus:selected.status,status:action,note:$('#review-note').value
+          id:selected.id,expectedStatus:selected.status,status:action,note:$('#review-note').value,
+          quantities:rechargeReview.quantities()
         }
       });
       $('#record-dialog').close();toast(result.message,!!result.paidPending);await refresh();

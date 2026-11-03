@@ -1,6 +1,6 @@
 'use strict';
 const { randomUUID } = require('node:crypto');
-const { paidPlan } = require('../lib/products');
+const { paidPlan, isCard, validQuantities } = require('../lib/products');
 
 const TRANSITIONS = {
   pending: ['verified', 'rejected'], verified: ['delivered', 'pending'],
@@ -77,26 +77,44 @@ class Recharge {
     const row = this.db.prepare('SELECT * FROM recharge_records WHERE id=?').get(id);
     return row ? this.parse(row) : null;
   }
-  updateStatus(id, status, expectedStatus, actor, note, paidEnabled = false) {
+  updateStatus(id, status, expectedStatus, actor, note, paidEnabled = false, quantities) {
     return this.db.transaction(() => {
       const record = this.db.prepare('SELECT * FROM recharge_records WHERE id=?').get(id);
       if (!record) return { error: 404, message: '登记记录不存在' };
       if (record.status !== expectedStatus) return { error: 409, message: '此记录已被处理，请刷新后重试' };
       if (!TRANSITIONS[record.status]?.includes(status)) return { error: 409, message: '当前状态不能执行此操作' };
       const job = this.paidJob(id);
+      const parsed = this.parse(record);
+      if (quantities !== undefined) {
+        if (record.status !== 'pending' || status !== 'verified' || job) {
+          return { error: 409, message: '只能在首次核款通过前更正数量，已提交的充值任务不能修改' };
+        }
+        if (!validQuantities(parsed.items, quantities)) return { error: 400, message: '请填写所有付款项的数量（1–99），不能增减付款项' };
+      }
       if (job && status === 'pending') return { error: 409, message: '此记录已提交 Paid 充值，不能退回重审；请核对到账状态' };
       if (job && status === 'delivered' && job.state !== 'done') return { error: 409, message: '付费时长尚未确认到账，请先重试充值' };
+      let corrected = quantities;
       if (status === 'verified') {
         let plan;
-        try { plan = paidPlan(this.parse(record)); }
+        try { plan = paidPlan({ ...parsed, quantities: quantities ?? parsed.quantities }); }
         catch (error) { return { error: 400, message: error.message }; }
         if (plan) {
+          corrected = plan.quantities;
           if (!paidEnabled) return { error: 503, message: '尚未配置 Paid 自动充值，核款状态未改变，请先完成部署配置' };
           if (!record.submitted_by || record.submitted_by !== record.game_account) {
             return { error: 409, message: '登记账号未绑定登录身份，不能自动充值，请人工核对' };
           }
           this.db.prepare('INSERT INTO paid_recharges(record_id,order_id,loginid,days) VALUES (?,?,?,?)')
             .run(id, 'yh:' + randomUUID(), record.game_account, plan.days);
+        }
+      }
+      if (corrected) {
+        const changes = parsed.items.filter(item => parsed.quantities?.[item] !== corrected[item])
+          .map(item => `${item}：${parsed.quantities?.[item] ?? '未记录'} → ${corrected[item]}`);
+        if (changes.length) {
+          this.db.prepare('UPDATE recharge_records SET quantities=? WHERE id=?').run(JSON.stringify(corrected), id);
+          this.db.prepare('INSERT INTO recharge_history(record_id,actor,from_status,to_status,note) VALUES (?,?,?,?,?)')
+            .run(id, actor, record.status, record.status, '核款更正数量；' + changes.join('；'));
         }
       }
       this.db.prepare('UPDATE recharge_records SET status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').run(status, id);
@@ -117,7 +135,8 @@ class Recharge {
         this.db.prepare("UPDATE paid_recharges SET state='done',error=NULL,old_enddate=?,enddate=?,updated_at=CURRENT_TIMESTAMP WHERE record_id=?")
           .run(receipt.old_enddate, receipt.enddate, id);
         const record = this.parse(this.db.prepare('SELECT * FROM recharge_records WHERE id=?').get(id));
-        const status = paidPlan(record).onlyCards ? 'delivered' : 'verified';
+        // Retries use the frozen job days, never today's pricing or corrected quantities.
+        const status = record.items.every(isCard) ? 'delivered' : 'verified';
         this.db.prepare('UPDATE recharge_records SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').run(status, id);
         this.db.prepare('INSERT INTO recharge_history(record_id,actor,from_status,to_status,note) VALUES (?,?,?,?,?)')
           .run(id, actor, record.status, status, `Paid 已到账 ${job.days} 天，到期时间 ${receipt.enddate}；游戏重登生效`);

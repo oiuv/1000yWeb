@@ -1,4 +1,5 @@
 import { $, state, init, api, submit, message, el } from './auth.js';
+import { updateCardPreview } from './recharge-plan.js';
 function currentTime() {
   const now=new Date();now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
   return now.toISOString().slice(0,16);
@@ -19,6 +20,13 @@ async function setup() {
   function updateSubmitAvailability() {
     $('#recharge-form [type="submit"]').disabled=$('#server').value==='炎黄新章' && !characters.length;
   }
+  function updateProducts() {
+    const items = Array.from(document.querySelectorAll('[name="items"]:checked'), box => box.value);
+    const inputs = [...document.querySelectorAll('[data-quantity]')];
+    for (const input of inputs) { input.disabled = !items.includes(input.dataset.quantity); input.required = !input.disabled; }
+    const quantities = Object.fromEntries(inputs.filter(input => !input.disabled).map(input => [input.dataset.quantity, Number(input.value)]));
+    return updateCardPreview({ server: $('#server').value, amount: $('#amount').value, items, quantities }, inputs, $('#recharge-plan'));
+  }
   function updateServer() {
     const yanhuang=$('#server').value==='炎黄新章';
     $('#game_account').value=state.user.account;
@@ -35,6 +43,7 @@ async function setup() {
       ? (profileError ? '角色读取失败，刷新页面成功后才可登记。' : characters.length ? '默认选择第一个角色，有多个时可下拉选择，不支持手填。' : '该炎黄账号没有角色，请先在游戏中创建角色，再刷新页面。')
       : '请手动填写神武奇章角色名称，不使用炎黄角色资料。';
     updateSubmitAvailability();
+    updateProducts();
   }
   updateServer();
   $('#recharge-form').hidden=false;
@@ -45,11 +54,14 @@ async function setup() {
   $('#transaction_id').addEventListener('input',event=>{event.target.value=event.target.value.toUpperCase();});
   $('#remark').addEventListener('input',()=>{$('#remark-count').textContent=$('#remark').value.length;});
   for(const box of document.querySelectorAll('[name="items"]')) {
-    box.addEventListener('change',()=>{box.closest('.product').querySelector('[data-quantity]').disabled=!box.checked;});
+    box.addEventListener('change',updateProducts);
   }
+  $('#amount').addEventListener('input',updateProducts);
+  for(const quantity of document.querySelectorAll('[data-quantity]'))quantity.addEventListener('input',updateProducts);
   $('#recharge-form').addEventListener('submit',event=>{
     event.preventDefault();const form=event.currentTarget;
     submit(form,async()=>{
+      const { error } = updateProducts(); if(error)throw error;
       const data=Object.fromEntries(new FormData(form));
       data.items=Array.from(document.querySelectorAll('[name="items"]:checked'),box=>box.value);
       data.quantities={};

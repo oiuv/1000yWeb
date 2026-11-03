@@ -97,6 +97,8 @@
     <form id="review-form">
       <div id="review-feedback" class="form-feedback" role="alert" hidden></div>
       <div class="field"><label for="review-action">处理操作</label><select id="review-action" name="status" required></select></div>
+      <div id="review-quantities" class="form-grid" hidden></div>
+      <p id="review-plan" class="notice" aria-live="polite" hidden></p>
       <div class="field"><label for="review-note">处理备注</label><textarea id="review-note" name="note" maxlength="200" placeholder="拒绝或重新审核须填写原因；备注对登记用户可见。" rows="3"></textarea></div>
       <div class="notice">请核对付款时间、订单尾号、实付金额和收货账号。标记“已交付”前，请确认已在游戏或付费服务中完成实际交付。</div>
       <div class="actions section-gap"><button class="button" type="submit">确认处理</button><button class="button secondary" type="button" data-close-dialog>取消</button></div>

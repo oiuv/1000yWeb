@@ -29,7 +29,8 @@ module.exports = ({ recharge, security, limits, users }) => {
     body('remark').optional().isString().bail().isLength({ max: 200 }).withMessage('备注最多 200 个字符')
   ], validate, asyncRoute(async (req, res) => {
     const { payment_time, transaction_id, amount, items, quantities, game_account, character_name, server, remark = '' } = req.body;
-    try { paidPlan({ server, items, quantities, amount }); }
+    let plan;
+    try { plan = paidPlan({ server, items, quantities, amount }); }
     catch (error) { return res.status(400).json({ success: false, message: error.message }); }
     if (server === '炎黄新章') {
       const profile = await users.getProfile(req.user.account);
@@ -39,7 +40,7 @@ module.exports = ({ recharge, security, limits, users }) => {
       }
     }
     const result = recharge.create({
-      payment_time, transaction_id, amount, items, quantities,
+      payment_time, transaction_id, amount, items, quantities: plan?.quantities || quantities,
       game_account: server === '炎黄新章' ? req.user.account : game_account,
       character_name, server, remark,
       ip_address: req.ip, submitted_by: req.user.account

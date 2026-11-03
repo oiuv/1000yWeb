@@ -29,13 +29,15 @@ async function order(t, change = {}, paid = fakePaid()) {
   const approve = () => admin.request('/api/admin/update-status', {id,status:'verified',expectedStatus:'pending',note:'已核对到账及购买数量'});
   return {...data,admin,player,id,approve,paid};
 }
-test('fixed month/year pricing is independent from total payment, with underpayment rejection', () => {
+test('single-card quantities follow payment; mixed orders keep explicit quantities', () => {
   for (const [items,quantities,amount,days] of [
     [['月卡'],{月卡:1},10,30], [['年卡'],{年卡:1},100,365],
-    [['月卡'],{月卡:10},100,300], [['月卡','年卡','宝石'],{月卡:2,年卡:1,宝石:3},150,425]
+    [['月卡'],{月卡:10},100,300], [['月卡'],{月卡:1},20,60], [['年卡'],{年卡:1},200,730],
+    [['月卡'],{},20,60], [['月卡','年卡','宝石'],{月卡:2,年卡:1,宝石:3},150,425]
   ]) assert.equal(paidPlan(registration({items,quantities,amount})).days, days);
-  assert.throws(()=>paidPlan(registration({items:['年卡'],quantities:{年卡:1},amount:99})),/不足/);
-  assert.throws(()=>paidPlan(registration({quantities:{}})),/数量/);
+  assert.throws(()=>paidPlan(registration({items:['年卡'],quantities:{年卡:1},amount:99})),/整数倍/);
+  assert.throws(()=>paidPlan(registration({items:['月卡','福袋'],quantities:{福袋:1}})),/数量/);
+  assert.throws(()=>paidPlan(registration({items:['年卡','福袋'],quantities:{年卡:1,福袋:1},amount:99})),/不足/);
   assert.equal(paidPlan(registration({server:'神武奇章'})),null);
 });
 test('approval credits fixed 365 days to locked account and completes a card-only order once', async t => {
@@ -100,14 +102,106 @@ test('retry requires administrator, CSRF and an existing payment job',async t=>{
     assert.equal((await admin.request('/api/admin/update-status',{id:badId,status:'verified',expectedStatus:'pending',note:''})).code,400);
   }
 });
-test('legacy records do not auto-credit on startup or approve unbound accounts/unknown quantities',async t=>{
+test('legacy records do not auto-credit on startup or approve unbound accounts/unknown mixed quantities',async t=>{
   const {db}=await fixture(t);const store=new Recharge(db);
   const base=registration({ip_address:'127.0.0.1',submitted_by:null});
   const one=store.create(base).id;
   assert.equal(store.updateStatus(one,'verified','pending','admin01','',true).error,409);
-  const two=store.create({...base,transaction_id:'000002',submitted_by:'demo01',quantities:{}}).id;
+  const two=store.create({...base,transaction_id:'000002',submitted_by:'demo01',items:['月卡','福袋'],quantities:{}}).id;
   assert.equal(store.updateStatus(two,'verified','pending','admin01','',true).error,400);
   assert.equal(db.prepare('SELECT COUNT(*) n FROM paid_recharges').get().n,0);
+});
+
+test('API normalizes a wrong single-card quantity before saving and credits the displayed days', async t => {
+  for (const [item, amount, days] of [['月卡',20,60],['年卡',200,730],['月卡',100,300]]) {
+    const {db,player,approve,paid}=await order(t,{items:[item],quantities:{[item]:1},amount});
+    const quantity=amount/(item==='月卡'?10:100);
+    assert.deepEqual(JSON.parse(db.prepare('SELECT quantities FROM recharge_records').get().quantities),{[item]:quantity});
+    assert.deepEqual((await player.request('/api/recharge/mine')).data.records[0].quantities,{[item]:quantity});
+    assert.equal((await approve()).code,200);
+    assert.equal([...paid.receipts.values()][0].days,days);
+  }
+});
+
+test('single-card invalid amounts are rejected without creating records; Shenwu stays manual',async t=>{
+  const {client,db}=await fixture(t), player=client(); await player.login();
+  for (const [item,amount] of [['月卡',9],['月卡',20.01],['月卡',25],['月卡',1000],['年卡',150],['年卡',10000]]) {
+    const result=await player.request('/api/recharge/submit',registration({items:[item],quantities:{[item]:1},amount}));
+    assert.equal(result.code,400); assert.match(result.data.message,/整数倍/);
+  }
+  assert.equal(db.prepare('SELECT COUNT(*) n FROM recharge_records').get().n,0);
+  assert.equal((await player.request('/api/recharge/submit',registration({server:'神武奇章',amount:25}))).code,201);
+  assert.deepEqual(JSON.parse(db.prepare('SELECT quantities FROM recharge_records').get().quantities),{月卡:1});
+});
+
+test('old pending single-card order is normalized only on approval, with an audit trail',async t=>{
+  const {db,id,approve,paid}=await order(t,{amount:20});
+  db.prepare('UPDATE recharge_records SET quantities=? WHERE id=?').run('{"月卡":1}',id);
+  const store=new Recharge(db);
+  assert.deepEqual(store.get(id).quantities,{月卡:1}); assert.equal(store.paidJob(id),undefined);
+  assert.equal((await approve()).code,200);
+  assert.deepEqual(store.get(id).quantities,{月卡:2}); assert.equal([...paid.receipts.values()][0].days,60);
+  assert.equal(store.history(id)[0].actor,'admin01'); assert.match(store.history(id)[0].note,/月卡：1 → 2/);
+  assert.equal((await approve()).code,409); assert.equal(paid.calls,1);
+});
+
+test('admin can correct all mixed quantities atomically before approval, but cannot change the products',async t=>{
+  const {db,id,admin,paid}=await order(t,{amount:150,items:['月卡','福袋'],quantities:{月卡:1,福袋:1}});
+  const store=new Recharge(db), body={id,status:'verified',expectedStatus:'pending',note:'已核对付款'};
+  for (const quantities of [{月卡:2},{月卡:2,福袋:1,年卡:1},{月卡:2,福袋:0},{月卡:2.5,福袋:1},{月卡:'2',福袋:1},null,[]]) {
+    assert.equal((await admin.request('/api/admin/update-status',{...body,quantities})).code,400);
+  }
+  const insufficient=await admin.request('/api/admin/update-status',{...body,quantities:{月卡:16,福袋:1}});
+  assert.equal(insufficient.code,400); assert.match(insufficient.data.message,/不足/);
+  assert.deepEqual(store.get(id).quantities,{月卡:1,福袋:1});
+  assert.equal(store.history(id).length,0); assert.equal(store.paidJob(id),undefined);
+  const result=await admin.request('/api/admin/update-status',{...body,quantities:{月卡:2,福袋:2}});
+  assert.equal(result.code,200); assert.equal(store.get(id).status,'verified');
+  assert.deepEqual(store.get(id).quantities,{月卡:2,福袋:2});
+  assert.equal([...paid.receipts.values()][0].days,60); assert.match(store.history(id)[0].note,/月卡：1 → 2；福袋：1 → 2/);
+  assert.equal((await admin.request('/api/admin/update-status',{...body,quantities:{月卡:3,福袋:1}})).code,409);
+  assert.equal((await admin.request('/api/admin/update-status',{...body,status:'delivered',expectedStatus:'verified',quantities:{月卡:3,福袋:1}})).code,409);
+  assert.equal(paid.calls,1);
+});
+
+test('corrections require admin and CSRF, and are not accepted on rejection or disabled bridge',async t=>{
+  const {id,db,player,admin}=await order(t,{amount:20},null);
+  db.prepare('UPDATE recharge_records SET quantities=? WHERE id=?').run('{"月卡":1}',id);
+  const body={id,status:'verified',expectedStatus:'pending',note:'',quantities:{月卡:2}};
+  assert.equal((await player.request('/api/admin/update-status',body)).code,403);
+  assert.equal((await admin.request('/api/admin/update-status',body,{'X-CSRF-Token':''})).code,403);
+  assert.equal((await admin.request('/api/admin/update-status',{...body,status:'rejected',note:'有误'})).code,409);
+  assert.equal((await admin.request('/api/admin/update-status',body)).code,503);
+  const store=new Recharge(db);
+  assert.equal(store.get(id).status,'pending'); assert.deepEqual(store.get(id).quantities,{月卡:1});
+  assert.equal(store.history(id).length,0); assert.equal(store.paidJob(id),undefined);
+});
+
+test('job creation failure rolls back quantity correction and approval together',async t=>{
+  const {db,id}=await order(t,{amount:20});
+  db.prepare('UPDATE recharge_records SET quantities=? WHERE id=?').run('{"月卡":1}',id);
+  db.exec("CREATE TRIGGER deny_approval BEFORE UPDATE ON recharge_records WHEN NEW.status='verified' BEGIN SELECT RAISE(ABORT,'synthetic failure'); END");
+  const store=new Recharge(db);
+  assert.throws(()=>store.updateStatus(id,'verified','pending','admin01','',true),/synthetic failure/);
+  assert.equal(store.get(id).status,'pending'); assert.deepEqual(store.get(id).quantities,{月卡:1});
+  assert.equal(store.paidJob(id),undefined); assert.equal(store.history(id).length,0);
+});
+
+test('legacy failed and completed jobs keep their original days/key even when new amount rules differ',async t=>{
+  const paid=fakePaid(), original=paid.credit.bind(paid);
+  paid.credit=async request=>{await original(request);throw new Error('synthetic lost response');};
+  const {db,id,admin,approve}=await order(t,{},paid);
+  assert.equal((await approve()).data.paidPending,true);
+  // A legacy single-card order may have an amount that the new form would reject.
+  db.prepare('UPDATE recharge_records SET amount=25 WHERE id=?').run(id);
+  const store=new Recharge(db), before=store.paidJob(id);
+  paid.credit=original;
+  assert.equal((await admin.request('/api/admin/retry-paid',{id})).code,200);
+  assert.equal(store.paidJob(id).state,'done'); assert.equal(store.get(id).status,'delivered');
+  assert.equal(store.paidJob(id).days,30); assert.equal(store.paidJob(id).order_id,before.order_id);
+  assert.equal(paid.receipts.size,1); assert.deepEqual(store.get(id).quantities,{月卡:1});
+  assert.equal((await admin.request('/api/admin/retry-paid',{id})).code,200); assert.equal(paid.calls,2);
+  assert.equal((await admin.request('/api/admin/update-status',{id,status:'verified',expectedStatus:'delivered',note:'',quantities:{月卡:2}})).code,409);
 });
 test('actual local Python bridge integrates with approval and idempotent receipt replay',{
   skip: !process.env.TEST_PAID_PYTHON || !process.env.TEST_PAID_SCRIPT

@@ -3,7 +3,7 @@ const express = require('express');
 const { body, query, validate, filters, STATUSES, asyncRoute } = require('../lib/validation');
 const { PAID_STATUSES } = require('../lib/paid-status');
 const { validAccount } = require('../lib/paid-admin');
-const { paidPlan } = require('../lib/products');
+const { isCard } = require('../lib/products');
 
 const listFilters = () => [
   query('page').optional().isString().bail().matches(/^[1-9]\d*$/).bail().isInt({ max: 1000000 }).withMessage('页码无效').toInt(),
@@ -116,20 +116,18 @@ module.exports = ({ recharge, security, paid, users, paidStatus, paidAdmin }) =>
     body('id').custom(value => Number.isSafeInteger(value) && value > 0).withMessage('登记编号无效'),
     body('status').isString().bail().isIn(STATUSES),
     body('expectedStatus').isString().bail().isIn(STATUSES),
+    body('quantities').optional().isObject({ strict: true }).withMessage('商品数量格式无效'),
     body('note').isString().bail().trim().isLength({ max: 200 }).withMessage('处理备注最多 200 个字符')
       .custom((note, { req }) => !['rejected', 'pending'].includes(req.body.status) || note.length > 0)
       .withMessage('拒绝或重新审核时，请填写原因')
   ], validate, asyncRoute(async (req, res) => {
-    const { id, status, expectedStatus, note } = req.body;
+    const { id, status, expectedStatus, note, quantities } = req.body;
     if (status === 'verified') {
       const record = recharge.get(id);
-      let plan;
-      try { plan = record && paidPlan(record); }
-      catch (error) { return res.status(400).json({ success: false, message: error.message }); }
-      const blocked = plan && await rechargeBlock(record.game_account);
+      const blocked = record?.server === '炎黄新章' && record.items.some(isCard) && await rechargeBlock(record.game_account);
       if (blocked) return res.status(blocked.error).json({ success: false, message: blocked.message });
     }
-    const result = recharge.updateStatus(id, status, expectedStatus, req.user.account, note, !!paid);
+    const result = recharge.updateStatus(id, status, expectedStatus, req.user.account, note, !!paid, quantities);
     if (result.error) return res.status(result.error).json({ success: false, message: result.message });
     if (status === 'verified' && recharge.paidJob(id)) {
       return res.json(await recharge.fulfillPaid(id, paid, req.user.account));
