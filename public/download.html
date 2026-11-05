@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="云端千年客户端下载：炎黄新章客户端及补丁安装指引，附云端新增辅助、分辨率、画面缩放与 FPS 设置说明。另提供神武奇章补丁。">
+<meta name="description" content="云端千年客户端下载：Android 手机版 0.1.109 正式版 APK、Windows 电脑版及补丁安装指引。炎黄账号与角色互通，另提供神武奇章电脑版补丁。">
 <title>客户端下载 · 云端千年·炎黄新章</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/clients.css">
 <link rel="stylesheet" href="css/download.css">
 </head>
 <body>
@@ -13,12 +14,45 @@
 <main class="container" id="main">
   <div class="breadcrumb"><a href="index.html">首页</a> / 客户端下载</div>
   <div class="page-heading">
-    <div><span class="eyebrow">行囊备齐 · 再入江湖</span><h1>客户端下载</h1><p>炎黄新章从这里开始。请按顺序安装，让补丁各归其位。</p></div>
+    <div><span class="eyebrow">行囊备齐 · 再入江湖</span><h1>客户端下载</h1><p>选择适合你的设备。电脑版与手机版共用炎黄账号和角色。</p></div>
     <a class="button secondary compact" href="#shenwu">寻找神武奇章？↓</a>
   </div>
 
+  <nav class="client-platforms" aria-label="选择客户端平台">
+    <a class="button secondary" href="#android">Android 手机版 ↓</a>
+    <a class="button secondary" href="#yanhuang">Windows 电脑版 ↓</a>
+  </nav>
+
+  <section class="panel android-download" id="android" aria-labelledby="android-title">
+    <div class="panel-title"><h2 id="android-title">炎黄新章 · Android 手机版</h2><span class="badge verified">正式版 · 开放玩家体验</span></div>
+    <div class="android-overview">
+      <div class="android-copy">
+        <span class="eyebrow">云端千年 · 随身江湖</span>
+        <h3>熟悉的千年，现在掌中相见。</h3>
+        <p>轮盘控制移动，触控选择目标，物品与武功放入快捷槽。沿用你的炎黄账号，登录即可继续原有角色的旅程。</p>
+        <dl class="android-specs">
+          <div><dt>版本号</dt><dd>0.1.109</dd></div>
+          <div><dt>安装包</dt><dd>APK · 约 679 MB</dd></div>
+          <div><dt>设备要求</dt><dd>Android 7.0 及以上，64 位 ARM 手机或平板</dd></div>
+        </dl>
+        <a class="button full" href="https://oiuv.oss-accelerate.aliyuncs.com/1000y/云端千年-0.1.109.apk" target="_blank" rel="noopener noreferrer">下载 Android 正式版 · 0.1.109 ↗</a>
+        <p class="android-download-note">安卓设备直接下载 APK 安装，无需电脑版补丁。暂不提供 iPhone / iPad 版本。</p>
+      </div>
+      <figure class="client-shot android-preview">
+        <a class="client-image-link" href="images/game-android.jpg" target="_blank" rel="noopener noreferrer" aria-label="查看安卓版游戏截图原图（新窗口）"><img src="images/game-android.jpg" width="2340" height="1080" decoding="async" alt="云端千年安卓版实机截图：横屏游戏场景、左侧移动轮盘和右侧武功快捷槽"></a>
+        <figcaption><div><h3>安卓版实机画面</h3><p>横屏触控 · 轮盘移动 · 自定义快捷槽</p></div></figcaption>
+      </figure>
+    </div>
+    <ol class="android-install" aria-label="Android 安装步骤">
+      <li><h3>下载并安装</h3><p>在安卓设备上打开本页，下载安装包；按系统提示，允许当前浏览器安装此应用后完成安装。</p></li>
+      <li><h3>登录炎黄账号</h3><p>打开“云端千年”，填写账号和密码。新玩家请先<a href="register.html">注册账号</a>，再进入游戏创建角色。</p></li>
+      <li><h3>接续你的江湖</h3><p>老玩家选择已有角色即可进入游戏。切换设备前，先退出原设备上的游戏；更新时直接覆盖安装，保留本机设置。</p></li>
+    </ol>
+    <p class="android-feedback">体验中遇到问题，可在玩家 QQ 群 <strong>2887111</strong> 反馈，并附上版本号、手机型号及操作步骤。</p>
+  </section>
+
   <section class="panel download-primary" id="yanhuang" aria-labelledby="yanhuang-title">
-    <div class="panel-title"><h2 id="yanhuang-title">炎黄新章</h2><span class="badge verified">当前主版本</span></div>
+    <div class="panel-title"><h2 id="yanhuang-title">炎黄新章 · Windows 电脑版</h2><span class="badge verified">经典键鼠操作</span></div>
     <div class="download-layout">
       <div>
         <p class="download-order">安装顺序不能颠倒：完整客户端 → 繁体升级 → 简体中文 → 云端补丁。</p>
@@ -65,8 +99,8 @@
   </section>
 
   <section class="panel client-guide" id="client-guide" aria-labelledby="client-guide-title">
-    <div class="panel-title"><h2 id="client-guide-title">炎黄客户端 · 云端新增功能</h2></div>
-    <p class="client-guide-intro">完成云端补丁更新后即可使用。下列命令在游戏聊天框中输入，按回车执行。</p>
+    <div class="panel-title"><h2 id="client-guide-title">电脑版 · 云端新增功能</h2></div>
+    <p class="client-guide-intro">以下说明适用于 Windows 电脑版，完成云端补丁更新后即可使用。下列命令在游戏聊天框中输入，按回车执行。</p>
     <div class="client-guide-grid">
       <section class="client-guide-card" aria-labelledby="assist-guide-title">
         <h3 id="assist-guide-title">内置辅助</h3>
@@ -111,7 +145,7 @@
   </section>
 
   <section class="panel download-secondary" id="shenwu" aria-labelledby="shenwu-title">
-    <div class="panel-title"><h2 id="shenwu-title">神武奇章</h2><span class="muted small">仅提供云端补丁</span></div>
+    <div class="panel-title"><h2 id="shenwu-title">神武奇章 · 电脑版</h2><span class="muted small">仅提供云端补丁</span></div>
     <div class="download-legacy">
       <div><p>请先准备好<strong>神武版客户端</strong>，将云端千年·神武奇章补丁解压到其游戏目录，覆盖同名文件后，运行 <code>云端千年.exe</code> 启动游戏。</p><p><strong>账号注册：</strong>使用神武客户端中的快手直接注册账号，不使用本站的炎黄注册入口。</p><p class="muted small">两版本补丁不能混用；神武补丁不能覆盖到上方的炎黄客户端中。</p></div>
       <a class="button secondary" href="https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000yClientPatch.zip" target="_blank" rel="noopener noreferrer">下载神武奇章补丁 ↗</a>

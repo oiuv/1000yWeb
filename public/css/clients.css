@@ -1,0 +1,50 @@
+@charset "UTF-8";
+/* Shared game screenshots: preserve the full PC and mobile interfaces. */
+.client-showcase { margin-bottom: 48px; padding-bottom: 36px; border-bottom: 1px solid var(--line); }
+.client-showcase .page-heading { align-items: center; }
+.client-showcase .page-heading > .button { flex-shrink: 0; }
+.client-showcase h2 { margin-bottom: 10px; }
+.client-showcase .page-heading p { font-size: 14px; }
+.client-gallery { display: grid; grid-template-columns: 1fr 1.623fr; gap: 24px; align-items: start; }
+.client-shot { min-width: 0; margin: 0; }
+.client-image-link { display: block; border: 1px solid var(--gold); padding: 4px; background: var(--ink); border-radius: 4px; }
+.client-image-link:hover { border-color: var(--red); }
+.client-shot img { display: block; width: 100%; height: auto; }
+.client-shot figcaption { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; }
+.client-shot h3 { font-size: 17px; margin: 0 0 4px; }
+.client-shot p { font-size: 13px; color: var(--muted); margin: 0; }
+.client-shot figcaption > a { flex-shrink: 0; font-size: 13px; text-decoration: none; }
+.client-gallery-note { margin: 16px 0 0; color: var(--muted); font-size: 12px; }
+.client-platforms { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+.android-download { border-top: 3px solid var(--green); scroll-margin-top: 20px; }
+.download-primary { scroll-margin-top: 20px; }
+.android-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 32px; align-items: center; }
+.android-copy > h3 { font: 600 24px/1.5 "STKaiti", "KaiTi", "FangSong", serif; }
+.android-copy > p { color: var(--muted); font-size: 14px; }
+.android-specs { margin: 22px 0; font-size: 13px; }
+.android-specs > div { display: grid; grid-template-columns: 5em minmax(0, 1fr); gap: 12px; margin-top: 8px; }
+.android-specs dt { color: var(--muted); }
+.android-specs dd { margin: 0; }
+.android-copy .android-download-note { font-size: 12px; margin: 12px 0 0; }
+.android-install { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; list-style: none; counter-reset: install; padding: 28px 0 0; margin: 28px 0 0; border-top: 1px solid var(--line); }
+.android-install li { counter-increment: install; }
+.android-install h3 { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; color: var(--green); }
+.android-install h3::before { content: counter(install, decimal-leading-zero); color: var(--gold); font: 20px/1 Georgia, serif; }
+.android-install p { margin: 0; font-size: 13px; color: var(--muted); }
+.android-feedback { margin: 24px 0 0; color: var(--muted); font-size: 12px; }
+@media (max-width: 1050px) {
+  .client-shot figcaption { flex-direction: column; align-items: start; gap: 8px; }
+  .android-overview { gap: 24px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
+}
+@media (max-width: 800px) {
+  .android-overview { grid-template-columns: minmax(0, 1fr); }
+  .android-install { gap: 24px; }
+}
+@media (max-width: 560px) {
+  .client-gallery, .android-install { grid-template-columns: minmax(0, 1fr); }
+  .client-showcase .page-heading > .button { margin-top: 18px; }
+  .client-shot figcaption { flex-direction: row; align-items: start; }
+  .client-shot figcaption > a { padding-block: 4px; }
+  .client-platforms { flex-direction: column; }
+  .android-copy > h3 { font-size: 22px; }
+}

@@ -12,6 +12,7 @@ const yanhuangDownloads = [
   'https://setup-traditional-chinese.1000y.download/1000y_patch_ChineseSimp.zip',
   'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000yHClientPatch.zip'
 ];
+const androidDownload = 'https://oiuv.oss-accelerate.aliyuncs.com/1000y/云端千年-0.1.109.apk';
 const shenwuDownload = 'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000yClientPatch.zip';
 const externalLinks = html => [...html.matchAll(/<a\b[^>]*href="(https:\/\/[^\"]+)"[^>]*>/g)];
 
@@ -88,7 +89,7 @@ test('site entry points stay on the new download page and external downloads pro
   }
   assert.doesNotMatch(readPublic('js/auth.js'), />游戏官网(?: ↗)?<\/a>/);
   const links = externalLinks(readPublic('download.html'));
-  assert.equal(links.length, 5);
+  assert.deepEqual(links.map(match => match[1]), [androidDownload, ...yanhuangDownloads, shenwuDownload]);
   for (const [tag] of links) {
     assert.match(tag, /target="_blank"/);
     assert.match(tag, /rel="noopener noreferrer"/);
