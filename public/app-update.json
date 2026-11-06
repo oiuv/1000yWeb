@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "channels": {
+    "release": {
+      "package_name": "com.gameivy.yanhuang",
+      "version_code": 111,
+      "version_name": "0.1.110",
+      "min_sdk": 24,
+      "url": "https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y-0.1.110.apk",
+      "size_bytes": 711802840,
+      "sha256": "d41d9db76590efe851fa97045fadccf10e5151831b88534083cc247d04825bb3",
+      "notes": [
+        "新增启动时检查更新，确认后下载并由系统安装。",
+        "下载时校验安装包完整性，支持取消下载。"
+      ]
+    },
+    "debug": null
+  }
+}

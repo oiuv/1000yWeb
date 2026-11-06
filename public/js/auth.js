@@ -140,7 +140,7 @@ export function timestamp(value, utc = false) {
   return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('zh-CN', { hour12: false });
 }
 // Preserve stored item keys for existing records and filters.
-const itemLabels = new Map([['福袋', '储物袋'], ['宝石', '宝石福袋']]);
+const itemLabels = new Map([['福袋', '储物福袋'], ['宝石', '宝石福袋'], ['真气珠', '真气珠（100 个／份）']]);
 export function itemText(record) {
   return record.items.map(item => (itemLabels.get(item) || item) + (record.quantities?.[item] ? ' ×' + record.quantities[item] : '（数量未记录）')).join('、');
 }

@@ -46,7 +46,14 @@ function createApp({ db, users, config = {}, paid = null, paidStatus = null, pai
     } catch { return res.status(400).send('请求格式不正确'); }
     next();
   });
-  app.use(express.static(path.join(__dirname, 'public'), { etag: true, maxAge: 0 }));
+  app.use(express.static(path.join(__dirname, 'public'), {
+    etag: true, maxAge: 0,
+    setHeaders(res, filePath) {
+      if (filePath === path.join(__dirname, 'public', 'app-update.json')) {
+        res.setHeader('Cache-Control', 'no-store');
+      }
+    }
+  }));
   app.use((req, res) => res.status(404).send('页面不存在，请返回首页。'));
   app.use((error, req, res, next) => {
     const status = error.type === 'entity.parse.failed' ? 400 : error.type === 'entity.too.large' ? 413 :

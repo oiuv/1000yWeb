@@ -26,7 +26,7 @@ export function createRechargeReview() {
     open(nextRecord, nextAction) {
       record = nextRecord; inputs = []; container.replaceChildren();
       for (const [index, item] of record.items.entries()) {
-        const field = el('div', 'field'), label = el('label', '', ({ 福袋: '储物袋', 宝石: '宝石福袋' }[item] || item) + '数量');
+        const field = el('div', 'field'), label = el('label', '', item === '真气珠' ? '真气珠份数（100 个／份）' : ({ 福袋: '储物福袋', 宝石: '宝石福袋' }[item] || item) + '数量');
         const input = el('input'); input.type = 'number'; input.min = '1'; input.max = '99'; input.step = '1'; input.required = true;
         input.id = 'review-quantity-' + index; label.htmlFor = input.id;
         input.dataset.quantity = item; input.value = record.quantities?.[item] ?? '';

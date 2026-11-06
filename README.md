@@ -15,8 +15,10 @@
 ## 客户端下载页维护
 
 首页展示电脑版与手机版实机截图，下载页分别提供 Android 正式 APK 和 Windows 安装步骤。
-Android 发版后，在 `public/download.html` 同步版本号、APK 地址、文件大小及设备要求，并更新
-`tests/download.test.js` 中的下载地址。公开入口只提供正式版，不提供 Debug 包。
+Android 下载按钮与二维码统一指向固定地址 `https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y-latest.apk`。
+页面不写具体版本号或包大小；发版时覆盖这个 OSS 文件即可，无需修改网页或二维码。公开入口只提供正式版，不提供 Debug 包。
+二维码图片位于 `public/images/android-download-qr.png`，内容是上述完整下载地址，保留黑白对比和四周留白。
+APP 检查更新使用 `public/app-update.json` 中的具体版本地址，上传顺序和缓存要求见 [APP_UPDATE.md](APP_UPDATE.md)。
 两端截图位于 `public/images/game-pc.png` 与 `public/images/game-android.jpg`；保留完整画面与原始宽高比。
 
 ## 环境要求
@@ -89,6 +91,9 @@ npm start
 
 充值登记中，炎黄单独购买月卡或年卡按实付金额计算数量（1–99），金额须为对应单价的整数倍。
 月卡每张 30 天，年卡每张 365 天，不自动互换；混合购买按所填数量核对，不将物品金额计入时长。
+储物福袋 50 元／个、宝石福袋 258 元／个、真气珠 100 元／份（每份 100 个），三者均可交易。
+真气珠每个增加 1 点真气，登记与后台核款的数量均按份记录；物品由 GM 人工核款和交付，不计入自动充值时长。
+储物福袋、宝石福袋沿用内部键`福袋`、`宝石`，以兼容历史登记和筛选；真气珠使用键`真气珠`。
 管理员可在待审核记录核款通过前更正数量，页面预览充值天数，更正留有处理记录。
 已创建的充值任务锁定天数和订单号，重试不重新计算；已到账订单不自动补差额。
 
@@ -112,3 +117,7 @@ npm test
 ## 许可证
 
 MIT License
+
+## Android客户端更新
+
+公开更新配置位于`public/app-update.json`；字段及发布顺序见[APP_UPDATE.md](APP_UPDATE.md)。配置与APK分开托管，发布前必须先上传并验证APK。

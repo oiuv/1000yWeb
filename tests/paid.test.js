@@ -53,9 +53,9 @@ test('approval credits fixed 365 days to locked account and completes a card-onl
   assert.equal(mine.paid.enddate,'2027-10-19 12:00:00');assert.equal(mine.history.length,2);
 });
 test('mixed orders credit only time and wait for manual goods delivery; no return-to-pending', async t => {
-  const {db,admin,id,approve,paid}=await order(t,{items:['月卡','福袋','宝石'],quantities:{月卡:1,福袋:2,宝石:1},amount:50});
+  const {db,admin,id,approve,paid}=await order(t,{items:['月卡','年卡','福袋','宝石','真气珠'],quantities:{月卡:1,年卡:1,福袋:1,宝石:1,真气珠:1},amount:518});
   await approve();assert.equal(db.prepare('SELECT status FROM recharge_records').get().status,'verified');
-  assert.equal([...paid.receipts.values()][0].days,30);
+  assert.equal([...paid.receipts.values()][0].days,395);
   assert.equal((await admin.request('/api/admin/update-status',{id,status:'pending',expectedStatus:'verified',note:'退回'})).code,409);
   assert.equal((await admin.request('/api/admin/update-status',{id,status:'delivered',expectedStatus:'verified',note:'物品已发放'})).code,200);
   assert.equal(paid.calls,1);
@@ -86,7 +86,7 @@ test('unconfigured bridge blocks card approval; Shenwu and item-only orders neve
   const unconfigured=await order(t,{},null);
   assert.equal((await unconfigured.approve()).code,503);
   assert.equal(unconfigured.db.prepare('SELECT status FROM recharge_records').get().status,'pending');
-  for(const change of [{server:'神武奇章'},{items:['福袋'],quantities:{福袋:1}}]) {
+  for(const change of [{server:'神武奇章'},{items:['福袋'],quantities:{福袋:1}},{items:['真气珠'],quantities:{真气珠:1},amount:100}]) {
     const entry=await order(t,change);assert.equal((await entry.approve()).code,200);
     assert.equal(entry.paid.calls,0);assert.equal(entry.db.prepare('SELECT COUNT(*) n FROM paid_recharges').get().n,0);
   }

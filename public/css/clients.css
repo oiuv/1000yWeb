@@ -18,14 +18,25 @@
 .client-platforms { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
 .android-download { border-top: 3px solid var(--green); scroll-margin-top: 20px; }
 .download-primary { scroll-margin-top: 20px; }
-.android-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 32px; align-items: center; }
+.android-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 32px; align-items: start; }
 .android-copy > h3 { font: 600 24px/1.5 "STKaiti", "KaiTi", "FangSong", serif; }
 .android-copy > p { color: var(--muted); font-size: 14px; }
+.android-features { margin: 24px 0; font-size: 14px; }
+.android-features > div { display: grid; grid-template-columns: 5em minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.android-features > div + div { margin-top: 14px; }
+.android-features dt { color: var(--green); font-weight: 600; }
+.android-features dd { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
 .android-specs { margin: 22px 0; font-size: 13px; }
 .android-specs > div { display: grid; grid-template-columns: 5em minmax(0, 1fr); gap: 12px; margin-top: 8px; }
 .android-specs dt { color: var(--muted); }
 .android-specs dd { margin: 0; }
 .android-copy .android-download-note { font-size: 12px; margin: 12px 0 0; }
+.android-media { min-width: 0; }
+.android-qr { display: flex; align-items: center; gap: 24px; margin: 24px 0 0; padding-top: 24px; border-top: 1px solid var(--line); }
+.android-qr img { display: block; width: 180px; height: 180px; flex-shrink: 0; background: #fff; }
+.android-qr h3 { font: 600 20px/1.5 "STKaiti", "KaiTi", "FangSong", serif; margin: 0 0 10px; color: var(--green); }
+.android-qr p { font-size: 13px; color: var(--muted); margin: 0; }
+.android-qr p + p { margin-top: 6px; }
 .android-install { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; list-style: none; counter-reset: install; padding: 28px 0 0; margin: 28px 0 0; border-top: 1px solid var(--line); }
 .android-install li { counter-increment: install; }
 .android-install h3 { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; color: var(--green); }
@@ -47,4 +58,6 @@
   .client-shot figcaption > a { padding-block: 4px; }
   .client-platforms { flex-direction: column; }
   .android-copy > h3 { font-size: 22px; }
+  .android-features > div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .android-qr { flex-direction: column; text-align: center; gap: 16px; }
 }

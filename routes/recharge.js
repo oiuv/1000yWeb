@@ -14,7 +14,7 @@ module.exports = ({ recharge, security, limits, users }) => {
       const text = String(value);
       return /^(?:0|[1-9]\d{0,5})(?:\.\d{1,2})?$/.test(text) && Number(value) >= 0.01;
     }).withMessage('金额为 0.01–999999.99 元，最多两位小数').toFloat(),
-    body('items').isArray({ min: 1, max: 4 }).bail()
+    body('items').isArray({ min: 1, max: ITEMS.length }).bail()
       .custom(items => items.every(item => ITEMS.includes(item)) && new Set(items).size === items.length)
       .withMessage('请选择有效且不重复的付款项'),
     body('quantities').isObject({ strict: true }).bail().custom((values, { req }) =>

@@ -12,7 +12,7 @@ const yanhuangDownloads = [
   'https://setup-traditional-chinese.1000y.download/1000y_patch_ChineseSimp.zip',
   'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000yHClientPatch.zip'
 ];
-const androidDownload = 'https://oiuv.oss-accelerate.aliyuncs.com/1000y/云端千年-0.1.109.apk';
+const androidDownload = 'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y-latest.apk';
 const shenwuDownload = 'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000yClientPatch.zip';
 const externalLinks = html => [...html.matchAll(/<a\b[^>]*href="(https:\/\/[^\"]+)"[^>]*>/g)];
 
@@ -27,7 +27,7 @@ test('download page and assets are public, with instructions present before Java
   assert.match(html, /<h1>客户端下载<\/h1>/);
   assert.match(html, /<ol class="download-steps"/);
   assert.equal([...html.matchAll(/class="download-step-number"/g)].length, 5);
-  for (const asset of ['css/style.css', 'css/download.css', 'js/home.js', 'js/auth.js']) {
+  for (const asset of ['css/style.css', 'css/clients.css', 'css/download.css', 'images/android-download-qr.png', 'js/home.js', 'js/auth.js']) {
     assert.equal((await fetch(base + '/' + asset)).status, 200, asset);
   }
 });
