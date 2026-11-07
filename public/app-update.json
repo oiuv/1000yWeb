@@ -3,15 +3,16 @@
   "channels": {
     "release": {
       "package_name": "com.gameivy.yanhuang",
-      "version_code": 111,
-      "version_name": "0.1.110",
+      "version_code": 112,
+      "version_name": "0.1.111",
       "min_sdk": 24,
-      "url": "https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y-0.1.110.apk",
-      "size_bytes": 711802840,
-      "sha256": "d41d9db76590efe851fa97045fadccf10e5151831b88534083cc247d04825bb3",
+      "url": "https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y-0.1.111.apk",
+      "size_bytes": 711815794,
+      "sha256": "0ba05ebfb7656b0a12775c73c0942cac54b5cc6703abc1f95498cfe1b17dea4a",
       "notes": [
-        "新增启动时检查更新，确认后下载并由系统安装。",
-        "下载时校验安装包完整性，支持取消下载。"
+        "统一界面石纹铜边风格，保留经典游戏素材。",
+        "优化门派、设置、物品、交易、角色资料及输入窗口的排版与间距。",
+        "修复部分卡片区域无法拖动列表的问题，改善触摸体验。"
       ]
     },
     "debug": null
