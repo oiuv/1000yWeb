@@ -3,16 +3,19 @@
   "channels": {
     "release": {
       "package_name": "com.gameivy.yanhuang",
-      "version_code": 112,
-      "version_name": "0.1.111",
+      "version_code": 128,
+      "version_name": "0.1.127",
       "min_sdk": 24,
-      "url": "https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y-0.1.111.apk",
-      "size_bytes": 711815794,
-      "sha256": "0ba05ebfb7656b0a12775c73c0942cac54b5cc6703abc1f95498cfe1b17dea4a",
+      "url": "https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000y-0.1.127.apk",
+      "size_bytes": 711915789,
+      "sha256": "93ca6c5c0aa976b3b6bfbd151337f45a962a3fc94e39809d8fb32e84f8488b7e",
       "notes": [
-        "统一界面石纹铜边风格，保留经典游戏素材。",
-        "优化门派、设置、物品、交易、角色资料及输入窗口的排版与间距。",
-        "修复部分卡片区域无法拖动列表的问题，改善触摸体验。"
+        "优化各弹窗文字留白与布局，聊天内容和底部提示统一对齐。",
+        "修复更新下载后无法打开系统安装器的问题，滚动条恢复暗金色。",
+        "新增背包长按换位、装备染色及对目标使用，补齐商店物品说明。",
+        "补齐删除角色、官网改密、喊话境界及原生对战界面。",
+        "修复角色名称与门派更新，保留聊天、物品和队伍的原生颜色。",
+        "0.1.110或0.1.111若无法安装，请用浏览器下载本版并覆盖安装一次。"
       ]
     },
     "debug": null
