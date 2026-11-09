@@ -7,9 +7,7 @@ const { fixture } = require('./helpers');
 
 const readPublic = name => readFileSync(path.join(__dirname, '../public', name), 'utf8');
 const yanhuangDownloads = [
-  'https://setup-simplified-chinese.1000y.download/1000y_Setup_20250410.exe',
-  'https://setup-traditional-chinese.1000y.download/1000y_patch_update.zip',
-  'https://setup-traditional-chinese.1000y.download/1000y_patch_ChineseSimp.zip',
+  'https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000yClient2026.zip',
   'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000yHClientPatch.zip'
 ];
 const androidDownload = 'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y-latest.apk';
@@ -26,22 +24,21 @@ test('download page and assets are public, with instructions present before Java
   assert.equal(html, readPublic('download.html'));
   assert.match(html, /<h1>客户端下载<\/h1>/);
   assert.match(html, /<ol class="download-steps"/);
-  assert.equal([...html.matchAll(/class="download-step-number"/g)].length, 5);
+  assert.equal([...html.matchAll(/class="download-step-number"/g)].length, 3);
   for (const asset of ['css/style.css', 'css/clients.css', 'css/download.css', 'images/android-download-qr.png', 'js/home.js', 'js/auth.js']) {
     assert.equal((await fetch(base + '/' + asset)).status, 200, asset);
   }
 });
 
-test('Yanhuang has the four approved downloads in installation order and its own registration', () => {
+test('Yanhuang offers the integrated client and optional Taiwan-client patch', () => {
   const html = readPublic('download.html');
   const section = html.slice(html.indexOf('id="yanhuang"'), html.indexOf('id="shenwu"'));
   assert.deepEqual(externalLinks(section).map(match => match[1]), yanhuangDownloads);
-  assert.match(section, /云端补丁一定最后覆盖/);
+  assert.match(section, /本站客户端下载后无需另装此补丁/);
   assert.match(section, /cl1000\.exe/);
-  assert.match(section, /桌面的“千年肆”快捷方式/);
   assert.match(section, /自动更新并启动游戏/);
   assert.match(section, /href="register\.html">注册炎黄账号/);
-  assert.match(section, /同一个游戏安装目录/);
+  assert.match(section, /台服千年肆的游戏安装目录/);
 });
 
 test('Yanhuang guide covers only the four cloud additions and distinguishes when settings take effect', () => {
