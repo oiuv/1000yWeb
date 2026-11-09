@@ -69,7 +69,7 @@ export async function init({ auth = false, admin = false } = {}) {
     '<a href="download.html">客户端下载</a><a href="about.html">关于云端</a>' +
     '<span class="nav-auth" id="nav-auth"><a href="login.html">登录</a><a class="button compact" href="register.html">注册账号</a></span></nav></div>';
   $('#site-footer').innerHTML = '<div class="footer-inner"><span>云端千年 · 炎黄新章<span class="muted">　武林霸业谈笑中，不胜千年一场醉。</span></span>' +
-    '<span><a href="guide.html">游戏资料</a><a href="download.html">客户端下载</a><a href="about.html">关于云端</a> · <span>玩家 QQ 群 · 2887111</span></span></div>';
+    '<span><a href="guide.html">游戏资料</a><a href="download.html">客户端下载</a><a href="about.html">关于云端</a><a href="privacy.html">隐私政策</a> · <span>玩家 QQ 群 · 2887111</span></span></div>';
   $('.nav-toggle').addEventListener('click', event => {
     const open = $('#site-nav').classList.toggle('open');
     event.currentTarget.setAttribute('aria-expanded', String(open));

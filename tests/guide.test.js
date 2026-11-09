@@ -61,7 +61,7 @@ test('shared navigation puts guides after home and about after downloads', () =>
     'index.html', 'guide.html', 'leaderboard.html', 'recharge.html',
     'download.html', 'about.html', 'login.html', 'register.html'
   ]);
-  assert.deepEqual(links(footer), ['guide.html', 'download.html', 'about.html']);
+  assert.deepEqual(links(footer), ['guide.html', 'download.html', 'about.html', 'privacy.html']);
 });
 
 test('item icons prefer display names and retain a representative image for repeated names', async () => {
