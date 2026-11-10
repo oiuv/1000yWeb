@@ -3,18 +3,15 @@
   "channels": {
     "release": {
       "package_name": "com.gameivy.yanhuang",
-      "version_code": 131,
-      "version_name": "0.1.130",
+      "version_code": 132,
+      "version_name": "0.1.131",
       "min_sdk": 24,
-      "url": "https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000y-0.1.130.apk",
+      "url": "https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000y-0.1.131.apk",
       "size_bytes": 711934755,
-      "sha256": "a96d8e11f3107d0bacf61a057894300919d0c1d9fce6615acdcf1ce32d2f08b9",
+      "sha256": "2d445194b51985aa2bb474372813994f3c409b0c2d5b1d45740f246ac21bbd24",
       "notes": [
-        "修复持续轮盘移动时延迟累加的问题，改善开启步法后的移动速度。",
-        "队伍页面增加解散队伍，交易页面增加核对交易物品。",
-        "聊天增加队伍频道，无需手动输入指令前缀。",
-        "设置指令补充当前位置、门派信息查询，优化常用操作排列。",
-        "0.1.110或0.1.111若无法安装，请用浏览器下载本版并覆盖安装一次。"
+        "通信版本同步为157，请更新后登录。",
+        "简化登录交互，连接进度在原按钮内显示，避免界面位移。"
       ]
     },
     "debug": null
