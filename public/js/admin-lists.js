@@ -64,7 +64,7 @@ function renderUsers(records, onAction) {
     button.type = 'button'; button.disabled = !(unban ? user.canUnban : user.canDisable);
     button.setAttribute('aria-label', label + ' ' + user.account);
     if (button.disabled) button.title = '账号操作暂不可用，请检查付费数据来源';
-    button.addEventListener('click', () => { if (!button.disabled) onAction(user.account, unban ? 'unban' : 'disable'); });
+    button.addEventListener('click', () => { if (!button.disabled) onAction(user.account, unban ? 'unban' : 'disable', user.paid.disableReason); });
     addCell(row, '操作', button); body.append(row);
   }
 }
@@ -86,7 +86,7 @@ export function createAdminLists() {
   const lists = { users: { page: 1, pages: 1, ready: false, version: 0 }, paid: { page: 1, pages: 1, ready: false, version: 0 } };
   const dialog = $('#disable-dialog'), form = $('#disable-form'), cancelButton = $('#disable-cancel');
   let selectedAction = null, submitting = false;
-  function openAction(account, operation) {
+  function openAction(account, operation, disableReason) {
     if (submitting) return;
     selectedAction = { account, operation }; form.reset(); message($('#disable-feedback'), '');
     const unban = operation === 'unban', label = unban ? '解封' : '禁用';
@@ -96,6 +96,8 @@ export function createAdminLists() {
     $('#disable-description').textContent = unban
       ? '解封仅将禁用（000）改为包时（100），原到期时间不变，不恢复默认试用，也不赠送时长。已到期的账号须充值后才能游戏。'
       : '禁用后不能通过充值解除禁用。禁用在下次付费校验时生效，本操作不会强制踢出已在线角色。';
+    $('#original-disable').hidden = !unban;
+    $('#original-disable-reason').textContent = unban ? (disableReason?.trim() ? disableReason : '未记录封号原因') : '';
     $('#disable-reason-label').textContent = label + '原因（选填）';
     $('#disable-reason').placeholder = unban ? '记录解封原因，方便后续核查' : '记录违规情况，方便后续核查';
     const confirmButton = form.querySelector('[type="submit"]');

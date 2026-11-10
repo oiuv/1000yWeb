@@ -29,7 +29,7 @@ module.exports = ({ recharge, security, paid, users, paidStatus, paidAdmin }) =>
     let availability = paidStatus ? 'available' : 'unconfigured';
     let paidRows = new Map();
     if (paidStatus) {
-      try { paidRows = await paidStatus.forAccounts(result.records.map(row => row.account)); }
+      try { paidRows = await paidStatus.forAccounts(result.records.map(row => row.account), { includeDisableReason: true }); }
       catch (error) {
         availability = 'unavailable';
         console.error('Paid status query failed:', error.code || error.name);

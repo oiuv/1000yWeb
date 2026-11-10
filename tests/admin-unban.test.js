@@ -63,3 +63,18 @@ test('missing writer or database failure does not claim success or expose databa
     assert.ok((await admin.request('/api/admin/users')).data.records.every(row => row.canUnban === false));
   }
 });
+
+
+test('admin receives the latest ban reason only while the account is disabled', async t => {
+  const { admin, paidData } = await setup(t);
+  const row = async () => (await admin.request('/api/admin/users')).data.records.find(row => row.account === 'demo01');
+  assert.equal((await row()).paid.disableReason, null);
+  await admin.request(endpoint, request);
+  paidData.admin.disable({ account: 'demo01', actor: 'admin01', reason: '第一次违规' });
+  await admin.request(endpoint, request);
+  paidData.admin.disable({ account: 'demo01', actor: 'admin01', reason: '再次使用外挂' });
+  assert.equal((await row()).paid.disableReason, '再次使用外挂');
+  assert.equal(Object.hasOwn(paidData.reader.forAccounts(['demo01']).get('demo01'), 'disableReason'), false);
+  await admin.request(endpoint, request);
+  assert.equal((await row()).paid.disableReason, null);
+});

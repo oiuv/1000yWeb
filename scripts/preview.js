@@ -20,6 +20,7 @@ for (let i = 1; i <= 37; i++) {
 const paidRows = [...users.rows.values()].filter((row, i) => i % 5 !== 0).map((row, i) => ({
   account: row.account, mode: i % 4 === 2 ? '000' : i % 4 === 3 ? '001' : '100',
   status: i % 4 === 2 ? 'disabled' : i % 4 === 1 ? 'expired' : 'active',
+  disableReason: i % 4 === 2 ? '使用第三方外挂，多次违规，封禁账号。' : null,
   enddate: i % 4 === 1 ? '2020-10-30 12:00:00' : '2031-10-30 12:00:00',
   createdAt: '2026-10-01 12:00:00', updatedAt: '2026-10-30 12:00:00'
 }));
@@ -40,11 +41,11 @@ const paidStatus = {
   }
 };
 const paidAdmin = {
-  disable({ account }) {
+  disable({ account, reason = '' }) {
     const row = paidRows.find(row => row.account === account);
     const alreadyDisabled = row?.mode === '000';
-    if (row) { row.mode = '000'; row.status = 'disabled'; }
-    else paidRows.push({ account, mode: '000', status: 'disabled', enddate: '2026-10-31 12:00:00',
+    if (row) { if (!alreadyDisabled) row.disableReason = reason; row.mode = '000'; row.status = 'disabled'; }
+    else paidRows.push({ account, mode: '000', status: 'disabled', disableReason: reason, enddate: '2026-10-31 12:00:00',
       createdAt: '2026-10-31 12:00:00', updatedAt: '2026-10-31 12:00:00' });
     return { account, status: 'disabled', alreadyDisabled };
   },

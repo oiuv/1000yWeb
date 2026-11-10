@@ -42,6 +42,7 @@ async function ui(t, fetch) {
     node(kind + '-filter-form', 'form'); node(kind + '-table', 'table').append(new Element('tbody'));
   }
   node('users-paid-notice'); const dialog = node('disable-dialog', 'dialog');
+  node('original-disable'); node('original-disable-reason');
   node('disable-account'); const form = node('disable-form', 'form');
   for (const suffix of ['title', 'target-label', 'description', 'reason-label']) node('disable-' + suffix);
   const feedback = node('disable-feedback'); feedback.className = 'form-feedback';
@@ -295,4 +296,22 @@ test('both lists preserve exact expiry and show its hint; Paid empty and error r
   assert.equal(body.children[0].children[0].colSpan, 7);
   failed = true; await state.lists.load('paid');
   assert.equal(body.children[0].children[0].colSpan, 7);
+});
+
+
+test('unban shows saved reason as text separately from the new reason', async t => {
+  let data = page(true);
+  data.records[0].paid.disableReason = '<b>使用外挂</b>\n重复违规';
+  const state = await ui(t, async () => response(data));
+  await state.lists.load('users'); await state.action().emit('click');
+  assert.equal(state.nodes.get('#original-disable').hidden, false);
+  assert.equal(state.nodes.get('#original-disable-reason').textContent, '<b>使用外挂</b>\n重复违规');
+  assert.equal(state.reason.value, '');
+  await state.cancel.emit('click'); data = page(true);
+  await state.lists.load('users'); await state.action().emit('click');
+  assert.equal(state.nodes.get('#original-disable-reason').textContent, '未记录封号原因');
+  await state.cancel.emit('click'); data = page(false);
+  await state.lists.load('users'); await state.action().emit('click');
+  assert.equal(state.nodes.get('#original-disable').hidden, true);
+  assert.equal(state.nodes.get('#original-disable-reason').textContent, '');
 });
