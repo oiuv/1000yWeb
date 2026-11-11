@@ -3,15 +3,15 @@
   "channels": {
     "release": {
       "package_name": "com.gameivy.yanhuang",
-      "version_code": 132,
-      "version_name": "0.1.131",
+      "version_code": 133,
+      "version_name": "0.1.132",
       "min_sdk": 24,
-      "url": "https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000y-0.1.131.apk",
-      "size_bytes": 711934755,
-      "sha256": "2d445194b51985aa2bb474372813994f3c409b0c2d5b1d45740f246ac21bbd24",
+      "url": "https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000y-0.1.132.apk",
+      "size_bytes": 711947399,
+      "sha256": "66e583a88d2955c4d53d62bb25f841e7849e35bc6eed50d5b0530cd888ca1e1d",
       "notes": [
-        "通信版本同步为157，请更新后登录。",
-        "简化登录交互，连接进度在原按钮内显示，避免界面位移。"
+        "角色选择新增人物装备、染色与存档场景预览，保留经典素材。",
+        "选中角色后起身行走，其他角色打坐；统一创建角色卡片布局。"
       ]
     },
     "debug": null
