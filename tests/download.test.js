@@ -8,7 +8,7 @@ const { fixture } = require('./helpers');
 const readPublic = name => readFileSync(path.join(__dirname, '../public', name), 'utf8');
 const yanhuangDownloads = [
   'https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000yClient2026.zip',
-  'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000yHClientPatch.zip'
+  'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y_Setup/cl1000.exe'
 ];
 const androidDownload = 'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y-latest.apk';
 const shenwuDownload = 'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000yClientPatch.zip';
@@ -30,11 +30,17 @@ test('download page and assets are public, with instructions present before Java
   }
 });
 
-test('Yanhuang offers the integrated client and optional Taiwan-client patch', () => {
+test('Yanhuang offers the integrated client and updater for existing Taiwan clients', () => {
   const html = readPublic('download.html');
   const section = html.slice(html.indexOf('id="yanhuang"'), html.indexOf('id="shenwu"'));
   assert.deepEqual(externalLinks(section).map(match => match[1]), yanhuangDownloads);
-  assert.match(section, /本站客户端下载后无需另装此补丁/);
+  assert.match(section, /本站完整客户端无需另行下载/);
+  assert.match(section, /已有台服客户端：下载云端更新器/);
+  assert.match(section, /更新器 · EXE/);
+  assert.match(section, /替换同名文件/);
+  assert.match(section, /先关闭游戏及其它更新器/);
+  assert.match(section, /更新器为 EXE 文件，无需解压/);
+  assert.doesNotMatch(section, /1000yHClientPatch\.zip|将补丁解压/);
   assert.match(section, /cl1000\.exe/);
   assert.match(section, /自动更新并启动游戏/);
   assert.match(section, /href="register\.html">注册炎黄账号/);
