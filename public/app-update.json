@@ -3,15 +3,16 @@
   "channels": {
     "release": {
       "package_name": "com.gameivy.yanhuang",
-      "version_code": 134,
-      "version_name": "0.1.133",
+      "version_code": 135,
+      "version_name": "0.1.134",
       "min_sdk": 24,
-      "url": "https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000y-0.1.133.apk",
-      "size_bytes": 711947399,
-      "sha256": "b3be1f59b7adefe77509b3914f5d715884cf4b694595384f982fe741dbb6f036",
+      "url": "https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000y-0.1.134.apk",
+      "size_bytes": 711951495,
+      "sha256": "e603d9c650522183a1deabe027688a2fefa871dca277d22e44d20c30f62edcf0",
       "notes": [
-        "修正选角人物偏移，角色在卡片内居中显示。",
-        "角色卡增加细边框、小角饰和姓名分隔线，统一界面细节。"
+        "修复进入房间后屋顶遮挡问题，选角卡片正确显示室内场景。",
+        "优化角色卡片人物位置与场景遮挡，墙体、岩石显示更自然。",
+        "新增聊天频道接收开关，统一声音、频道及辅助设置的卡片对齐。"
       ]
     },
     "debug": null
