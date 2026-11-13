@@ -45,7 +45,7 @@ module.exports = ({ recharge, security, limits, users }) => {
       character_name, server, remark,
       ip_address: req.ip, submitted_by: req.user.account
     });
-    if (result.duplicate) return res.status(409).json({ success: false, message: '相同付款信息已登记，请勿重复提交；如需更正请联系 GM' });
+    if (result.duplicate) return res.status(409).json({ success: false, message: '该充值账号已有相同交易尾号的待审核订单，请勿重复提交；填写有误请联系 GM 审核拒绝后重新登记' });
     res.status(201).json({ success: true, id: result.id, message: '登记成功，请等待 GM 核款与交付' });
   }));
   router.get('/mine', security.requireUser, pageQuery, validate, (req, res) => {

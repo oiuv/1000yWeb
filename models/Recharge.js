@@ -10,18 +10,17 @@ class Recharge {
   constructor(db) { this.db = db; }
   create(data) {
     return this.db.transaction(() => {
-      // Six digits help human reconciliation; they are not globally unique payment IDs.
+      // Only pending orders block the same account and suffix; rejected entries can be corrected and resubmitted.
       const duplicate = this.db.prepare('SELECT id FROM recharge_records WHERE ' +
-        'transaction_id = ? COLLATE NOCASE AND payment_time = ? AND amount = ? AND ' +
-        "game_account = ? COLLATE NOCASE AND server = ? AND status <> 'rejected'")
-        .get(data.transaction_id, data.payment_time, data.amount, data.game_account, data.server);
+        "game_account = ? COLLATE NOCASE AND transaction_id = ? COLLATE NOCASE AND status = 'pending' LIMIT 1")
+        .get(data.game_account, data.transaction_id);
       if (duplicate) return { duplicate: true, id: duplicate.id };
       const result = this.db.prepare('INSERT INTO recharge_records ' +
         '(payment_time,transaction_id,amount,items,game_account,character_name,server,remark,ip_address,submitted_by,quantities)' +
         ' VALUES (@payment_time,@transaction_id,@amount,@items,@game_account,@character_name,@server,@remark,@ip_address,@submitted_by,@quantities)')
         .run({ ...data, items: JSON.stringify(data.items), quantities: JSON.stringify(data.quantities) });
       return { id: Number(result.lastInsertRowid), duplicate: false };
-    })();
+    }).immediate();
   }
   where(filters = {}, submittedBy) {
     const clauses = [], params = [];

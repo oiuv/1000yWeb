@@ -30,6 +30,7 @@ function openDatabase(filename) {
     db.exec('CREATE INDEX IF NOT EXISTS idx_status ON recharge_records(status);' +
       'CREATE INDEX IF NOT EXISTS idx_submitted_by ON recharge_records(submitted_by);' +
       'CREATE INDEX IF NOT EXISTS idx_transaction_id ON recharge_records(transaction_id);' +
+      "CREATE INDEX IF NOT EXISTS idx_pending_account_transaction ON recharge_records(game_account COLLATE NOCASE,transaction_id COLLATE NOCASE) WHERE status='pending';" +
       'CREATE TABLE IF NOT EXISTS recharge_history (' +
       'id INTEGER PRIMARY KEY AUTOINCREMENT, record_id INTEGER NOT NULL REFERENCES recharge_records(id),' +
       'actor TEXT NOT NULL, from_status TEXT NOT NULL, to_status TEXT NOT NULL,' +

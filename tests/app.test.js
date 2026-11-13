@@ -72,12 +72,13 @@ test('password changes require old password and confirmation, and revoke all ses
   assert.equal((await second.request('/api/auth/profile')).code,401);
   assert.equal((await first.login('demo01','Changed!2')).code,200);
 });
-test('six digit payment suffix stays usable; exact repeated submissions are blocked, other times allowed', async t => {
+test('same account and payment suffix cannot be resubmitted at a different time; different suffixes are allowed', async t => {
   const { client } = await fixture(t);
   const agent=client();await agent.login();
   assert.equal((await agent.request('/api/recharge/submit',registration())).code,201);
   assert.equal((await agent.request('/api/recharge/submit',registration())).code,409);
-  assert.equal((await agent.request('/api/recharge/submit',registration({payment_time:'2026-10-19T12:01'}))).code,201);
+  assert.equal((await agent.request('/api/recharge/submit',registration({payment_time:'2026-10-19T12:01'}))).code,409);
+  assert.equal((await agent.request('/api/recharge/submit',registration({transaction_id:'123457'}))).code,201);
 });
 test('recharge validates actual products, quantities, calendar times, amounts and page size', async t => {
   const { client } = await fixture(t); const agent=client();
