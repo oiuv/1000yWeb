@@ -7,7 +7,7 @@ const { fixture } = require('./helpers');
 
 const readPublic = name => readFileSync(path.join(__dirname, '../public', name), 'utf8');
 const yanhuangDownloads = [
-  'https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000yClient2026.zip',
+  'https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000yClient-main.zip',
   'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y_Setup/cl1000.exe'
 ];
 const androidDownload = 'https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y-latest.apk';
