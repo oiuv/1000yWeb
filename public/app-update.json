@@ -3,15 +3,19 @@
   "channels": {
     "release": {
       "package_name": "com.gameivy.yanhuang",
-      "version_code": 136,
-      "version_name": "0.1.135",
+      "version_code": 137,
+      "version_name": "0.1.136",
       "min_sdk": 24,
-      "url": "https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000y-0.1.135.apk",
-      "size_bytes": 711951654,
-      "sha256": "2765db421e2a6e20cebfa2ca3932922f3e406740559f66896e89791e2f3404bf",
+      "url": "https://oiuv.oss-cn-beijing.aliyuncs.com/1000y/1000y-0.1.136.apk",
+      "size_bytes": 711955750,
+      "sha256": "114a33b3a4950302c2647dc3a1e39688c223ff9a352b2f669c6f56604cb85521",
       "notes": [
-        "修复NPC对话头像偏移，人物与名称居中，保留完整原生阴影。",
-        "优化客户端检查更新流程。"
+        "修复新手村多人登录卡住及打开、关闭物品栏明显卡顿的问题。",
+        "减少HUD、角色资料和图标的无效刷新，改善多人场景响应。",
+        "选角卡片复用地图索引，缩短角色形象与背景的加载等待。",
+        "修复弓、投法辅助空动作，按约3.5秒重新选择目标持续攻击。",
+        "优化入场公告与玩家界面显示顺序，减少重复收键盘及特效补算。",
+        "放大移动轮盘，聊天与提示左侧同步让位，右边界保持不变。"
       ]
     },
     "debug": null
