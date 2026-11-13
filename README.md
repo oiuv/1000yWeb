@@ -16,9 +16,9 @@
 
 首页展示电脑版与手机版实机截图，下载页分别提供 Android 正式 APK 和 Windows 安装步骤。
 Android 下载按钮与二维码统一指向固定地址 `https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y-latest.apk`。
-页面不写具体版本号或包大小；发版时覆盖这个 OSS 文件即可，无需修改网页或二维码。公开入口只提供正式版，不提供 Debug 包。
+页面不写具体版本号或包大小，下载按钮和二维码不随APP版本变化。公开入口只提供正式版，不提供 Debug 包。
 二维码图片位于 `public/images/android-download-qr.png`，内容是上述完整下载地址，保留黑白对比和四周留白。
-APP 检查更新使用 `public/app-update.json` 中的具体版本地址，上传顺序和缓存要求见 [APP_UPDATE.md](APP_UPDATE.md)。
+网站为旧版APP保留静态更新配置入口`/app-update.json`，响应禁用缓存。
 两端截图位于 `public/images/game-pc.png` 与 `public/images/game-android.jpg`；保留完整画面与原始宽高比。
 
 ## 环境要求
@@ -117,7 +117,3 @@ npm test
 ## 许可证
 
 MIT License
-
-## Android客户端更新
-
-公开更新配置位于`public/app-update.json`；字段及发布顺序见[APP_UPDATE.md](APP_UPDATE.md)。配置与APK分开托管，发布前必须先上传并验证APK。
