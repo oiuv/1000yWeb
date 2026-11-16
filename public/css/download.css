@@ -1,6 +1,8 @@
 @charset "UTF-8";
 .download-primary { border-top: 3px solid var(--gold); }
-.download-layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 32px; align-items: start; }
+.download-layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.download-side { min-width: 0; }
+.pc-preview { margin-bottom: 24px; }
 .download-order { color: var(--green); font-size: 14px; margin-bottom: 8px; }
 .download-steps { list-style: none; margin: 0; padding: 0; }
 .download-steps > li { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 24px 0; border-bottom: 1px solid var(--line); }
@@ -12,7 +14,7 @@
 .download-steps .button { white-space: nowrap; }
 .download-steps > .download-launch { grid-template-columns: 36px minmax(0, 1fr); border-bottom: 0; padding-bottom: 0; }
 .download-launch h3 { color: var(--green); }
-.download-guide { padding: 22px; background: var(--wash); border-radius: 4px; font-size: 13px; }
+.download-guide { grid-column: 1 / -1; padding: 22px; background: var(--wash); border-radius: 4px; font-size: 13px; }
 .download-guide h3 { font-size: 15px; }
 .download-guide p { color: var(--muted); }
 .download-guide strong { color: var(--ink); }
@@ -43,7 +45,7 @@
 .client-guide-fps li + li { margin-top: 0; }
 .client-guide-card .client-guide-note { border-top: 1px solid var(--line); padding-top: 14px; margin: 18px 0 0; color: var(--muted); font-size: 12px; }
 @media (max-width: 1050px) {
-  .download-layout { grid-template-columns: minmax(0, 1fr) 240px; gap: 24px; }
+  .download-layout { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; }
   .download-steps > li { grid-template-columns: 32px minmax(0, 1fr); gap: 12px; }
   .download-steps .button { grid-column: 2; justify-self: start; }
 }
@@ -57,6 +59,6 @@
   .page-heading > .button { margin-top: 18px; }
   .download-steps > li { padding-block: 20px; }
   .download-steps > .download-launch { grid-template-columns: 32px minmax(0, 1fr); }
-  .download-guide { padding: 18px; }
+  .download-guide { grid-column: 1 / -1; padding: 18px; }
   .client-guide-card { padding: 18px; }
 }
