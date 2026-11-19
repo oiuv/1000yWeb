@@ -24,7 +24,7 @@ test('all reference articles are public static pages, readable without client re
     if (file.endsWith('.html')) assert.equal(await response.text(), read(file));
     else await response.arrayBuffer();
   }
-  assert.match(read('guide.html'), /122 篇资料/);
+  assert.match(read('guide.html'), /<h1>游戏资料<\/h1><p>查一件装备，寻一门武功，读一段江湖往事。（资料仅供参考，以游戏内实际内容为准）<\/p>/);
   assert.equal([...read('guide.html').matchAll(/data-guide-entry=/g)].length, 122);
   for (const { file } of manifest.articles) {
     assert.match(read(file), /<article class="guide-article">[\s\S]+<\/article>/);
@@ -359,29 +359,30 @@ test('cloud guide includes current beginner rewards, crafting and shops in pages
   const entry = index.find(a => a.id === article.file);
   assert.ok(entry);
   assert.ok(read('guide.html').includes(article.file));
-  for (const heading of ['新手挑战奖励', '墨铁衣服制造', '留香花卉', '门派守卫']) {
+  for (const heading of ['新手村商店', '新手挑战奖励', '墨铁衣服制造', '王陵与交易村传送', '留香花卉', '门派守卫']) {
     assert.ok(html.includes('id="' + heading + '"'));
     assert.ok(html.includes('href="#' + heading + '"'));
     assert.ok(entry.text.includes(heading));
   }
-  for (const text of ['男子天桃甲或女子天桃甲 ×1', '金元 ×1', '裁缝', '初级工', '100 万钱币', '留香蓝彼岸花']) {
+  for (const text of ['男子天桃甲或女子天桃甲 ×1', '金元 ×1', '裁缝', '熟练工', '未满 50 岁',
+    '风兄出售男子衣物和发型，牛美出售女子衣物和发型', '50，67', '100 万钱币', '留香蓝彼岸花']) {
     assert.ok(html.includes(text), text);
     assert.ok(entry.text.includes(text), text + ' searchable');
   }
   const crafting = html.match(/<h2 id="墨铁衣服制造">[\s\S]*?<tbody>([\s\S]*?)<\/tbody>/)[1];
   const cells = [...crafting.matchAll(/<td>([\s\S]*?)<\/td>/g)].map(([, cell]) => cell.replace(/<[^>]+>/g, ''));
   assert.deepEqual(cells, [
-    '男子墨铁战斗服', '10 品', '犀牛王角 ×1、熊掌 ×1、白老虎指甲 ×1',
-    '女子墨铁战斗服', '10 品', '犀牛王后角 ×1、熊掌 ×1、白老虎指甲 ×1',
-    '男子墨铁弓服', '9 品', '男子墨铁战斗服 ×1、火心 ×1、龟甲 ×1',
-    '女子墨铁弓服', '9 品', '女子墨铁战斗服 ×1、火心 ×1、龟甲 ×1'
+    '男子墨铁战斗服', '6 品', '犀牛王角 ×1、熊掌 ×1、白老虎指甲 ×1',
+    '女子墨铁战斗服', '6 品', '犀牛王后角 ×1、熊掌 ×1、白老虎指甲 ×1',
+    '男子墨铁弓服', '5 品', '男子墨铁战斗服 ×1、火心 ×1、龟甲 ×1',
+    '女子墨铁弓服', '5 品', '女子墨铁战斗服 ×1、火心 ×1、龟甲 ×1'
   ]);
   const equipment = manifest.articles.find(a => a.source === '新手入门/【装备】简介/【装备】简介：新手村装备.md');
   assert.ok(equipment);
   const equipmentHtml = read(equipment.file);
-  assert.match(equipmentHtml, /裁缝初级工/);
+  assert.match(equipmentHtml, /裁缝达到<strong>熟练工<\/strong>/);
   assert.ok(equipmentHtml.includes('href="' + article.file + '#' + encodeURIComponent('墨铁衣服制造') + '"'));
-  assert.doesNotMatch(equipmentHtml, /墨铁弓服属于7品|需要技能工才能制作/);
+  assert.doesNotMatch(equipmentHtml, /墨铁弓服属于7品|需要技能工才能制作|裁缝初级工/);
 });
 
 test('age guide retains all 100 rows, year conversions, contents and searchable text', () => {
@@ -423,9 +424,9 @@ test('cloud guide publishes ice and fire map rules and equipment lists in pages 
   const entry = index.find(a => a.id === article.file);
   const section = html.match(/<h2 id="冰火地图与装备属性">([\s\S]*?)(?=<h2 )/)[1];
   assert.ok(html.includes('href="#冰火地图与装备属性"'));
-  for (const text of ['活力上限', '实际穿戴', '竹筒', '万毒门', '不属于冰火环境',
-    '本馆', '黄金沙漠', '北海雪原', '黄龙溪谷', '血皇城', '血皇塔一层',
-    '血皇塔二层', '血皇塔三层', '血皇塔顶', '护国神拳', '护国神剑', '百炼四季甲胄',
+  for (const text of ['实际穿戴', '竹筒', '万毒门', '不属于冰火环境',
+    '本馆', '黄金沙漠', '北海雪原', '黄龙溪谷', '血皇城', '血皇塔各层',
+    '护国神拳', '护国神剑', '百炼四季甲胄',
     '耀月拳套', '冷月剑', '圆月斧', '撼日刀', '追日枪', '女子月光护腕', '女子逐日靴', '男子披星帽']) {
     assert.ok(section.includes(text), text);
     assert.ok(entry.text.includes(text), text + ' searchable');
@@ -433,9 +434,11 @@ test('cloud guide publishes ice and fire map rules and equipment lists in pages 
   const tables = [...section.matchAll(/<tbody>([\s\S]*?)<\/tbody>/g)].map(([, body]) =>
     [...body.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map(([, row]) =>
       [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map(([, cell]) => cell.replace(/<[^>]+>/g, ''))));
-  assert.deepEqual(tables.map(rows => rows.length), [2, 9, 7, 3]);
-  assert.deepEqual(tables[1][0], ['本馆', '冰', '8 秒', '活力上限的 20%']);
-  assert.deepEqual(tables[1][1], ['黄金沙漠', '火', '10 秒', '30.00 点']);
+  assert.deepEqual(tables.map(rows => rows.length), [2, 2, 7, 3]);
+  assert.deepEqual(tables[1], [
+    ['严寒', '本馆、北海雪原、血皇塔各层'],
+    ['炎热', '黄金沙漠、黄龙溪谷、血皇城']
+  ]);
   for (const [column, count] of [[1, 19], [2, 20]]) {
     assert.equal(tables[2].flatMap(row => row[column].split('、')).length, count);
   }
@@ -445,7 +448,7 @@ test('cloud guide publishes ice and fire map rules and equipment lists in pages 
     ['男子披星帽', '男', '火，抗严寒']
   ]);
   assert.match(section, /全系列仍有耐久，可与玩家交换，不可升段/);
-  assert.doesNotMatch(section, /SpecialItemType|ARR_WEAPON|覆盖优先级|检查顺序/);
+  assert.doesNotMatch(section, /SpecialItemType|ARR_WEAPON|覆盖优先级|检查顺序|伤害间隔|每次损失活力/);
 });
 
 test('cloud guide keeps gem gift trading and reward restrictions concise in pages and search', () => {
