@@ -364,10 +364,17 @@ test('cloud guide includes current beginner rewards, crafting and shops in pages
     assert.ok(html.includes('href="#' + heading + '"'));
     assert.ok(entry.text.includes(heading));
   }
-  for (const text of ['男子天桃甲或女子天桃甲 ×1', '金元 ×1', '裁缝', '熟练工', '未满 50 岁',
+  for (const text of ['男子天桃甲或女子天桃甲 ×1', '金元 ×1', '裁缝', '熟练工', '55 岁及以下',
+    '基础材料和对应的进阶材料偶尔会一起散落',
     '风兄出售男子衣物和发型，牛美出售女子衣物和发型', '50，67', '100 万钱币', '留香蓝彼岸花']) {
     assert.ok(html.includes(text), text);
     assert.ok(entry.text.includes(text), text + ' searchable');
+  }
+  for (const [monster, materials] of [
+    ['人形鬼', '生铁、钢铁'], ['媚鬼', '青玉、绿玉'], ['蹦鬼', '青铜、黄铜'], ['赤魔', '硅石、黑石']
+  ]) {
+    assert.ok(html.includes(`<td>万毒门</td>\n<td>${monster}</td>\n<td>${materials}</td>`), monster);
+    assert.ok(entry.text.includes(materials), materials + ' searchable');
   }
   const crafting = html.match(/<h2 id="墨铁衣服制造">[\s\S]*?<tbody>([\s\S]*?)<\/tbody>/)[1];
   const cells = [...crafting.matchAll(/<td>([\s\S]*?)<\/td>/g)].map(([, cell]) => cell.replace(/<[^>]+>/g, ''));
