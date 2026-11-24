@@ -18,7 +18,6 @@
 Android 下载按钮与二维码统一指向固定地址 `https://oiuv.oss-accelerate.aliyuncs.com/1000y/1000y-latest.apk`。
 页面不写具体版本号或包大小，下载按钮和二维码不随APP版本变化。公开入口只提供正式版，不提供 Debug 包。
 二维码图片位于 `public/images/android-download-qr.png`，内容是上述完整下载地址，保留黑白对比和四周留白。
-网站为旧版APP保留静态更新配置入口`/app-update.json`，响应禁用缓存。
 两端截图位于 `public/images/game-pc.png` 与 `public/images/game-android.jpg`；保留完整画面与原始宽高比。
 
 ## 环境要求
