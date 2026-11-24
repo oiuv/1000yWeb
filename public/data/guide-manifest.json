@@ -1,6 +1,11 @@
 {
   "articles": [
     {
+      "source": "采集技能指南.md",
+      "file": "guide-cc02b10c940e.html",
+      "sha256": "6b63017f7ab46bf2523716a7ff7f8fd8304b62010452ff0828523e0c979d00a2"
+    },
+    {
       "source": "新手入门/【怪物】简介/【怪物】简介（大地图）.md",
       "file": "guide-040e5a2f5fb7.html",
       "sha256": "6bcbb54da8a8316418a5f07a61c7d6933f6c5aa5283a8f72a2624b6756ba71e6"
@@ -498,7 +503,7 @@
     {
       "source": "新手入门/炎黄新章/【炎黄新章】介绍——采集技能介绍.md",
       "file": "guide-58f8f8145c83.html",
-      "sha256": "2f19f445ba2f58510c23e09f02addd16d9999ce07cc7a39638c9682527aaf3cc"
+      "sha256": "b3e20804cf2033bf155366f9f8d67ab7d00da191266dcea6b1f62b5f483fb03c"
     },
     {
       "source": "新手入门/炎黄新章/【炎黄新章】介绍——结婚系统.md",
@@ -573,7 +578,7 @@
     {
       "source": "云端千年.md",
       "file": "guide-215fa283b647.html",
-      "sha256": "d2dc79b9ac822d726a9e144e10d4376a4acfb73e0d4620ebdedf2823806c2d20"
+      "sha256": "91b95baddfbe7186df4edbeae56f90b6b4b171a40a1ff95c48307204a9dc5d2c"
     },
     {
       "source": "职业技能/【职业技能】简介：材料篇.md",
