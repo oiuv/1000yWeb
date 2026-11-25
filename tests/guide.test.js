@@ -12,9 +12,9 @@ const index = JSON.parse(read('data/guide-search.json'));
 
 test('all reference articles are public static pages, readable without client rendering', async t => {
   const { base } = await fixture(t);
-  assert.equal(manifest.articles.length, 123);
-  assert.equal(new Set(manifest.articles.map(a => a.file)).size, 123);
-  assert.equal(index.length, 123);
+  assert.equal(manifest.articles.length, 124);
+  assert.equal(new Set(manifest.articles.map(a => a.file)).size, 124);
+  assert.equal(index.length, 124);
   assert.deepEqual(readdirSync(root).filter(file => /^guide-.*\.html$/.test(file)).sort(),
     manifest.articles.map(a => a.file).sort());
   for (const file of ['guide.html', manifest.articles[0].file, 'css/guide.css', 'css/item-icons.css', 'images/item.png', 'data/guide-search.json']) {
@@ -25,7 +25,7 @@ test('all reference articles are public static pages, readable without client re
     else await response.arrayBuffer();
   }
   assert.match(read('guide.html'), /<h1>游戏资料<\/h1><p>查一件装备，寻一门武功，读一段江湖往事。（资料仅供参考，以游戏内实际内容为准）<\/p>/);
-  assert.equal([...read('guide.html').matchAll(/data-guide-entry=/g)].length, 123);
+  assert.equal([...read('guide.html').matchAll(/data-guide-entry=/g)].length, 124);
   for (const { file } of manifest.articles) {
     assert.match(read(file), /<article class="guide-article">[\s\S]+<\/article>/);
     assert.ok(index.some(a => a.id === file));
@@ -475,8 +475,8 @@ test('search supports all categories, full text, multiple literal terms and empt
   const { filterGuides, categories } = await import('../public/js/guide-search.mjs');
   assert.equal(categories.length, 9);
   const entries = index.map(e => ({ ...e, text: e.title + ' ' + e.text }));
-  assert.equal(filterGuides(entries).length, 123);
-  assert.equal(filterGuides(entries, '  ', 'unknown').length, 123);
+  assert.equal(filterGuides(entries).length, 124);
+  assert.equal(filterGuides(entries, '  ', 'unknown').length, 124);
   const matches = filterGuides(entries, '英雄铠甲', 'equipment');
   assert.ok(matches.length >= 1);
   assert.ok(matches.every(e => e.category === 'equipment' && e.text.includes('英雄铠甲')));
